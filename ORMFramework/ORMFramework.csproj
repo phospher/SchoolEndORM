@@ -1,0 +1,133 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.50727</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{68361E78-73D1-45BD-A54C-059A0009842C}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ORMFramework</RootNamespace>
+    <AssemblyName>ORMFramework</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <OldToolsVersion>2.0</OldToolsVersion>
+    <TargetFrameworkProfile />
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="log4net, Version=1.2.10.0, Culture=neutral, PublicKeyToken=1b44e1d426115821, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>F:\log4net-1.2.10\bin\net\2.0\release\log4net.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.OracleClient" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Cache\CacheEntity.cs" />
+    <Compile Include="Cache\GlobalCacheResult.cs" />
+    <Compile Include="Cache\ISessionCache.cs" />
+    <Compile Include="LogHelper\LogHelper.cs" />
+    <Compile Include="Session\ISession.cs" />
+    <Compile Include="Session\LoadList.cs" />
+    <Compile Include="Cache\ObjectCache.cs" />
+    <Compile Include="Cache\ObjectCalculator.cs" />
+    <Compile Include="Cache\GlobalCacheEntity.cs" />
+    <Compile Include="Cache\GlobalCache.cs" />
+    <Compile Include="Cache\SessionCache.cs" />
+    <Compile Include="Configuration\ConfigManager.cs" />
+    <Compile Include="Configuration\EntityClass\Configuration.cs" />
+    <Compile Include="Configuration\EntityClass\DatabaseType.cs" />
+    <Compile Include="Configuration\EntityClass\EntityMapping.cs" />
+    <Compile Include="Configuration\EntityClass\EntityRelation.cs" />
+    <Compile Include="Configuration\EntityClass\ManyToManyRelation.cs" />
+    <Compile Include="Configuration\EntityClass\RelationType.cs" />
+    <Compile Include="Event\CommandEvent.cs" />
+    <Compile Include="Event\SelectEvent.cs" />
+    <Compile Include="Event\UpdateEvent.cs" />
+    <Compile Include="Listener\DefaultCommandListener.cs" />
+    <Compile Include="Listener\DefaultDeleteListener.cs" />
+    <Compile Include="Listener\DefaultInsertListener.cs" />
+    <Compile Include="Listener\DefaultSelectListener.cs" />
+    <Compile Include="Listener\DefaultSubmitListener.cs" />
+    <Compile Include="Listener\DefaultUpdateListener.cs" />
+    <Compile Include="Listener\IListeners.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SessionFactory\DbDriverFactory\OdbcDriverFactory.cs" />
+    <Compile Include="SessionFactory\DbDriverFactory\OleDbDriverFactory.cs" />
+    <Compile Include="SessionFactory\DbDriverFactory\OracleDriverFactory.cs" />
+    <Compile Include="SessionFactory\DbDriverFactory\SQLDriverFactory.cs" />
+    <Compile Include="SessionFactory\IDbDriverFactory.cs" />
+    <Compile Include="SessionFactory\SessionFactory.cs" />
+    <Compile Include="Event\ActionEvent.cs" />
+    <Compile Include="Session\IPersistenceContext.cs" />
+    <Compile Include="Session\PersistenceContext.cs" />
+    <Compile Include="Session\Session.cs" />
+    <Compile Include="SQLGenerator\ISQLGenerator.cs" />
+    <Compile Include="SQLGenerator\SQLGenerator.cs" />
+    <Compile Include="Statment\Operator.cs" />
+    <Compile Include="Statment\QueryExpression.cs" />
+    <Compile Include="Statment\StatElement.cs" />
+    <Compile Include="Statment\StatementAnalyst.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Configuration\Config.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

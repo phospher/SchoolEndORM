@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+    <SessionFactory>
+        <Database>SqlServer</Database>
+        <ConnectionString>Data Source=192.168.248.128;User ID=sa;Password=phospherlau204;initial catalog=test</ConnectionString>
+    </SessionFactory>
+    <Mappings>
+        <Map ClassName="ORMFramework.Examples.Student" TableName="Student" Key="StudentId"></Map>
+        <Map ClassName="ORMFramework.Examples.Department" TableName="Department" Key="Id">
+            <One-to-Many KeyColum="Id" Property="Teachers" ReferenceClass="ORMFramework.Examples.Teacher" ReferenceColum="DepartmentId" />
+        </Map>
+        <Map ClassName="ORMFramework.Examples.Teacher" TableName="Teacher" Key="Id">
+            <Many-to-One KeyColum="DepartmentId" Property="Department" ReferenceClass="Department" ReferenceColum="Id" />
+        </Map>
+        <Map ClassName="ORMFramework.Examples.ContactMenu" TableName="ContactMenu" Key="StudentId">
+            <One-to-One KeyColum="StudentId" Property="Student" ReferenceClass="ORMFramework.Examples.Student" ReferenceColum="StudentId" />
+        </Map>
+        <Map ClassName="ORMFramework.Examples.Course" TableName="Course" Key="Id">
+            <Many-to-Many KeyColum="Id" Property="Students">
+                <ReferenceTable Name="Course_Student" ReferenceColum="CourseId" ReferenceClassColum="StudentId" />
+                <ReferenceClass Name="Student" KeyColum="StudentId" />
+            </Many-to-Many>
+        </Map>
+    </Mappings>
+    <log4net>
+        <root>
+            <level value="ALL" />
+            <appender-ref ref="FileLogAppender" />
+        </root>
+        <logger name="DefaultLogger">
+            <level value="ALL" />
+        </logger>
+        <appender name="FileLogAppender" type="log4net.Appender.FileAppender">
+            <file value="log\log.txt" />
+            <appendToFile value="true" />
+            <Layout type="log4net.Layout.PatternLayout">
+                <param name="ConversionPattern" value="%p: %m%n" />
+            </Layout>
+        </appender>
+    </log4net>
+</Configuration>

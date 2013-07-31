@@ -1,0 +1,6 @@
+F:\project\ORMFramework v0.1\ORMFramework\bin\Debug\ORMFramework.dll
+F:\project\ORMFramework v0.1\ORMFramework\bin\Debug\ORMFramework.pdb
+F:\project\ORMFramework v0.1\ORMFramework\bin\Debug\log4net.dll
+F:\project\ORMFramework v0.1\ORMFramework\obj\Debug\ORMFramework.csprojResolveAssemblyReference.cache
+F:\project\ORMFramework v0.1\ORMFramework\obj\Debug\ORMFramework.dll
+F:\project\ORMFramework v0.1\ORMFramework\obj\Debug\ORMFramework.pdb

@@ -1,0 +1,13 @@
+E:\毕业设计\ORMFramework\ORMFramework\obj\Debug\ResolveAssemblyReference.cache
+E:\毕业设计\ORMFramework\ORMFramework\bin\Debug\ORMFramework.dll
+E:\毕业设计\ORMFramework\ORMFramework\bin\Debug\ORMFramework.pdb
+E:\毕业设计\ORMFramework\ORMFramework\obj\Debug\ORMFramework.dll
+E:\毕业设计\ORMFramework\ORMFramework\obj\Debug\ORMFramework.pdb
+E:\毕业设计\ORMFramework\ORMFramework\bin\Debug\log4net.dll
+E:\毕业设计\ORMFramework\ORMFramework\bin\Debug\log4net.xml
+F:\project\ORMFramework v0.1\ORMFramework\obj\Debug\ResolveAssemblyReference.cache
+F:\project\ORMFramework v0.1\ORMFramework\obj\Debug\ORMFramework.dll
+F:\project\ORMFramework v0.1\ORMFramework\obj\Debug\ORMFramework.pdb
+F:\project\ORMFramework v0.1\ORMFramework\bin\Debug\ORMFramework.dll
+F:\project\ORMFramework v0.1\ORMFramework\bin\Debug\ORMFramework.pdb
+F:\project\ORMFramework v0.1\ORMFramework\bin\Debug\log4net.xml

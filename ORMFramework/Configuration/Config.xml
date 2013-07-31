@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Configuration>
+    <SessionFactory>
+        <Database>SqlServer</Database>
+        <ConnectionString>Data Source=localhost;User ID=sa;Password=;initial catalog=Northwind</ConnectionString>
+    </SessionFactory>
+    <Mappings>
+        <Map ClassName="ORMFramework.Test.Student" TableName="tb_student" Key="Id">
+            <One-to-One KeyColum="ClassId" Property="Class" ReferenceClass="ORMFramework.Test.Class" ReferenceColum="Id" />
+        </Map>
+        <Map ClassName="ORMFramework.Test.Class" TableName="tb_class" Key="Id" >
+            <One-to-One KeyColum="Id" Property="Student" ReferenceClass="Student" ReferenceColum="class" />
+            <!--
+            <One-to-Many KeyColum="Id" Property="Students" ReferenceClass="Student" ReferenceColum="class" />
+            <Many-to-One KeyColum="Id" Property="Students" ReferenceClass="Student" ReferenceColum="class" />
+            <Many-to-Many KeyColum="Id" Property="Students">
+                <ReferenceTable Name="tb_student_class" ReferenceColum="ClassId" ReferenceClassColum="StudentId" />
+                <ReferenceClass Name="Student" KeyColum="Id" />
+            </Many-to-Many>
+            -->
+        </Map>
+    </Mappings>
+    <log4net>
+        <root>
+            <level value="ALL" />
+            <appender-ref ref="FileLogAppender" />
+        </root>
+        <logger name="DefaultLogger">
+            <level value="ALL" />
+        </logger>
+        <appender name="FileLogAppender" type="log4net.Appender.FileAppender">
+            <file value="log\log.txt" />
+            <appendToFile value="true" />
+            <Layout type="log4net.Layout.PatternLayout">
+                <param name="ConversionPattern" value="%p: %m%n" />
+            </Layout>
+        </appender>
+    </log4net>
+</Configuration>
