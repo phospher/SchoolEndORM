@@ -8,13 +8,15 @@ using ORMFramework;
 using ORMFramework.SQL;
 using ORMFramework.Configuration;
 using ORMFramework.Statment;
-namespace ORMFramework.Test {
+namespace ORMFramework.Test
+{
     /// <summary>
     ///这是 ORMFramework.SQLGenerator.SQLGenerator 的测试类，旨在
     ///包含所有 ORMFramework.SQLGenerator.SQLGenerator 单元测试
     ///</summary>
-    [TestClass ()]
-    public class SQLGeneratorTest {
+    [TestClass()]
+    public class SQLGeneratorTest
+    {
 
 
         private TestContext testContextInstance;
@@ -23,11 +25,14 @@ namespace ORMFramework.Test {
         ///获取或设置测试上下文，上下文提供
         ///有关当前测试运行及其功能的信息。
         ///</summary>
-        public TestContext TestContext {
-            get {
+        public TestContext TestContext
+        {
+            get
+            {
                 return testContextInstance;
             }
-            set {
+            set
+            {
                 testContextInstance = value;
             }
         }
@@ -68,130 +73,138 @@ namespace ORMFramework.Test {
         private IPersistenceContext pesistenceContext;
         object @object;
 
-    //    private void Init () {
-    //        Configuration.ConfigManager config = new ORMFramework.Configuration.ConfigManager ( "E:\\毕业设计\\ORMFramework\\ORMFramework\\Configuration\\Config.xml" );
-    //        Dictionary<string, EntityMapping> mappings = new Dictionary<string, EntityMapping> ();
-    //        foreach ( EntityMapping mapping in config.GetSystemConfiguration ().Mappings ) {
-    //            mappings.Add ( mapping.ClassName, mapping );
-    //        }
-    //        pesistenceContext = new PersistenceContext ( null, mappings );
-    //        @object = new Student ( 1 );
-    //        ( ( Student ) @object ).Class = new Class ( 1 );
-    //    }
+        //    private void Init () {
+        //        Configuration.ConfigManager config = new ORMFramework.Configuration.ConfigManager ( "E:\\毕业设计\\ORMFramework\\ORMFramework\\Configuration\\Config.xml" );
+        //        Dictionary<string, EntityMapping> mappings = new Dictionary<string, EntityMapping> ();
+        //        foreach ( EntityMapping mapping in config.GetSystemConfiguration ().Mappings ) {
+        //            mappings.Add ( mapping.ClassName, mapping );
+        //        }
+        //        pesistenceContext = new PersistenceContext ( null, mappings );
+        //        @object = new Student ( 1 );
+        //        ( ( Student ) @object ).Class = new Class ( 1 );
+        //    }
 
-    //    /// <summary>
-    //    ///GetDeleteSQL (object) 的测试
-    //    ///</summary>
-    //    [TestMethod ()]
-    //    public void GetDeleteSQLTest () {
-    //        Init ();
-    //        SQLGenerator target = new SQLGenerator ( pesistenceContext );
-    //        string actual = target.GetDeleteSQL ( @object );
-    //        Console.WriteLine ( actual );
-    //    }
+        //    /// <summary>
+        //    ///GetDeleteSQL (object) 的测试
+        //    ///</summary>
+        //    [TestMethod ()]
+        //    public void GetDeleteSQLTest () {
+        //        Init ();
+        //        SQLGenerator target = new SQLGenerator ( pesistenceContext );
+        //        string actual = target.GetDeleteSQL ( @object );
+        //        Console.WriteLine ( actual );
+        //    }
 
-    //    /// <summary>
-    //    ///GetInsertSQL (object) 的测试
-    //    ///</summary>
-    //    [TestMethod ()]
-    //    public void GetInsertSQLTest () {
-    //        Init ();
-    //        SQLGenerator target = new SQLGenerator ( pesistenceContext );
-    //        string actual = target.GetInsertSQL ( @object );
-    //        Console.WriteLine ( actual );
-    //    }
+        //    /// <summary>
+        //    ///GetInsertSQL (object) 的测试
+        //    ///</summary>
+        //    [TestMethod ()]
+        //    public void GetInsertSQLTest () {
+        //        Init ();
+        //        SQLGenerator target = new SQLGenerator ( pesistenceContext );
+        //        string actual = target.GetInsertSQL ( @object );
+        //        Console.WriteLine ( actual );
+        //    }
 
-    //    /// <summary>
-    //    ///GetSelectSQL (Type) 的测试
-    //    ///</summary>
-    //    [TestMethod ()]
-    //    public void GetSelectSQLTest () {
-    //        Init ();
-    //        SQLGenerator target = new SQLGenerator ( pesistenceContext );
-    //        Type type = typeof ( Student ); // TODO: 初始化为适当的值
-    //        string actual = target.GetSelectSQL ( type );
-    //        Console.WriteLine ( actual );
-    //    }
+        //    /// <summary>
+        //    ///GetSelectSQL (Type) 的测试
+        //    ///</summary>
+        //    [TestMethod ()]
+        //    public void GetSelectSQLTest () {
+        //        Init ();
+        //        SQLGenerator target = new SQLGenerator ( pesistenceContext );
+        //        Type type = typeof ( Student ); // TODO: 初始化为适当的值
+        //        string actual = target.GetSelectSQL ( type );
+        //        Console.WriteLine ( actual );
+        //    }
 
-    //    /// <summary>
-    //    ///GetSelectSQL (Type, List&lt;StatElement&gt;) 的测试
-    //    ///</summary>
-    //    [TestMethod ()]
-    //    public void GetSelectSQLTest1 () {
-    //        Init ();
-    //        SQLGenerator target = new SQLGenerator ( pesistenceContext );
-    //        Type type = typeof ( Student ); ; // TODO: 初始化为适当的值
-    //        System.Collections.Generic.List<ORMFramework.Statment.StatElement> expression = new List<StatElement> (); // TODO: 初始化为适当的值
-    //        StatElement element = new StatElement ();
-    //        element.Type = StatElementType.Variable;
-    //        element.Value = "Id";
-    //        expression.Add ( element );
-    //        element = new StatElement ();
-    //        element.Type = StatElementType.Operator;
-    //        element.Value = Operator.Equals;
-    //        expression.Add ( element );
-    //        element = new StatElement ();
-    //        element.Type = StatElementType.Constant;
-    //        element.Value = 1;
-    //        expression.Add ( element );
+        //    /// <summary>
+        //    ///GetSelectSQL (Type, List&lt;StatElement&gt;) 的测试
+        //    ///</summary>
+        //    [TestMethod ()]
+        //    public void GetSelectSQLTest1 () {
+        //        Init ();
+        //        SQLGenerator target = new SQLGenerator ( pesistenceContext );
+        //        Type type = typeof ( Student ); ; // TODO: 初始化为适当的值
+        //        System.Collections.Generic.List<ORMFramework.Statment.StatElement> expression = new List<StatElement> (); // TODO: 初始化为适当的值
+        //        StatElement element = new StatElement ();
+        //        element.Type = StatElementType.Variable;
+        //        element.Value = "Id";
+        //        expression.Add ( element );
+        //        element = new StatElement ();
+        //        element.Type = StatElementType.Operator;
+        //        element.Value = Operator.Equals;
+        //        expression.Add ( element );
+        //        element = new StatElement ();
+        //        element.Type = StatElementType.Constant;
+        //        element.Value = 1;
+        //        expression.Add ( element );
 
-    //        string actual = target.GetSelectSQL ( type, expression );
+        //        string actual = target.GetSelectSQL ( type, expression );
 
-    //        Console.WriteLine ( actual );
-    //    }
+        //        Console.WriteLine ( actual );
+        //    }
 
-    //    /// <summary>
-    //    ///GetUpdateSQL (object, object) 的测试
-    //    ///</summary>
-    //    [TestMethod ()]
-    //    public void GetUpdateSQLTest () {
-    //        Init ();
-    //        SQLGenerator target = new SQLGenerator ( pesistenceContext );
+        //    /// <summary>
+        //    ///GetUpdateSQL (object, object) 的测试
+        //    ///</summary>
+        //    [TestMethod ()]
+        //    public void GetUpdateSQLTest () {
+        //        Init ();
+        //        SQLGenerator target = new SQLGenerator ( pesistenceContext );
 
-    //        object oldObject = new Student ( 1 ); // TODO: 初始化为适当的值
-    //        ( ( Student ) oldObject ).Class = new Class ( 2 );
-    //        object newObject = new Student ( 2 );
-    //        ( ( Student ) newObject ).Class = new Class ( 1 );// TODO: 初始化为适当的值
-    //        string actual;
-    //        actual = target.GetUpdateSQL ( oldObject, newObject );
+        //        object oldObject = new Student ( 1 ); // TODO: 初始化为适当的值
+        //        ( ( Student ) oldObject ).Class = new Class ( 2 );
+        //        object newObject = new Student ( 2 );
+        //        ( ( Student ) newObject ).Class = new Class ( 1 );// TODO: 初始化为适当的值
+        //        string actual;
+        //        actual = target.GetUpdateSQL ( oldObject, newObject );
 
-    //        Console.WriteLine ( actual );
-    //    }
+        //        Console.WriteLine ( actual );
+        //    }
 
 
     }
-    public class Student {
+    public class Student
+    {
         private int _id;
         private Class _class;
         private string _name;
 
-        public int Id {
+        public int Id
+        {
             get { return _id; }
             set { _id = value; }
         }
 
-        public string Name {
+        public string Name
+        {
             get { return _name; }
             set { _name = value; }
         }
 
-        public Student ( int id ) {
+        public Student(int id)
+        {
             _id = id;
         }
 
-        public Class Class {
+        public Class Class
+        {
             get { return _class; }
             set { _class = value; }
         }
     }
-    public class Class {
+    public class Class
+    {
         private int _id;
 
-        public Class ( int id ) {
+        public Class(int id)
+        {
             _id = id;
         }
 
-        public int Id {
+        public int Id
+        {
             get { return _id; }
             set { _id = value; }
         }

@@ -1,0 +1,7 @@
+.vs/
+ORMFramework/bin/
+ORMFramework/obj/
+ORMFramework.Examples/bin/
+ORMFramework.Examples/obj/
+ORMFramework.Test/bin/
+ORMFramework.Test/obj/

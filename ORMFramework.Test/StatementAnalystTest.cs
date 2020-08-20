@@ -8,13 +8,15 @@ using ORMFramework.Statment;
 using System.Collections;
 using ORMFramework;
 using System.Reflection;
-namespace ORMFramework.Test {
+namespace ORMFramework.Test
+{
     /// <summary>
     ///这是 ORMFramework.Statment.StatementAnalyst 的测试类，旨在
     ///包含所有 ORMFramework.Statment.StatementAnalyst 单元测试
     ///</summary>
-    [TestClass ()]
-    public class StatementAnalystTest {
+    [TestClass()]
+    public class StatementAnalystTest
+    {
 
 
         private TestContext testContextInstance;
@@ -23,11 +25,14 @@ namespace ORMFramework.Test {
         ///获取或设置测试上下文，上下文提供
         ///有关当前测试运行及其功能的信息。
         ///</summary>
-        public TestContext TestContext {
-            get {
+        public TestContext TestContext
+        {
+            get
+            {
                 return testContextInstance;
             }
-            set {
+            set
+            {
                 testContextInstance = value;
             }
         }
@@ -134,51 +139,61 @@ namespace ORMFramework.Test {
 
     }
 
-    public class List2 : ICollection<int> {
+    public class List2 : ICollection<int>
+    {
         #region ICollection<int> 成员
 
-        public void Add ( int item ) {
-            throw new Exception ( "The method or operation is not implemented." );
+        public void Add(int item)
+        {
+            throw new Exception("The method or operation is not implemented.");
         }
 
-        public void Clear () {
-            throw new Exception ( "The method or operation is not implemented." );
+        public void Clear()
+        {
+            throw new Exception("The method or operation is not implemented.");
         }
 
-        public bool Contains ( int item ) {
-            throw new Exception ( "The method or operation is not implemented." );
+        public bool Contains(int item)
+        {
+            throw new Exception("The method or operation is not implemented.");
         }
 
-        public void CopyTo ( int[] array, int arrayIndex ) {
-            throw new Exception ( "The method or operation is not implemented." );
+        public void CopyTo(int[] array, int arrayIndex)
+        {
+            throw new Exception("The method or operation is not implemented.");
         }
 
-        public int Count {
-            get { throw new Exception ( "The method or operation is not implemented." ); }
+        public int Count
+        {
+            get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        public bool IsReadOnly {
-            get { throw new Exception ( "The method or operation is not implemented." ); }
+        public bool IsReadOnly
+        {
+            get { throw new Exception("The method or operation is not implemented."); }
         }
 
-        public bool Remove ( int item ) {
-            throw new Exception ( "The method or operation is not implemented." );
+        public bool Remove(int item)
+        {
+            throw new Exception("The method or operation is not implemented.");
         }
 
         #endregion
 
         #region IEnumerable<int> 成员
 
-        public IEnumerator<int> GetEnumerator () {
-            throw new Exception ( "The method or operation is not implemented." );
+        public IEnumerator<int> GetEnumerator()
+        {
+            throw new Exception("The method or operation is not implemented.");
         }
 
         #endregion
 
         #region IEnumerable 成员
 
-        IEnumerator IEnumerable.GetEnumerator () {
-            throw new Exception ( "The method or operation is not implemented." );
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            throw new Exception("The method or operation is not implemented.");
         }
 
         #endregion

@@ -1,37 +1,48 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Data;
+using System.Text;
 using ORMFramework.Configuration;
 
-namespace ORMFramework {
-    public class PersistenceContext : IPersistenceContext {
+namespace ORMFramework
+{
+    public class PersistenceContext : IPersistenceContext
+    {
         private IDbDriverFactory _driverFactory;
         private IDbConnection _connection;
         private Dictionary<string, EntityMapping> _mappings;
 
-        public IDbConnection Connection {
-            get {
-                if ( _connection == null || _connection.State == ConnectionState.Closed ) {
-                    _connection = _driverFactory.GetDbConnection ();
+        public IDbConnection Connection
+        {
+            get
+            {
+                if (_connection == null || _connection.State == ConnectionState.Closed)
+                {
+                    _connection = _driverFactory.GetDbConnection();
                 }
                 return _connection;
             }
         }
 
-        public IDbDriverFactory DbDriverFactory {
+        public IDbDriverFactory DbDriverFactory
+        {
             get { return _driverFactory; }
         }
 
-        public PersistenceContext ( IDbDriverFactory driverFactory, Dictionary<string, EntityMapping> mappings ) {
+        public PersistenceContext(IDbDriverFactory driverFactory, Dictionary<string, EntityMapping> mappings)
+        {
             _driverFactory = driverFactory;
             _mappings = mappings;
         }
 
-        public EntityMapping GetEntityMappingByClassName ( string className ) {
-            if ( _mappings != null && _mappings.ContainsKey ( className ) ) {
+        public EntityMapping GetEntityMappingByClassName(string className)
+        {
+            if (_mappings != null && _mappings.ContainsKey(className))
+            {
                 return _mappings[className];
-            } else {
+            }
+            else
+            {
                 return null;
             }
         }

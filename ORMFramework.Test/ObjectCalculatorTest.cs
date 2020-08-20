@@ -5,13 +5,15 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using ORMFramework.Statment;
-namespace ORMFramework.Test {
+namespace ORMFramework.Test
+{
     /// <summary>
     ///这是 ORMFramework.Cache.ObjectCalculator 的测试类，旨在
     ///包含所有 ORMFramework.Cache.ObjectCalculator 单元测试
     ///</summary>
-    [TestClass ()]
-    public class ObjectCalculatorTest {
+    [TestClass()]
+    public class ObjectCalculatorTest
+    {
 
 
         private TestContext testContextInstance;
@@ -20,11 +22,14 @@ namespace ORMFramework.Test {
         ///获取或设置测试上下文，上下文提供
         ///有关当前测试运行及其功能的信息。
         ///</summary>
-        public TestContext TestContext {
-            get {
+        public TestContext TestContext
+        {
+            get
+            {
                 return testContextInstance;
             }
-            set {
+            set
+            {
                 testContextInstance = value;
             }
         }

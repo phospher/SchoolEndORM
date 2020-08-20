@@ -1,6 +1,6 @@
-﻿using System;
-using System.Data;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using ORMFramework.Listener;
 
 namespace ORMFramework

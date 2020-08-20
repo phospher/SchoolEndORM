@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using log4net;
 using log4net.Config;
-using System.IO;
 using log4net.Repository;
 
 namespace ORMFramework.LogHelper

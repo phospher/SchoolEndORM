@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Reflection;
 using System.Text;
+using System.Threading;
+using ORMFramework.Configuration;
 using ORMFramework.SQL;
 using ORMFramework.Statment;
-using System.Reflection;
-using ORMFramework.Configuration;
-using System.Threading;
-using System.Data;
 
 namespace ORMFramework.Cache
 {
@@ -17,9 +17,11 @@ namespace ORMFramework.Cache
         private static Dictionary<Type, List<GlobalCacheEntity>> _objTable = new Dictionary<Type, List<GlobalCacheEntity>>();
         private static Dictionary<Guid, GlobalCacheEntity> _objList = new Dictionary<Guid, GlobalCacheEntity>();
         private static ISQLGenerator _sqlGenerator = new SQLGenerator();
-        private static readonly Type[] _basicType = new Type[]{typeof(bool),typeof(byte),typeof(sbyte),
-            typeof(decimal),typeof(double),typeof(float),typeof(int),typeof(uint),typeof(long),
-            typeof(ulong),typeof(short),typeof(ushort),typeof(char),typeof (string),typeof(byte[])};
+        private static readonly Type[] _basicType = new Type[] {
+            typeof (bool), typeof (byte), typeof (sbyte),
+            typeof (decimal), typeof (double), typeof (float), typeof (int), typeof (uint), typeof (long),
+            typeof (ulong), typeof (short), typeof (ushort), typeof (char), typeof (string), typeof (byte[])
+        };
 
         public static IEnumerable<GlobalCacheResult> Search<T>(QueryExpression queryExpression, IPersistenceContext persistenceContext, IList<Guid> ignoreIds)
         {

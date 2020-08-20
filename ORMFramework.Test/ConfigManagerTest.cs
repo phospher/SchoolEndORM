@@ -5,13 +5,15 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using ORMFramework.Configuration;
-namespace ORMFramework.Test {
+namespace ORMFramework.Test
+{
     /// <summary>
     ///这是 ORMFramework.Configuration.ConfigManager 的测试类，旨在
     ///包含所有 ORMFramework.Configuration.ConfigManager 单元测试
     ///</summary>
-    [TestClass ()]
-    public class ConfigManagerTest {
+    [TestClass()]
+    public class ConfigManagerTest
+    {
 
 
         private TestContext testContextInstance;
@@ -20,11 +22,14 @@ namespace ORMFramework.Test {
         ///获取或设置测试上下文，上下文提供
         ///有关当前测试运行及其功能的信息。
         ///</summary>
-        public TestContext TestContext {
-            get {
+        public TestContext TestContext
+        {
+            get
+            {
                 return testContextInstance;
             }
-            set {
+            set
+            {
                 testContextInstance = value;
             }
         }
@@ -66,14 +71,15 @@ namespace ORMFramework.Test {
         /// <summary>
         ///GetSystemConfiguration () 的测试
         ///</summary>
-        [TestMethod ()]
-        public void GetSystemConfigurationTest () {
-            ConfigManager target = new ConfigManager ( "E:\\毕业设计\\ORMFramework\\ORMFramework\\Configuration\\Config.xml" );
+        [TestMethod()]
+        public void GetSystemConfigurationTest()
+        {
+            ConfigManager target = new ConfigManager("E:\\毕业设计\\ORMFramework\\ORMFramework\\Configuration\\Config.xml");
 
             Configuration.Configuration expected = null;
             Configuration.Configuration actual;
 
-            actual = target.GetSystemConfiguration ();
+            actual = target.GetSystemConfiguration();
         }
 
     }
