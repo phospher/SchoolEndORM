@@ -1,9 +1,0 @@
-E:\毕业设计\ORMFramework\ORMFramework.Test\obj\Debug\ResolveAssemblyReference.cache
-E:\毕业设计\ORMFramework\ORMFramework.Test\bin\Debug\ORMFramework.Test.dll
-E:\毕业设计\ORMFramework\ORMFramework.Test\bin\Debug\ORMFramework.Test.pdb
-E:\毕业设计\ORMFramework\ORMFramework.Test\obj\Debug\ORMFramework.Test.dll
-E:\毕业设计\ORMFramework\ORMFramework.Test\obj\Debug\ORMFramework.Test.pdb
-E:\毕业设计\ORMFramework\ORMFramework.Test\bin\Debug\ORMFramework.dll
-E:\毕业设计\ORMFramework\ORMFramework.Test\bin\Debug\ORMFramework.pdb
-E:\毕业设计\ORMFramework\ORMFramework.Test\bin\Debug\log4net.dll
-E:\毕业设计\ORMFramework\ORMFramework.Test\bin\Debug\log4net.xml

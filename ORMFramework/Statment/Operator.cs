@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ORMFramework.Statment {
-    public enum Operator {
+namespace ORMFramework.Statment
+{
+    public enum Operator
+    {
         Equals = 0,
         UnEquals = 1,
         Greater = 2,
