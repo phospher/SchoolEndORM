@@ -1,6 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<TestLists xmlns="http://microsoft.com/schemas/VisualStudio/TeamTest/2010">
-  <TestList name="测试列表" id="8c43106b-9dc1-4907-a29f-aa66a61bf5b6">
-    <RunConfiguration name="本地测试运行" storage="localtestrun.testrunconfig" id="a8de01d9-a1ea-4f99-93f7-744f8af937fb" type="Microsoft.VisualStudio.TestTools.Common.TestRunConfiguration" />
-  </TestList>
-</TestLists>
