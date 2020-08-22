@@ -30,7 +30,6 @@ namespace ORMFramework.DbDriverFactory
             {
                 throw new Exception("ConnectionString can not be null or empty");
             }
-
             return new SqlConnection(_connectionString);
         }
 
