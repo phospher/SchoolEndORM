@@ -2,7 +2,7 @@
 <Configuration>
     <SessionFactory>
         <Database>SqlServer</Database>
-        <ConnectionString>server=xxxx;port=3306;database=test;uid=test;pwd=12345678;Charset=utf8</ConnectionString>
+        <ConnectionString>server=xxxx;port=3306;database=test;uid=test;pwd=xxxx;Charset=utf8</ConnectionString>
         <ProviderName>MySql.Data.MySqlClient.MySqlClientFactory,MySql.Data</ProviderName>
     </SessionFactory>
     <Mappings>
