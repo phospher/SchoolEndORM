@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
+using System.Collections.Concurrent;
 
 namespace ORMFramework
 {
@@ -11,6 +13,8 @@ namespace ORMFramework
 
         private DbProviderFactory _dbProviderFactory;
 
+        private readonly static IDictionary<string, object> _registedProviderName = new ConcurrentDictionary<string, object>();
+
         public DefaultDbDriverFactory(string providerName) : this(string.Empty, providerName)
         {
 
@@ -18,6 +22,11 @@ namespace ORMFramework
 
         public DefaultDbDriverFactory(string connectionString, string providerName)
         {
+            if (!_registedProviderName.ContainsKey(providerName))
+            {
+                DbProviderFactories.RegisterFactory(providerName, providerName);
+                _registedProviderName.Add(providerName, new object());
+            }
             this.ConnectionString = connectionString;
             this._dbProviderFactory = DbProviderFactories.GetFactory(providerName);
         }

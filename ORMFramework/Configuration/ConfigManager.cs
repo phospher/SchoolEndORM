@@ -92,6 +92,9 @@ namespace ORMFramework.Configuration
                     case "ConnectionString":
                         result = ReadConnectionString(reader, configuration);
                         break;
+                    case "ProviderName":
+                        result = ReadProviderName(reader, configuration);
+                        break;
                     default:
                         return false;
                 }
@@ -151,6 +154,24 @@ namespace ORMFramework.Configuration
                 result = true;
             }
             if (result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "ConnectionString")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private bool ReadProviderName(XmlTextReader reader, Configuration configuration)
+        {
+            bool result = false;
+            if (reader.Read() && reader.NodeType == XmlNodeType.Text)
+            {
+                configuration.ProviderName = reader.ReadString().Trim();
+                result = true;
+            }
+            if (result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "ProviderName")
             {
                 return true;
             }

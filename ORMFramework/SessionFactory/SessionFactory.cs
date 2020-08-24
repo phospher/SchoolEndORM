@@ -36,8 +36,8 @@ namespace ORMFramework
             {
                 this.Configuration = new ConfigManager(configFilePath).GetSystemConfiguration();
             }
-            this._driverFactory = new DefaultDbDriverFactory(this.Configuration.ProviderName,
-                this.Configuration.ConnectionString);
+            this._driverFactory = new DefaultDbDriverFactory(this.Configuration.ConnectionString,
+                this.Configuration.ProviderName);
             foreach (EntityMapping map in this.Configuration.Mappings)
             {
                 _mappings.Add(map.ClassName, map);
