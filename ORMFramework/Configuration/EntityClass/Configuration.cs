@@ -8,8 +8,6 @@ namespace ORMFramework.Configuration
     {
         private IList<EntityMapping> _mappings = new List<EntityMapping>();
 
-        public DatabaseType DatabaseType { get; set; }
-
         public string ConnectionString { get; set; }
 
         public string ProviderName { get; set; }

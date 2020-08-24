@@ -86,9 +86,6 @@ namespace ORMFramework.Configuration
             {
                 switch (reader.Name)
                 {
-                    case "Database":
-                        result = ReadDatabase(reader, configuration);
-                        break;
                     case "ConnectionString":
                         result = ReadConnectionString(reader, configuration);
                         break;
@@ -100,42 +97,6 @@ namespace ORMFramework.Configuration
                 }
             }
             if (result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "SessionFactory")
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private bool ReadDatabase(XmlTextReader reader, Configuration configuration)
-        {
-            bool result = false;
-            if (reader.Read() && reader.NodeType == XmlNodeType.Text)
-            {
-                switch (reader.ReadString().ToLower())
-                {
-                    case "sqlserver":
-                        configuration.DatabaseType = DatabaseType.SQLServer;
-                        result = true;
-                        break;
-                    case "odbc":
-                        configuration.DatabaseType = DatabaseType.Odbc;
-                        result = true;
-                        break;
-                    case "oledb":
-                        configuration.DatabaseType = DatabaseType.OleDb;
-                        result = true;
-                        break;
-                    case "oracle":
-                        configuration.DatabaseType = DatabaseType.Oracle;
-                        break;
-                    default:
-                        return false;
-                }
-            }
-            if (result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "Database")
             {
                 return true;
             }

@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Configuration>
     <SessionFactory>
-        <Database>SqlServer</Database>
         <ConnectionString>server=xxxx;port=3306;database=test;uid=test;pwd=xxxx;Charset=utf8</ConnectionString>
         <ProviderName>MySql.Data.MySqlClient.MySqlClientFactory,MySql.Data</ProviderName>
     </SessionFactory>
