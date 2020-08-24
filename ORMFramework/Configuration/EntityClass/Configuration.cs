@@ -6,31 +6,17 @@ namespace ORMFramework.Configuration
 {
     public class Configuration
     {
-        private DatabaseType _databaseType;
-        private string _connectionString;
-        private IList<EntityMapping> _mappings;
+        private IList<EntityMapping> _mappings = new List<EntityMapping>();
 
-        public DatabaseType DatabaseType
-        {
-            get { return _databaseType; }
-            set { _databaseType = value; }
-        }
+        public string ConnectionString { get; set; }
 
-        public string ConnectionString
-        {
-            get { return _connectionString; }
-            set { _connectionString = value; }
-        }
+        public string ProviderName { get; set; }
 
         public IList<EntityMapping> Mappings
         {
             get
             {
-                if (_mappings == null)
-                {
-                    _mappings = new List<EntityMapping>();
-                }
-                return _mappings;
+                return this._mappings;
             }
         }
     }

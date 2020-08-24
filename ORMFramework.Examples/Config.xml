@@ -1,11 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Configuration>
     <SessionFactory>
-        <Database>SqlServer</Database>
-        <ConnectionString>Data Source=192.168.248.128;User ID=sa;Password=phospherlau204;initial catalog=test</ConnectionString>
+        <ConnectionString>server=xxxx;port=3306;database=test;uid=test;pwd=xxxx;Charset=utf8</ConnectionString>
+        <ProviderName>MySql.Data.MySqlClient.MySqlClientFactory,MySql.Data</ProviderName>
     </SessionFactory>
     <Mappings>
-        <Map ClassName="ORMFramework.Examples.Student" TableName="Student" Key="StudentId"></Map>
+        <Map ClassName="ORMFramework.Examples.Student" TableName="Student" Key="StudentId">
+        </Map>
         <Map ClassName="ORMFramework.Examples.Department" TableName="Department" Key="Id">
             <One-to-Many KeyColum="Id" Property="Teachers" ReferenceClass="ORMFramework.Examples.Teacher" ReferenceColum="DepartmentId" />
         </Map>

@@ -12,7 +12,7 @@ namespace ORMFramework.Examples
         {
             SessionFactory sessionFactory = new SessionFactory();
             ISession session;
-            sessionFactory.Initialize(@"E:\毕业设计\ORMFramework\ORMFramework.Examples\Config.xml");
+            sessionFactory.Initialize(@"/Users/phospher/Projects/openSource/SchoolEndORM/ORMFramework.Examples/Config.xml");
             session = sessionFactory.CreateSession();
             TestInsert(session);
             Console.ReadKey();
