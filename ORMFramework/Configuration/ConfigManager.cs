@@ -18,7 +18,7 @@ namespace ORMFramework.Configuration
 
         public ConfigManager()
         {
-            _configFilePath = Environment.CurrentDirectory + "\\Config.xml";
+            _configFilePath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + "Config.xml";
         }
 
         public ConfigManager(string configFilePath)

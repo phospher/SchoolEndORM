@@ -16,7 +16,7 @@ namespace ORMFramework.LogHelper
         {
             if (string.IsNullOrEmpty(configFilePath))
             {
-                configFilePath = Environment.CurrentDirectory + "\\Config.xml";
+                configFilePath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + "Config.xml";
             }
             ILoggerRepository repository = LogManager.CreateRepository("NETCoreRepository");
             XmlConfigurator.Configure(repository, new FileInfo(configFilePath));
