@@ -13,6 +13,6 @@
     <ProjectReference Include="..\ORMFramework\ORMFramework.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MySql.Data" Version="8.0.22" />
+    <PackageReference Include="MySql.Data" Version="8.0.32.1" />
   </ItemGroup>
 </Project>
