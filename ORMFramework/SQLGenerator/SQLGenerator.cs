@@ -16,20 +16,10 @@ namespace ORMFramework.SQL
             typeof (ulong), typeof (short), typeof (ushort), typeof (byte[])
         };
         private static readonly Type[] _stringType = new Type[] { typeof(char), typeof(string), typeof(DateTime) };
-        private IPersistenceContext _persistenceContext;
 
-        public IPersistenceContext PersistenceContext
-        {
-            get { return _persistenceContext; }
-            set { _persistenceContext = value; }
-        }
+        public IPersistenceContext PersistenceContext { get; set; }
 
         public SQLGenerator() { }
-
-        public SQLGenerator(IPersistenceContext pesistenceContext)
-        {
-            _persistenceContext = pesistenceContext;
-        }
 
         public string GetSelectSQL(Type type)
         {
@@ -40,7 +30,7 @@ namespace ORMFramework.SQL
         {
             List<StatElement> expression;
             StringBuilder sql = new StringBuilder("select * from ");
-            EntityMapping mapping = _persistenceContext.GetEntityMappingByClassName(type.FullName);
+            EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(type.FullName);
             string tableName = mapping.TableName;
             sql.Append(tableName);
             if (queryExpression != null)
@@ -85,7 +75,7 @@ namespace ORMFramework.SQL
 
             StringBuilder sql = new StringBuilder("update ");
             StringBuilder where = new StringBuilder(" where (");
-            EntityMapping mapping = _persistenceContext.GetEntityMappingByClassName(newObject.GetType().FullName);
+            EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(newObject.GetType().FullName);
             string tableName = mapping.TableName;
             PropertyInfo[] properties = oldObject.GetType().GetProperties();
             sql.Append(tableName);
@@ -137,7 +127,7 @@ namespace ORMFramework.SQL
         public string GetDeleteSQL(object @object)
         {
             StringBuilder sql = new StringBuilder("delete from ");
-            EntityMapping mapping = _persistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
+            EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
             string tableName = mapping.TableName;
             PropertyInfo[] properties = @object.GetType().GetProperties();
             sql.Append(tableName);
@@ -180,7 +170,7 @@ namespace ORMFramework.SQL
             StringBuilder sql = new StringBuilder("insert into ");
             StringBuilder colums = new StringBuilder("(");
             StringBuilder values = new StringBuilder("(");
-            EntityMapping mapping = _persistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
+            EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
             string tableName = mapping.TableName;
             PropertyInfo[] properties = @object.GetType().GetProperties();
             sql.Append(tableName);

@@ -63,6 +63,7 @@ namespace ORMFramework
             session.PersistenceContext.DbDriverFactory.ConnectionString = this.Configuration.ConnectionString;
             session.PersistenceContext.DbDriverFactory.SetProviderName(this.Configuration.ProviderName);
             session.PersistenceContext.Mappings = this._mappings;
+            session.PersistenceContext.SQLGenerator.PersistenceContext = session.PersistenceContext;
 
             return session;
         }

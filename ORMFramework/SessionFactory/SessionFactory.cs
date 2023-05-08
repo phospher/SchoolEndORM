@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using ORMFramework.Cache;
 using ORMFramework.Configuration;
+using ORMFramework.SQL;
 
 namespace ORMFramework
 {
@@ -53,6 +54,8 @@ namespace ORMFramework
         public ISession CreateSession()
         {
             IPersistenceContext persistenceContext = new PersistenceContext(_driverFactory, _mappings);
+            persistenceContext.SQLGenerator = new SQLGenerator();
+            persistenceContext.SQLGenerator.PersistenceContext = persistenceContext;
             return new Session(this, persistenceContext);
         }
     }

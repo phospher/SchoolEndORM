@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
+using ORMFramework.SQL;
 
 namespace ORMFramework.Ioc
 {
@@ -12,7 +13,8 @@ namespace ORMFramework.Ioc
         {
             { typeof(ISession), ServiceLifetime.Transient },
             { typeof(IDbDriverFactory), ServiceLifetime.Transient },
-            { typeof(IPersistenceContext), ServiceLifetime.Transient }
+            { typeof(IPersistenceContext), ServiceLifetime.Transient },
+            { typeof(ISQLGenerator), ServiceLifetime.Transient }
         };
 
         private readonly ServiceProvider serviceProvider;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Text;
 using ORMFramework.Configuration;
+using ORMFramework.SQL;
 
 namespace ORMFramework
 {
@@ -25,14 +26,17 @@ namespace ORMFramework
             }
         }
 
+        public ISQLGenerator SQLGenerator { get; set; }
+
         public IDbDriverFactory DbDriverFactory
         {
             get { return _driverFactory; }
         }
 
-        public PersistenceContext(IDbDriverFactory driverFactory)
+        public PersistenceContext(IDbDriverFactory driverFactory, ISQLGenerator sqlGenerator)
         {
             this._driverFactory = driverFactory;
+            this.SQLGenerator = sqlGenerator;
         }
 
         public PersistenceContext(IDbDriverFactory driverFactory, IDictionary<string, EntityMapping> mappings)

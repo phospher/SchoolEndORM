@@ -17,7 +17,6 @@ namespace ORMFramework.Cache
         private List<CacheEntity> _updateList = new List<CacheEntity>();
         private List<CacheEntity> _deleteList = new List<CacheEntity>();
         private IPersistenceContext _persistenceContext;
-        private ISQLGenerator _sqlGenerator;
 
         public IPersistenceContext PersistenceContext
         {
@@ -27,7 +26,6 @@ namespace ORMFramework.Cache
         public SessionCache(IPersistenceContext persistenceContext)
         {
             _persistenceContext = persistenceContext;
-            _sqlGenerator = new SQLGenerator(_persistenceContext);
         }
 
         ~SessionCache()
@@ -351,7 +349,7 @@ namespace ORMFramework.Cache
             foreach (CacheEntity cacheEntity in _updateList)
             {
                 GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId);
-                string sql = _sqlGenerator.GetUpdateSQL(globalCacheResult.Value, cacheEntity.Value);
+                string sql = this._persistenceContext.SQLGenerator.GetUpdateSQL(globalCacheResult.Value, cacheEntity.Value);
                 cmd.CommandText = sql;
                 cmd.ExecuteNonQuery();
             }
@@ -370,7 +368,7 @@ namespace ORMFramework.Cache
             foreach (CacheEntity cacheEntity in _deleteList)
             {
                 GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId);
-                string sql = _sqlGenerator.GetDeleteSQL(globalCacheResult.Value);
+                string sql = this._persistenceContext.SQLGenerator.GetDeleteSQL(globalCacheResult.Value);
                 cmd.CommandText = sql;
                 cmd.ExecuteNonQuery();
                 GlobalCache.Delete(cacheEntity.ObjectId);
@@ -382,7 +380,7 @@ namespace ORMFramework.Cache
         {
             foreach (CacheEntity cacheEntity in _insertList)
             {
-                string sql = _sqlGenerator.GetInsertSQL(cacheEntity.Value);
+                string sql = this._persistenceContext.SQLGenerator.GetInsertSQL(cacheEntity.Value);
                 cmd.CommandText = sql;
                 cmd.ExecuteNonQuery();
             }

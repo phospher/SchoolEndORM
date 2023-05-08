@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ORMFramework.SQL;
 
 namespace ORMFramework.Ioc
 {
@@ -12,6 +13,7 @@ namespace ORMFramework.Ioc
             componentImplTypes[typeof(ISession)] = typeof(Session);
             componentImplTypes[typeof(IDbDriverFactory)] = typeof(DefaultDbDriverFactory);
             componentImplTypes[typeof(IPersistenceContext)] = typeof(PersistenceContext);
+            componentImplTypes[typeof(ISQLGenerator)] = typeof(SQLGenerator);
         }
 
         public ComponentProviderBuilder SetSession<T>() where T : ISession

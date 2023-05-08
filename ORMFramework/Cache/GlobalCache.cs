@@ -16,7 +16,6 @@ namespace ORMFramework.Cache
         private static int INCREASE = 100;
         private static Dictionary<Type, List<GlobalCacheEntity>> _objTable = new Dictionary<Type, List<GlobalCacheEntity>>();
         private static Dictionary<Guid, GlobalCacheEntity> _objList = new Dictionary<Guid, GlobalCacheEntity>();
-        private static ISQLGenerator _sqlGenerator = new SQLGenerator();
         private static readonly Type[] _basicType = new Type[] {
             typeof (bool), typeof (byte), typeof (sbyte),
             typeof (decimal), typeof (double), typeof (float), typeof (int), typeof (uint), typeof (long),
@@ -34,14 +33,14 @@ namespace ORMFramework.Cache
             EntityMapping mapping = persistenceContext.GetEntityMappingByClassName(objType.FullName);
             Dictionary<string, List<object>> ignorePrimaryKey = new Dictionary<string, List<object>>();
             StringBuilder sql;
-            _sqlGenerator.PersistenceContext = persistenceContext;
+            ISQLGenerator sqlGenerator = persistenceContext.SQLGenerator;
             if (queryExpression == null)
             {
-                sql = new StringBuilder(_sqlGenerator.GetSelectSQL(objType));
+                sql = new StringBuilder(sqlGenerator.GetSelectSQL(objType));
             }
             else
             {
-                sql = new StringBuilder(_sqlGenerator.GetSelectSQL(objType, queryExpression));
+                sql = new StringBuilder(sqlGenerator.GetSelectSQL(objType, queryExpression));
             }
             if (_objTable.ContainsKey(objType))
             {
