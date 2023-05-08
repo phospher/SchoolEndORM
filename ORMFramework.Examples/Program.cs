@@ -10,25 +10,25 @@ namespace ORMFramework.Examples
     {
         static void Main(string[] args)
         {
-            SessionFactory sessionFactory = new SessionFactory();
+            ISessionFactory sessionFactory = new SessionFactoryIoc();
             ISession session;
-            sessionFactory.Initialize(@"/Users/phospher/Projects/openSource/SchoolEndORM/ORMFramework.Examples/Config.xml");
+            sessionFactory.Initialize(@"/Users/liuqiming/Projects/personal/SchoolEndORM/ORMFramework.Examples/Config.xml");
             session = sessionFactory.CreateSession();
-            TestInsert(session);
-            Console.ReadKey();
-            TestUpdate(session);
-            Console.ReadKey();
-            TestDelete(session);
-            Console.ReadKey();
-            TestOneToMany(session);
-            Console.ReadKey();
-            TestManyToOne(session);
-            Console.ReadKey();
-            TestOneToOne(session);
-            Console.ReadKey();
-            TestManyToMany(session);
-            Console.ReadKey();
-            TestMultitransaction(sessionFactory);
+            //TestInsert(session);
+            //Console.ReadKey();
+            //TestUpdate(session);
+            //Console.ReadKey();
+            //TestDelete(session);
+            //Console.ReadKey();
+            //TestOneToMany(session);
+            //Console.ReadKey();
+            //TestManyToOne(session);
+            //Console.ReadKey();
+            //TestOneToOne(session);
+            //Console.ReadKey();
+            //TestManyToMany(session);
+            //Console.ReadKey();
+            //TestMultitransaction(sessionFactory);
             Console.ReadKey();
         }
 

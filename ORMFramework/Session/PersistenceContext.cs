@@ -10,7 +10,8 @@ namespace ORMFramework
     {
         private IDbDriverFactory _driverFactory;
         private IDbConnection _connection;
-        private Dictionary<string, EntityMapping> _mappings;
+
+        public IDictionary<string, EntityMapping> Mappings { get; set; }
 
         public IDbConnection Connection
         {
@@ -29,17 +30,22 @@ namespace ORMFramework
             get { return _driverFactory; }
         }
 
-        public PersistenceContext(IDbDriverFactory driverFactory, Dictionary<string, EntityMapping> mappings)
+        public PersistenceContext(IDbDriverFactory driverFactory)
         {
-            _driverFactory = driverFactory;
-            _mappings = mappings;
+            this._driverFactory = driverFactory;
+        }
+
+        public PersistenceContext(IDbDriverFactory driverFactory, IDictionary<string, EntityMapping> mappings)
+        {
+            this._driverFactory = driverFactory;
+            this.Mappings = mappings;
         }
 
         public EntityMapping GetEntityMappingByClassName(string className)
         {
-            if (_mappings != null && _mappings.ContainsKey(className))
+            if (this.Mappings != null && this.Mappings.ContainsKey(className))
             {
-                return _mappings[className];
+                return this.Mappings[className];
             }
             else
             {

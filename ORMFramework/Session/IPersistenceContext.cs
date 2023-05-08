@@ -10,6 +10,8 @@ namespace ORMFramework
     {
         IDbDriverFactory DbDriverFactory { get; }
         IDbConnection Connection { get; }
+        IDictionary<string, EntityMapping> Mappings { get; set; }
         EntityMapping GetEntityMappingByClassName(string className);
+
     }
 }

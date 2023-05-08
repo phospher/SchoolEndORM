@@ -1,15 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using ORMFramework.Cache;
+﻿using System;
 using ORMFramework.Configuration;
+using System.Collections.Generic;
+using ORMFramework.Ioc;
 
 namespace ORMFramework
 {
-    public class SessionFactory : ISessionFactory
+    public class SessionFactoryIoc : ISessionFactory
     {
         private IDbDriverFactory _driverFactory;
         private Dictionary<string, EntityMapping> _mappings;
+        private IComponentProvider _componentProvider;
 
         public Configuration.Configuration Configuration
         {
@@ -18,11 +18,17 @@ namespace ORMFramework
 
         public void Initialize()
         {
-            Initialize(string.Empty);
+            this.Initialize(string.Empty);
         }
 
         public void Initialize(string configFilePath)
         {
+            this.Initialize(configFilePath, new ComponentProviderBuilder().build());   
+        }
+
+        public void Initialize(string configFilePath, IComponentProvider componentProvider)
+        {
+            this._componentProvider = componentProvider;
             if (_driverFactory != null)
             {
                 return;
@@ -52,8 +58,14 @@ namespace ORMFramework
 
         public ISession CreateSession()
         {
-            IPersistenceContext persistenceContext = new PersistenceContext(_driverFactory, _mappings);
-            return new Session(this, persistenceContext);
+            ISession session = this._componentProvider.GetComponent<ISession>();
+            session.SessionFactory = this;
+            session.PersistenceContext.DbDriverFactory.ConnectionString = this.Configuration.ConnectionString;
+            session.PersistenceContext.DbDriverFactory.SetProviderName(this.Configuration.ProviderName);
+            session.PersistenceContext.Mappings = this._mappings;
+
+            return session;
         }
     }
 }
+

@@ -9,4 +9,10 @@
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="7.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="Ioc\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Ioc\" />
+  </ItemGroup>
 </Project>

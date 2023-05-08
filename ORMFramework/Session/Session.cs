@@ -11,7 +11,6 @@ namespace ORMFramework
 {
     public class Session : ISession, IDisposable
     {
-        private SessionFactory _sessionFactory;
         private ISelectListener _selectListener;
         private List<IInsertListener> _insertListeners = new List<IInsertListener>();
         private List<IDeleteListener> _deleteListeners = new List<IDeleteListener>();
@@ -21,10 +20,7 @@ namespace ORMFramework
         private IPersistenceContext _persistenceContext;
         private ISessionCache _sessionCache;
 
-        public SessionFactory SessionFactory
-        {
-            get { return _sessionFactory; }
-        }
+        public ISessionFactory SessionFactory { get; set; }
 
         public ISelectListener SelectListener
         {
@@ -66,10 +62,8 @@ namespace ORMFramework
             get { return _persistenceContext; }
         }
 
-        internal Session(SessionFactory sessionFactory, IPersistenceContext persistenceContext)
+        public Session()
         {
-            _sessionFactory = sessionFactory;
-            _persistenceContext = persistenceContext;
             _sessionCache = new SessionCache(_persistenceContext);
             _selectListener = new DefaultSelectListener();
             _insertListeners.Add(new DefaultInsertListener());
@@ -77,6 +71,17 @@ namespace ORMFramework
             _deleteListeners.Add(new DefaultDeleteListener());
             _submitListeners.Add(new DefaultSubmitListener());
             _commandListener = new DefaultCommandListener();
+        }
+
+        public Session(IPersistenceContext persistenceContext) : this(null, persistenceContext)
+        {
+
+        }
+
+        public Session(ISessionFactory sessionFactory, IPersistenceContext persistenceContext) : this()
+        {
+            this.SessionFactory = sessionFactory;
+            _persistenceContext = persistenceContext;
         }
 
         ~Session()

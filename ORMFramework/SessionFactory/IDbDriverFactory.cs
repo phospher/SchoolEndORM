@@ -10,6 +10,7 @@ namespace ORMFramework
     {
         string ConnectionString { get; set; }
 
+        void SetProviderName(string providerName);
         IDbConnection GetDbConnection();
         IDbConnection GetDbConnection(string connectionString);
         IDbCommand GetDBCommand();
