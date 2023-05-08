@@ -7,53 +7,28 @@ namespace ORMFramework.Cache
 {
     public class GlobalCacheEntity : CacheEntity
     {
-        private Lock _lock;
-        private int _readCount;
         private Queue<Thread> _blockThreads;
-        private bool _isDeleted;
-        private int _writeLockThreadId;
-        private int _referenceCount;
 
-        public Lock Lock
-        {
-            get { return _lock; }
-            set { _lock = value; }
-        }
+        public Lock Lock { get; set; }
 
-        public int ReadCount
-        {
-            get { return _readCount; }
-            set { _readCount = value; }
-        }
+        public int ReadCount { get; set; }
 
         public Queue<Thread> BlockThreads
         {
             get { return _blockThreads; }
         }
 
-        public bool IsDeleted
-        {
-            get { return _isDeleted; }
-            set { _isDeleted = value; }
-        }
+        public bool IsDeleted { get; set; }
 
-        public int WriteLockThreadId
-        {
-            get { return _writeLockThreadId; }
-            set { _writeLockThreadId = value; }
-        }
+        public int WriteLockThreadId { get; set; }
 
-        public int ReferenceCount
-        {
-            get { return _referenceCount; }
-            set { _referenceCount = value; }
-        }
+        public int ReferenceCount { get; set; }
 
         public GlobalCacheEntity()
         {
-            _readCount = 0;
-            _lock = Lock.None;
-            _isDeleted = false;
+            this.ReadCount = 0;
+            this.Lock = Lock.None;
+            this.IsDeleted = false;
             _blockThreads = new Queue<Thread>();
         }
 
@@ -61,14 +36,14 @@ namespace ORMFramework.Cache
         {
             Value = value;
             Version = DateTime.UtcNow.Ticks;
-            _readCount = 0;
-            _lock = Lock.None;
+            this.ReadCount = 0;
+            this.Lock = Lock.None;
             _blockThreads = new Queue<Thread>();
             ForeignKeys = new Dictionary<string, object>();
             ObjectId = Guid.NewGuid();
-            _isDeleted = false;
-            _writeLockThreadId = -1;
-            _referenceCount = 0;
+            this.IsDeleted = false;
+            this.WriteLockThreadId = -1;
+            this.ReferenceCount = 0;
         }
     }
 

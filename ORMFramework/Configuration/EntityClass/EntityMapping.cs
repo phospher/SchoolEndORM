@@ -6,22 +6,12 @@ namespace ORMFramework.Configuration
 {
     public class EntityMapping
     {
-        private string _className;
-        private string _tableName;
         private IEnumerable<string> _keys;
         private IDictionary<string, EntityRelation> _relations;
 
-        public string ClassName
-        {
-            get { return _className; }
-            set { _className = value; }
-        }
+        public string ClassName { get; set; }
 
-        public string TableName
-        {
-            get { return _tableName; }
-            set { _tableName = value; }
-        }
+        public string TableName { get; set; }
 
         public IEnumerable<string> Keys
         {

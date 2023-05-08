@@ -7,33 +7,13 @@ namespace ORMFramework.Event
 {
     public class CommandEvent
     {
-        private string _commandText;
-        private IPersistenceContext _persistenceContext;
-        private bool _isQuery;
-        private object _result;
 
-        public string CommandText
-        {
-            get { return _commandText; }
-            set { _commandText = value; }
-        }
+        public string CommandText { get; set; }
 
-        public IPersistenceContext PersistenceContext
-        {
-            get { return _persistenceContext; }
-            set { _persistenceContext = value; }
-        }
+        public IPersistenceContext PersistenceContext { get; set; }
 
-        public bool IsQuery
-        {
-            get { return _isQuery; }
-            set { _isQuery = value; }
-        }
+        public bool IsQuery { get; set; }
 
-        public object Result
-        {
-            get { return _result; }
-            set { _result = value; }
-        }
+        public object Result { get; set; }
     }
 }

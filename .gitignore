@@ -5,3 +5,4 @@ ORMFramework.Examples/bin/
 ORMFramework.Examples/obj/
 ORMFramework.Test/bin/
 ORMFramework.Test/obj/
+**/dist/

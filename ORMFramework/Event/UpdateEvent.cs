@@ -6,12 +6,6 @@ namespace ORMFramework.Event
 {
     public class UpdateEvent : ActionEvent
     {
-        private object _entity;
-
-        public object Entity
-        {
-            get { return _entity; }
-            set { _entity = value; }
-        }
+        public object Entity { get; set; }
     }
 }

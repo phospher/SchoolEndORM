@@ -7,19 +7,8 @@ namespace ORMFramework.Event
 {
     public class ActionEvent
     {
-        private object _result;
-        private ISessionCache _cache;
+        public object Result { get; set; }
 
-        public object Result
-        {
-            get { return _result; }
-            set { _result = value; }
-        }
-
-        public ISessionCache Cache
-        {
-            get { return _cache; }
-            set { _cache = value; }
-        }
+        public ISessionCache Cache { get; set; }
     }
 }

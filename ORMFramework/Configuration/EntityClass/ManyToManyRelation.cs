@@ -6,26 +6,10 @@ namespace ORMFramework.Configuration
 {
     public class ManyToManyRelation : EntityRelation
     {
-        private string _referenceTableName;
-        private string _referenceClassKeyColum;
-        private string _referenceClassColum;
+        public string ReferenceTableName { get; set; }
 
-        public string ReferenceTableName
-        {
-            get { return _referenceTableName; }
-            set { _referenceTableName = value; }
-        }
+        public string ReferenceClassKeyColum { get; set; }
 
-        public string ReferenceClassKeyColum
-        {
-            get { return _referenceClassKeyColum; }
-            set { _referenceClassKeyColum = value; }
-        }
-
-        public string ReferenceClassColum
-        {
-            get { return _referenceClassColum; }
-            set { _referenceClassColum = value; }
-        }
+        public string ReferenceClassColum { get; set; }
     }
 }

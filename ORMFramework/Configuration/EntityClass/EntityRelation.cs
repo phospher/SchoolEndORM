@@ -6,40 +6,14 @@ namespace ORMFramework.Configuration
 {
     public class EntityRelation
     {
-        private string _keyColum;
-        private string _Property;
-        private string _referenceClassName;
-        private string _referenceColum;
-        private RelationType _type;
+        public string KeyColum { get; set; }
 
-        public string KeyColum
-        {
-            get { return _keyColum; }
-            set { _keyColum = value; }
-        }
+        public string Property { get; set; }
 
-        public string Property
-        {
-            get { return _Property; }
-            set { _Property = value; }
-        }
+        public string ReferenceClassName { get; set; }
 
-        public string ReferenceClassName
-        {
-            get { return _referenceClassName; }
-            set { _referenceClassName = value; }
-        }
+        public string ReferenceColum { get; set; }
 
-        public string ReferenceColum
-        {
-            get { return _referenceColum; }
-            set { _referenceColum = value; }
-        }
-
-        public RelationType Type
-        {
-            get { return _type; }
-            set { _type = value; }
-        }
+        public RelationType Type { get; set; }
     }
 }

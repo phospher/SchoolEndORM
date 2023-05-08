@@ -7,19 +7,9 @@ namespace ORMFramework.Event
 {
     public class SelectEvent : ActionEvent
     {
-        private QueryExpression _queryExpression;
-        private Type _searchType;
 
-        public QueryExpression QueryExpression
-        {
-            get { return _queryExpression; }
-            set { _queryExpression = value; }
-        }
+        public QueryExpression QueryExpression { get; set; }
 
-        public Type SearchType
-        {
-            get { return _searchType; }
-            set { _searchType = value; }
-        }
+        public Type SearchType { get; set; }
     }
 }
