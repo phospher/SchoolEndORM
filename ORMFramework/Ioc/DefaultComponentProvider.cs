@@ -2,6 +2,8 @@
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using ORMFramework.SQL;
+using ORMFramework.Cache;
+using ORMFramework.Listener;
 
 namespace ORMFramework.Ioc
 {
@@ -14,7 +16,14 @@ namespace ORMFramework.Ioc
             { typeof(ISession), ServiceLifetime.Transient },
             { typeof(IDbDriverFactory), ServiceLifetime.Transient },
             { typeof(IPersistenceContext), ServiceLifetime.Transient },
-            { typeof(ISQLGenerator), ServiceLifetime.Transient }
+            { typeof(ISQLGenerator), ServiceLifetime.Transient },
+            { typeof(ISessionCache), ServiceLifetime.Transient },
+            { typeof(ISelectListener), ServiceLifetime.Singleton },
+            { typeof(IInsertListener), ServiceLifetime.Singleton },
+            { typeof(IUpdateListener), ServiceLifetime.Singleton },
+            { typeof(IDeleteListener), ServiceLifetime.Singleton },
+            { typeof(ICommandListener), ServiceLifetime.Singleton },
+            { typeof(ISubmitListener), ServiceLifetime.Singleton }
         };
 
         private readonly ServiceProvider serviceProvider;

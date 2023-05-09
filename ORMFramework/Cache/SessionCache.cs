@@ -16,17 +16,8 @@ namespace ORMFramework.Cache
         private List<CacheEntity> _insertList = new List<CacheEntity>();
         private List<CacheEntity> _updateList = new List<CacheEntity>();
         private List<CacheEntity> _deleteList = new List<CacheEntity>();
-        private IPersistenceContext _persistenceContext;
 
-        public IPersistenceContext PersistenceContext
-        {
-            get { return _persistenceContext; }
-        }
-
-        public SessionCache(IPersistenceContext persistenceContext)
-        {
-            _persistenceContext = persistenceContext;
-        }
+        public IPersistenceContext PersistenceContext { get; set; }
 
         ~SessionCache()
         {
@@ -45,7 +36,7 @@ namespace ORMFramework.Cache
                     RefreshCacheEntity(cacheEntity);
                     if (ObjectCalculator.IsTargetObject(cacheEntity.Value, expression))
                     {
-                        EntityMapping mapping = _persistenceContext.GetEntityMappingByClassName(objType.FullName);
+                        EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(objType.FullName);
                         result.Add((object)cacheEntity.Value);
                         ignoreIds.Add(cacheEntity.ObjectId);
                     }
@@ -66,7 +57,7 @@ namespace ORMFramework.Cache
             {
                 bool hasTarget = false;
                 Type objType = soruceObject.GetType();
-                EntityMapping mapping = _persistenceContext.GetEntityMappingByClassName(objType.FullName);
+                EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(objType.FullName);
                 foreach (KeyValuePair<string, EntityRelation> item in mapping.Relations)
                 {
                     EntityRelation relation = item.Value;
@@ -185,7 +176,7 @@ namespace ORMFramework.Cache
             catch (Exception ex)
             {
                 RollBack();
-                throw ex;
+                throw;
             }
         }
 
@@ -284,7 +275,7 @@ namespace ORMFramework.Cache
         private List<object> ProcessQueryCommand(string sql)
         {
             List<object> result = new List<object>();
-            IDbDriverFactory driverFactory = _persistenceContext.DbDriverFactory;
+            IDbDriverFactory driverFactory = this.PersistenceContext.DbDriverFactory;
             IDbConnection conn = driverFactory.GetDbConnection();
             IDbDataAdapter da = driverFactory.GetDbDataAdapter(sql, conn);
             DataSet ds = new DataSet();
@@ -300,7 +291,7 @@ namespace ORMFramework.Cache
 
         public void Commit()
         {
-            IDbDriverFactory driverFactory = _persistenceContext.DbDriverFactory;
+            IDbDriverFactory driverFactory = this.PersistenceContext.DbDriverFactory;
             IDbConnection conn = driverFactory.GetDbConnection();
             IDbCommand cmd;
             IDbTransaction tran;
@@ -349,7 +340,7 @@ namespace ORMFramework.Cache
             foreach (CacheEntity cacheEntity in _updateList)
             {
                 GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId);
-                string sql = this._persistenceContext.SQLGenerator.GetUpdateSQL(globalCacheResult.Value, cacheEntity.Value);
+                string sql = this.PersistenceContext.SQLGenerator.GetUpdateSQL(globalCacheResult.Value, cacheEntity.Value);
                 cmd.CommandText = sql;
                 cmd.ExecuteNonQuery();
             }
@@ -359,7 +350,7 @@ namespace ORMFramework.Cache
         {
             foreach (CacheEntity cacheEntity in _updateList)
             {
-                GlobalCache.Update(cacheEntity.ObjectId, cacheEntity.Value, cacheEntity.ForeignKeys, _persistenceContext);
+                GlobalCache.Update(cacheEntity.ObjectId, cacheEntity.Value, cacheEntity.ForeignKeys, this.PersistenceContext);
             }
         }
 
@@ -368,7 +359,7 @@ namespace ORMFramework.Cache
             foreach (CacheEntity cacheEntity in _deleteList)
             {
                 GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId);
-                string sql = this._persistenceContext.SQLGenerator.GetDeleteSQL(globalCacheResult.Value);
+                string sql = this.PersistenceContext.SQLGenerator.GetDeleteSQL(globalCacheResult.Value);
                 cmd.CommandText = sql;
                 cmd.ExecuteNonQuery();
                 GlobalCache.Delete(cacheEntity.ObjectId);
@@ -380,7 +371,7 @@ namespace ORMFramework.Cache
         {
             foreach (CacheEntity cacheEntity in _insertList)
             {
-                string sql = this._persistenceContext.SQLGenerator.GetInsertSQL(cacheEntity.Value);
+                string sql = this.PersistenceContext.SQLGenerator.GetInsertSQL(cacheEntity.Value);
                 cmd.CommandText = sql;
                 cmd.ExecuteNonQuery();
             }
@@ -413,7 +404,7 @@ namespace ORMFramework.Cache
             {
                 ignoreIds.Add(cacheEntity.ObjectId);
             }
-            globalCacheResults = GlobalCache.Search(objType, expression, _persistenceContext, ignoreIds);
+            globalCacheResults = GlobalCache.Search(objType, expression, this.PersistenceContext, ignoreIds);
             foreach (GlobalCacheResult globalCacheResult in globalCacheResults)
             {
                 CacheEntity cacheEntity = new CacheEntity();

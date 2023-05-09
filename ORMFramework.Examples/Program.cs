@@ -12,10 +12,10 @@ namespace ORMFramework.Examples
         {
             ISessionFactory sessionFactory = new SessionFactoryIoc();
             ISession session;
-            sessionFactory.Initialize(@"/Users/phospher/Projects/openSource/SchoolEndORM/ORMFramework.Examples/Config.xml");
+            sessionFactory.Initialize(@"/Users/liuqiming/Projects/personal/SchoolEndORM/ORMFramework.Examples/Config.xml");
             session = sessionFactory.CreateSession();
-            //TestInsert(session);
-            //Console.ReadKey();
+            TestInsert(session);
+            Console.ReadKey();
             //TestUpdate(session);
             //Console.ReadKey();
             //TestDelete(session);
@@ -29,7 +29,7 @@ namespace ORMFramework.Examples
             //TestManyToMany(session);
             //Console.ReadKey();
             //TestMultitransaction(sessionFactory);
-            Console.ReadKey();
+            //Console.ReadKey();
         }
 
         private static void ReadObjects(ISession session)
@@ -63,7 +63,7 @@ namespace ORMFramework.Examples
         {
             Student[] result;
             Console.WriteLine("Update an object...");
-            result = session.Search<Student>("StudentId=='200730740402'");
+            result = session.Search<Student>("StudentId=='200730740404'");
             result[0].Name = "Lisa";
             result[0].Gender = "Female";
             session.Update(result[0]);
@@ -135,7 +135,7 @@ namespace ORMFramework.Examples
             }
         }
 
-        private static void TestMultitransaction(SessionFactory sessionFactory)
+        private static void TestMultitransaction(ISessionFactory sessionFactory)
         {
             Thread transaction1 = new Thread(new ParameterizedThreadStart(Transaction1));
             transaction1.Start(sessionFactory);
@@ -143,7 +143,7 @@ namespace ORMFramework.Examples
 
         private static void Transaction1(object sessionFactory)
         {
-            ISession session = ((SessionFactory)sessionFactory).CreateSession();
+            ISession session = ((ISessionFactory)sessionFactory).CreateSession();
             Course[] result = session.Search<Course>("Id==2");
             Thread transaction2 = new Thread(new ParameterizedThreadStart(Transaction2));
             result[0].Name = "Art";
@@ -157,7 +157,7 @@ namespace ORMFramework.Examples
 
         private static void Transaction2(object sessionFactory)
         {
-            ISession session = ((SessionFactory)sessionFactory).CreateSession();
+            ISession session = ((ISessionFactory)sessionFactory).CreateSession();
             Course[] result;
             Console.WriteLine("Transaction2 begin to read the object...");
             result = session.Search<Course>("Id==2");

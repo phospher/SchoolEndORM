@@ -62,26 +62,31 @@ namespace ORMFramework
             get { return _persistenceContext; }
         }
 
-        public Session()
-        {
-            _sessionCache = new SessionCache(_persistenceContext);
-            _selectListener = new DefaultSelectListener();
-            _insertListeners.Add(new DefaultInsertListener());
-            _updateListeners.Add(new DefaultUpdateListener());
-            _deleteListeners.Add(new DefaultDeleteListener());
-            _submitListeners.Add(new DefaultSubmitListener());
-            _commandListener = new DefaultCommandListener();
-        }
 
         public Session(IPersistenceContext persistenceContext) : this(null, persistenceContext)
         {
 
         }
 
-        public Session(ISessionFactory sessionFactory, IPersistenceContext persistenceContext) : this()
+        public Session(ISessionFactory sessionFactory, IPersistenceContext persistenceContext) : this(sessionFactory, persistenceContext, new SessionCache(), new DefaultSelectListener(),
+            new DefaultInsertListener(), new DefaultUpdateListener(), new DefaultDeleteListener(), new DefaultSubmitListener(), new DefaultCommandListener())
+        {
+
+        }
+
+        public Session(ISessionFactory sessionFactory, IPersistenceContext persistenceContext, ISessionCache sessionCache, ISelectListener selectListener, IInsertListener insertListener,
+            IUpdateListener updateListener, IDeleteListener deleteListener, ISubmitListener submitListener, ICommandListener commandListener)
         {
             this.SessionFactory = sessionFactory;
             _persistenceContext = persistenceContext;
+            _sessionCache = sessionCache;
+            _sessionCache.PersistenceContext = persistenceContext;
+            _selectListener = selectListener;
+            _insertListeners.Add(insertListener);
+            _updateListeners.Add(updateListener);
+            _deleteListeners.Add(deleteListener);
+            _submitListeners.Add(submitListener);
+            _commandListener = commandListener;
         }
 
         ~Session()

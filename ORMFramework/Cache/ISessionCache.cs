@@ -10,7 +10,7 @@ namespace ORMFramework.Cache
         void Delete(object @object);
         void GetReferenceClasses(object soruceObject);
         void Insert(object @object);
-        IPersistenceContext PersistenceContext { get; }
+        IPersistenceContext PersistenceContext { get; set; }
         IEnumerable<object> Search(Type objType, QueryExpression expression);
         void Update(object @object);
     }

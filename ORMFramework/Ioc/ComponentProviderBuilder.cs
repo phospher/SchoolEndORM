@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using ORMFramework.Cache;
+using ORMFramework.Listener;
 using ORMFramework.SQL;
 
 namespace ORMFramework.Ioc
@@ -14,6 +16,12 @@ namespace ORMFramework.Ioc
             componentImplTypes[typeof(IDbDriverFactory)] = typeof(DefaultDbDriverFactory);
             componentImplTypes[typeof(IPersistenceContext)] = typeof(PersistenceContext);
             componentImplTypes[typeof(ISQLGenerator)] = typeof(SQLGenerator);
+            componentImplTypes[typeof(ISessionCache)] = typeof(SessionCache);
+            componentImplTypes[typeof(ISelectListener)] = typeof(DefaultSelectListener);
+            componentImplTypes[typeof(IInsertListener)] = typeof(DefaultInsertListener);
+            componentImplTypes[typeof(IUpdateListener)] = typeof(DefaultUpdateListener);
+            componentImplTypes[typeof(IDeleteListener)] = typeof(DefaultDeleteListener);
+            componentImplTypes[typeof(ICommandListener)] = typeof(DefaultCommandListener);
         }
 
         public ComponentProviderBuilder SetSession<T>() where T : ISession
