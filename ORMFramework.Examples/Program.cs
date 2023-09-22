@@ -14,10 +14,11 @@ namespace ORMFramework.Examples
             ISession session;
             sessionFactory.Initialize(@"/Users/liuqiming/Projects/personal/SchoolEndORM/ORMFramework.Examples/Config.xml");
             session = sessionFactory.CreateSession();
-            TestInsert(session);
+            string studentId = Guid.NewGuid().ToString();
+            TestInsert(session, studentId);
             Console.ReadKey();
-            //TestUpdate(session);
-            //Console.ReadKey();
+            TestUpdate(session, studentId);
+            Console.ReadKey();
             //TestDelete(session);
             //Console.ReadKey();
             //TestOneToMany(session);
@@ -45,11 +46,11 @@ namespace ORMFramework.Examples
             Console.WriteLine("Got objects successfully...");
         }
 
-        private static void TestInsert(ISession session)
+        private static void TestInsert(ISession session, string studentId)
         {
             Student student = new Student();
             Console.WriteLine("Insert an object to database...");
-            student.StudentId = "200730740404";
+            student.StudentId = studentId;
             student.Name = "Dickson";
             student.Gender = "Male";
             session.Insert(student);
@@ -59,11 +60,11 @@ namespace ORMFramework.Examples
             ReadObjects(session);
         }
 
-        private static void TestUpdate(ISession session)
+        private static void TestUpdate(ISession session, string studentId)
         {
             Student[] result;
             Console.WriteLine("Update an object...");
-            result = session.Search<Student>("StudentId=='200730740404'");
+            result = session.Search<Student>(string.Format("StudentId=='{0}'", studentId));
             result[0].Name = "Lisa";
             result[0].Gender = "Female";
             session.Update(result[0]);
