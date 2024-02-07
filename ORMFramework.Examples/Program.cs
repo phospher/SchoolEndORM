@@ -19,8 +19,8 @@ namespace ORMFramework.Examples
             Console.ReadKey();
             TestUpdate(session, studentId);
             Console.ReadKey();
-            //TestDelete(session);
-            //Console.ReadKey();
+            TestDelete(session, studentId);
+            Console.ReadKey();
             //TestOneToMany(session);
             //Console.ReadKey();
             //TestManyToOne(session);
@@ -74,11 +74,11 @@ namespace ORMFramework.Examples
             ReadObjects(session);
         }
 
-        private static void TestDelete(ISession session)
+        private static void TestDelete(ISession session, string studentId)
         {
             Student[] result;
             Console.WriteLine("Delete an object...");
-            result = session.Search<Student>("StudentId=='200730740404'");
+            result = session.Search<Student>(string.Format("StudentId=='{0}'", studentId));
             session.Delete(result[0]);
             session.Submit();
             Console.WriteLine("Deleted Successfully...");

@@ -11,5 +11,21 @@ namespace ORMFramework.Examples
         public string Name { get; set; }
 
         public string Gender { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || this.GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            Student student = (Student)obj;
+            return this.StudentId == student.StudentId;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.StudentId.GetHashCode();
+        }
     }
 }
