@@ -34,5 +34,21 @@ namespace ORMFramework.Examples
             get { return _department; }
             set { _department = value; }
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || this.GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            Teacher student = (Teacher)obj;
+            return this.Id == student.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Id.GetHashCode();
+        }
     }
 }

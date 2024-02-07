@@ -41,5 +41,21 @@ namespace ORMFramework.Examples
             get { return _student; }
             set { _student = value; }
         }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || this.GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            ContactMenu student = (ContactMenu)obj;
+            return this.Id == student.Id;
+        }
+
+        public override int GetHashCode()
+        {
+            return this.Id.GetHashCode();
+        }
     }
 }
