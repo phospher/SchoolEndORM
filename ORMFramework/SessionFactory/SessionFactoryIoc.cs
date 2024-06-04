@@ -23,7 +23,7 @@ namespace ORMFramework
 
         public void Initialize(string configFilePath)
         {
-            this.Initialize(configFilePath, new ComponentProviderBuilder().build());   
+            this.Initialize(configFilePath, new ComponentProviderBuilder().Build());   
         }
 
         public void Initialize(string configFilePath, IComponentProvider componentProvider)

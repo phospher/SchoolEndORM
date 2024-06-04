@@ -36,7 +36,7 @@ namespace ORMFramework.Ioc
             return this;
         }
 
-        public IComponentProvider build()
+        public IComponentProvider Build()
         {
             return new DefaultComponentProvider(this.componentImplTypes);
         }

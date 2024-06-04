@@ -11,7 +11,7 @@ namespace ORMFramework.Test
 		public void TestGetSession()
 		{
 			IComponentProvider componentProvider = new ComponentProviderBuilder()
-				.build();
+				.Build();
 			ISession session = componentProvider.GetComponent<ISession>();
 			Assert.AreEqual<Type>(typeof(Session), session.GetType());
 		}
