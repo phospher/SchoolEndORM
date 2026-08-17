@@ -1,5 +1,6 @@
 using System.Data;
 using System.Data.Common;
+using System.Diagnostics.CodeAnalysis;
 
 namespace ORMFramework.Test.Fakes;
 
@@ -11,7 +12,8 @@ public sealed class FakeDbConnection : IDbConnection
 
     public int CloseCount { get; private set; }
 
-    public string ConnectionString { get; set; } = "";
+    [AllowNull]
+    public string ConnectionString { get; set; } = null!;
 
     public int ConnectionTimeout => 0;
 
@@ -52,17 +54,18 @@ public sealed class FakeDbCommand : IDbCommand
 {
     public bool IsDisposed { get; private set; }
 
-    public string CommandText { get; set; } = "";
+    [AllowNull]
+    public string CommandText { get; set; } = null!;
 
     public int CommandTimeout { get; set; }
 
     public CommandType CommandType { get; set; }
 
-    public IDbConnection Connection { get; set; } = null!;
+    public IDbConnection? Connection { get; set; }
 
     public IDataParameterCollection Parameters => null!;
 
-    public IDbTransaction Transaction { get; set; } = null!;
+    public IDbTransaction? Transaction { get; set; }
 
     public UpdateRowSource UpdatedRowSource { get; set; }
 
@@ -130,13 +133,13 @@ public sealed class FakeDbTransaction : IDbTransaction
 
 public sealed class FakeDbDataAdapter : IDbDataAdapter
 {
-    public IDbCommand SelectCommand { get; set; } = null!;
+    public IDbCommand? SelectCommand { get; set; }
 
-    public IDbCommand InsertCommand { get; set; } = null!;
+    public IDbCommand? InsertCommand { get; set; }
 
-    public IDbCommand UpdateCommand { get; set; } = null!;
+    public IDbCommand? UpdateCommand { get; set; }
 
-    public IDbCommand DeleteCommand { get; set; } = null!;
+    public IDbCommand? DeleteCommand { get; set; }
 
     public MissingMappingAction MissingMappingAction { get; set; }
 
