@@ -16,10 +16,7 @@ public sealed class SessionCache : ISessionCache
 
     public IPersistenceContext PersistenceContext { get; set; }
 
-    ~SessionCache()
-    {
-        Collect();
-    }
+    private bool _disposed;
 
     public IEnumerable<object> Search(Type objType, QueryExpression expression)
     {
@@ -248,10 +245,13 @@ public sealed class SessionCache : ISessionCache
     {
         var result = new List<object>();
         IDbDriverFactory driverFactory = PersistenceContext.DbDriverFactory;
-        IDbConnection conn = driverFactory.GetDbConnection();
+        using var conn = driverFactory.GetDbConnection();
+        using var ds = new DataSet();
         IDbDataAdapter da = driverFactory.GetDbDataAdapter(sql, conn);
-        var ds = new DataSet();
-        da.Fill(ds);
+        using (da as IDisposable)
+        {
+            da.Fill(ds);
+        }
         DataTable dt = ds.Tables[0];
         foreach (DataRow row in dt.Rows)
         {
@@ -263,10 +263,10 @@ public sealed class SessionCache : ISessionCache
     public void Commit()
     {
         IDbDriverFactory driverFactory = PersistenceContext.DbDriverFactory;
-        IDbConnection conn = driverFactory.GetDbConnection();
+        using var conn = driverFactory.GetDbConnection();
         conn.Open();
-        IDbTransaction tran = conn.BeginTransaction();
-        IDbCommand cmd = conn.CreateCommand();
+        using var tran = conn.BeginTransaction();
+        using var cmd = conn.CreateCommand();
         cmd.Transaction = tran;
         try
         {
@@ -274,13 +274,11 @@ public sealed class SessionCache : ISessionCache
             CommitToGlobalCache();
             ClearAllChangeList();
             tran.Commit();
-            conn.Close();
         }
-        catch (Exception ex)
+        catch
         {
             tran.Rollback();
-            conn.Close();
-            throw ex;
+            throw;
         }
     }
 
@@ -404,7 +402,11 @@ public sealed class SessionCache : ISessionCache
 
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+        _disposed = true;
         Collect();
-        GC.SuppressFinalize(this);
     }
 }

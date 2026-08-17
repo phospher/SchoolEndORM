@@ -398,10 +398,13 @@ public static class GlobalCache
 
     private static void ReadDataFromDatabase(Type objType, string sql, List<GlobalCacheResult> resultList, IPersistenceContext persistenceContext)
     {
-        IDbConnection conn = persistenceContext.Connection;
+        using var conn = persistenceContext.Connection;
+        using var ds = new DataSet();
         IDbDataAdapter dataAdapter = persistenceContext.DbDriverFactory.GetDbDataAdapter(sql, conn);
-        var ds = new DataSet();
-        dataAdapter.Fill(ds);
+        using (dataAdapter as IDisposable)
+        {
+            dataAdapter.Fill(ds);
+        }
         DataTable dt = ds.Tables[0];
         if (dt.Rows.Count > 0)
         {

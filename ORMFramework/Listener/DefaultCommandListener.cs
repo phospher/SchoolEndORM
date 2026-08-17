@@ -17,13 +17,13 @@ sealed class DefaultCommandListener : ICommandListener
         if (@event.IsQuery)
         {
             IDbDataAdapter da = @event.PersistenceContext.DbDriverFactory.GetDbDataAdapter(@event.CommandText, conn);
-            var ds = new DataSet();
+            using var ds = new DataSet();
             da.Fill(ds);
             @event.Result = ds;
         }
         else
         {
-            IDbCommand cmd = conn.CreateCommand();
+            using var cmd = conn.CreateCommand();
             cmd.CommandText = @event.CommandText;
             @event.Result = cmd.ExecuteNonQuery();
         }

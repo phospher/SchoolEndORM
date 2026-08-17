@@ -35,6 +35,27 @@ public class SessionCacheTest
     }
 
     [TestMethod]
+    public void Dispose_CalledTwice_ReleasesGlobalCacheReferenceExactlyOnce_AndDoesNotThrow()
+    {
+        var objectId = Guid.NewGuid();
+        var entity = new CacheEntity { ObjectId = objectId, Value = new TestEntity() };
+        GlobalCache.Insert(entity);
+
+        var sessionCache = new SessionCache();
+        FieldInfo objListField = typeof(SessionCache).GetField("_objList", BindingFlags.NonPublic | BindingFlags.Instance);
+        var objList = (Dictionary<object, CacheEntity>)objListField.GetValue(sessionCache);
+        objList.Add(entity.Value, entity);
+
+        sessionCache.Dispose();
+        sessionCache.Dispose();
+
+        FieldInfo globalObjListField = typeof(GlobalCache).GetField("_objList", BindingFlags.NonPublic | BindingFlags.Static);
+        var globalObjList = (Dictionary<Guid, GlobalCacheEntity>)globalObjListField.GetValue(null);
+        Assert.IsTrue(globalObjList.TryGetValue(objectId, out GlobalCacheEntity globalEntity), "entity should still be present (reference count > 0 prevents collection)");
+        Assert.AreEqual(0, globalEntity.ReferenceCount, "disposing twice must release the global cache reference exactly once");
+    }
+
+    [TestMethod]
     public void GetObjectsFromGlobalCache_WithNullIgnoreIds_DoesNotThrowNullReference()
     {
         var persistenceContext = new FakePersistenceContext();

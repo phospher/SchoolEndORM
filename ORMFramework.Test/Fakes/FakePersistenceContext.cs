@@ -6,10 +6,20 @@ namespace ORMFramework.Test.Fakes;
 public class FakePersistenceContext : IPersistenceContext
 {
     private IDictionary<string, EntityMapping> _mappings = new Dictionary<string, EntityMapping>();
+    private IDbConnection _connection;
+    private IDbDriverFactory _dbDriverFactory;
 
-    public IDbDriverFactory DbDriverFactory => throw new InvalidOperationException("no database in unit test");
+    public IDbDriverFactory DbDriverFactory
+    {
+        get { return _dbDriverFactory ?? throw new InvalidOperationException("no database in unit test"); }
+        set { _dbDriverFactory = value; }
+    }
 
-    public IDbConnection Connection => throw new InvalidOperationException("no database in unit test");
+    public IDbConnection Connection
+    {
+        get { return _connection ?? throw new InvalidOperationException("no database in unit test"); }
+        set { _connection = value; }
+    }
 
     public IDictionary<string, EntityMapping> Mappings
     {

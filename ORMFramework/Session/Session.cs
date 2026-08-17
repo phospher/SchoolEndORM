@@ -9,6 +9,8 @@ public sealed class Session : ISession, IDisposable
 {
     private ISessionCache _sessionCache;
 
+    private bool _disposed;
+
     public ISessionFactory SessionFactory { get; set; }
 
     public ISelectListener SelectListener { get; }
@@ -52,11 +54,6 @@ public sealed class Session : ISession, IDisposable
         DeleteListeners.Add(deleteListener);
         SubmitListeners.Add(submitListener);
         CommandListener = commandListener;
-    }
-
-    ~Session()
-    {
-        _sessionCache.Dispose();
     }
 
     public object[] Search(Type objType, string selectCommand) => OnSearch(objType, selectCommand).ToArray();
@@ -139,6 +136,11 @@ public sealed class Session : ISession, IDisposable
 
     public void Dispose()
     {
+        if (_disposed)
+        {
+            return;
+        }
+        _disposed = true;
         _sessionCache.Dispose();
     }
 }
