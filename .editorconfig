@@ -1,0 +1,52 @@
+root = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+tab_width = 4
+csharp_new_line_before_open_brace = all
+csharp_style_namespace_declarations = file_scoped:warning
+
+csharp_style_var_for_built_in_types = false:silent
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_expression_bodied_properties = when_on_single_line:suggestion
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_implicit_object_creation_when_type_is_apparent = true:suggestion
+csharp_style_prefer_switch_expression = true:suggestion
+csharp_style_prefer_pattern_matching = true:suggestion
+csharp_style_prefer_not_pattern = true:suggestion
+csharp_style_prefer_index_operator = true:suggestion
+csharp_style_prefer_range_operator = true:suggestion
+csharp_prefer_simple_using_statement = true:suggestion
+csharp_style_throw_expression = true:suggestion
+csharp_style_inlined_variable_declaration = true:suggestion
+
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_prefer_auto_properties = true:warning
+dotnet_style_readonly_field = true:suggestion
+dotnet_diagnostic.IDE0005.severity = warning
+
+dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_property = false:warning
+dotnet_style_qualification_for_method = false:warning
+
+dotnet_naming_rule.private_field_underscore.severity = warning
+dotnet_naming_rule.private_field_underscore.symbols = private_fields
+dotnet_naming_rule.private_field_underscore.style = underscore_style
+
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+
+dotnet_naming_style.underscore_style.required_prefix = _
+dotnet_naming_style.underscore_style.capitalization = camel_case
+
+# const 字段走 PascalCase，不被 _camelCase 私有字段规则捕获
+dotnet_naming_rule.const_fields_pascal_case.severity = warning
+dotnet_naming_rule.const_fields_pascal_case.symbols = const_fields
+dotnet_naming_rule.const_fields_pascal_case.style = pascal_case_style
+
+dotnet_naming_symbols.const_fields.applicable_kinds = field
+dotnet_naming_symbols.const_fields.required_modifiers = const
+
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
