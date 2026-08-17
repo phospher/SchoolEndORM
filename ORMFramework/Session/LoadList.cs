@@ -3,6 +3,7 @@ using System.Text;
 using ORMFramework.Cache;
 using ORMFramework.Event;
 using ORMFramework.Listener;
+using ORMFramework.SQL;
 using ORMFramework.Statment;
 
 namespace ORMFramework;
@@ -65,18 +66,7 @@ public sealed class LoadList<T> : IList<T>
         {
             statement.Append(ForeignKeyName);
             statement.Append("==");
-            if (ForeignKeyValues[i] is string || ForeignKeyValues[i] is char)
-            {
-                statement.Append(string.Format("'{0}'", ForeignKeyValues[i]));
-            }
-            else if (ForeignKeyValues[i] is DateTime)
-            {
-                statement.Append(string.Format("'{0}'", ((DateTime)ForeignKeyValues[i]).ToString("yyyy-MM-dd HH:mm:ss")));
-            }
-            else
-            {
-                statement.Append(ForeignKeyValues[i]);
-            }
+            statement.Append(SqlLiteral.Format(ForeignKeyValues[i]));
             if (i < ForeignKeyValues.Count - 1)
             {
                 statement.Append(" || ");

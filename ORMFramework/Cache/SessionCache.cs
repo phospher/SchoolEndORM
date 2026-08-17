@@ -2,6 +2,7 @@ using System.Data;
 using System.Reflection;
 using System.Text;
 using ORMFramework.Configuration;
+using ORMFramework.SQL;
 using ORMFramework.Statment;
 
 namespace ORMFramework.Cache;
@@ -67,18 +68,7 @@ public sealed class SessionCache : ISessionCache
                         object foreignKeysValue = _objList[soruceObject].ForeignKeys[relation.KeyColum];
                         expressionStr.Append(relation.ReferenceColum);
                         expressionStr.Append("==");
-                        if (foreignKeysValue is string || foreignKeysValue is char)
-                        {
-                            expressionStr.Append(string.Format("'{0}'", foreignKeysValue));
-                        }
-                        else if (foreignKeysValue is DateTime)
-                        {
-                            expressionStr.Append(string.Format("'{0}'", ((DateTime)foreignKeysValue).ToString("yyyy-MM-dd HH:mm:ss")));
-                        }
-                        else
-                        {
-                            expressionStr.Append(foreignKeysValue);
-                        }
+                        expressionStr.Append(SqlLiteral.Format(foreignKeysValue));
                         expression = new StatementAnalyst(expressionStr.ToString()).GetQueryExpression();
                         if (_objTable.ContainsKey(referenceType))
                         {
@@ -120,20 +110,7 @@ public sealed class SessionCache : ISessionCache
                             sql.Append(" from ");
                             sql.Append(relation2.ReferenceTableName);
                             sql.Append(" where ");
-                            sql.Append(relation2.ReferenceColum);
-                            sql.Append("=");
-                            if (foreignKeyValue is string || foreignKeyValue is char)
-                            {
-                                sql.Append(string.Format("'{0}'", foreignKeyValue));
-                            }
-                            else if (foreignKeyValue is DateTime)
-                            {
-                                sql.Append(string.Format("'{0}'", ((DateTime)foreignKeyValue).ToString("yyyy-MM-dd HH:mm:ss")));
-                            }
-                            else
-                            {
-                                sql.Append(foreignKeyValue);
-                            }
+                            sql.Append(SqlLiteral.Comparison(relation2.ReferenceColum, foreignKeyValue));
                             foreignKeyValues.AddRange(ProcessQueryCommand(sql.ToString()));
                             loadListType.GetProperty("ForeignKeyName").SetValue(loadList, relation2.ReferenceClassKeyColum, null);
                         }

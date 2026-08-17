@@ -174,31 +174,13 @@ public sealed class SQLGenerator : ISQLGenerator
             {
                 object value = properties[i].GetValue(@object, null);
                 colums.Append(properties[i].Name);
-                if (value != null)
-                {
-                    values.Append(value);
-                }
-                else
-                {
-                    values.Append("NULL");
-                }
+                values.Append(SqlLiteral.Format(value));
             }
             else if (IsStringType(properties[i].PropertyType))
             {
                 object value = properties[i].GetValue(@object, null);
                 colums.Append(properties[i].Name);
-                if (value == null)
-                {
-                    values.Append("NULL");
-                }
-                else if (value.GetType() == typeof(DateTime))
-                {
-                    values.Append(string.Format("'{0}'", ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss")));
-                }
-                else
-                {
-                    values.Append(string.Format("'{0}'", value));
-                }
+                values.Append(SqlLiteral.Format(value));
                 //} else if ( properties[i].PropertyType.GetInterface ( "System.Collections.ICollection" ) == null ) {
                 //    object value = properties[i].GetValue ( @object, null );
                 //    EntityRelation relation = mapping.Relations[properties[i].Name];
@@ -236,7 +218,7 @@ public sealed class SQLGenerator : ISQLGenerator
             throw new Exception("Invalid property type");
         }
 
-        return string.Format("{0}={1}", property.Name, property.GetValue(@object, null));
+        return SqlLiteral.Comparison(property.Name, property.GetValue(@object, null));
     }
 
     private string GenerateStatementByStringProperty(PropertyInfo property, object @object)
@@ -245,19 +227,7 @@ public sealed class SQLGenerator : ISQLGenerator
         {
             throw new Exception("Invalid property type");
         }
-        object value = property.GetValue(@object, null);
-        if (value == null)
-        {
-            return string.Format("{0}='{1}'", property.Name, "NULL");
-        }
-        else if (value.GetType() == typeof(DateTime))
-        {
-            return string.Format("{0}='{1}'", property.Name, ((DateTime)value).ToString("yyyy-MM-dd HH:mm:ss"));
-        }
-        else
-        {
-            return string.Format("{0}='{1}'", property.Name, value);
-        }
+        return SqlLiteral.Comparison(property.Name, property.GetValue(@object, null));
     }
 
     private bool IsBasicType(Type type)

@@ -60,19 +60,18 @@ public class SQLGeneratorTest
     [TestMethod]
     public void GetUpdateSQL_MatchesCurrentSnapshot()
     {
-        // TODO(6.3/7.9): 修复 13.8（null 渲染为 'NULL'）后更新此快照。
         var oldObject = new TestEntity { Id = 1, Name = null, Created = new DateTime(2024, 1, 2, 3, 4, 5), Score = 1.5, Children = null };
         var newObject = new TestEntity { Id = 2, Name = "abc", Created = new DateTime(2025, 6, 7, 8, 9, 10), Score = 2.5, Children = null };
         string actual = CreateGenerator().GetUpdateSQL(oldObject, newObject);
-        Assert.AreEqual("update TestEntity set Id=2,Name='abc',Created='2025-06-07 08:09:10',Score=2.5 where (Id=1 and Name='NULL' and Created='2024-01-02 03:04:05' and Score=1.5)", actual);
+        Assert.AreEqual("update TestEntity set Id=2,Name='abc',Created='2025-06-07 08:09:10',Score=2.5 where (Id=1 and Name is null and Created='2024-01-02 03:04:05' and Score=1.5)", actual);
     }
 
     [TestMethod]
     public void GetDeleteSQL_MatchesCurrentSnapshot()
     {
-        // TODO(6.3/7.9): 修复 13.7（尾随分隔符）/ 13.8（'NULL'）后更新此快照。
+        // TODO(7.9): 修复 13.7（尾随分隔符）后更新此快照。
         var entity = new TestEntity { Id = 1, Name = null, Created = new DateTime(2024, 1, 2, 3, 4, 5), Score = 1.5, Children = null };
         string actual = CreateGenerator().GetDeleteSQL(entity);
-        Assert.AreEqual("delete from TestEntity where (Id=1 and Name='NULL' and Created='2024-01-02 03:04:05' and Score=1.5 and )", actual);
+        Assert.AreEqual("delete from TestEntity where (Id=1 and Name is null and Created='2024-01-02 03:04:05' and Score=1.5 and )", actual);
     }
 }

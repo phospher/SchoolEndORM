@@ -391,22 +391,7 @@ public static class GlobalCache
             sql.Append(" not in (");
             foreach (object o in key.Value)
             {
-                if (o is string || o is char)
-                {
-                    sql.Append("'");
-                    sql.Append(o);
-                    sql.Append("'");
-                }
-                else if (o is DateTime)
-                {
-                    sql.Append("'");
-                    sql.Append(((DateTime)o).ToString("yyyy-MM-dd HH:mm:ss"));
-                    sql.Append("'");
-                }
-                else
-                {
-                    sql.Append(o);
-                }
+                sql.Append(SqlLiteral.Format(o));
                 j++;
                 if (j < key.Value.Count)
                 {

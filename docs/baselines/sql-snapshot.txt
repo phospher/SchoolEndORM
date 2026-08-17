@@ -1,5 +1,5 @@
 select * from TestEntity)
 select * from TestEntity where (Id=1)
 insert into TestEntity(Id,Name,Created,Score,) values(1,NULL,'2024-01-02 03:04:05',1.5,)
-update TestEntity set Id=2,Name='abc',Created='2025-06-07 08:09:10',Score=2.5 where (Id=1 and Name='NULL' and Created='2024-01-02 03:04:05' and Score=1.5)
-delete from TestEntity where (Id=1 and Name='NULL' and Created='2024-01-02 03:04:05' and Score=1.5 and )
+update TestEntity set Id=2,Name='abc',Created='2025-06-07 08:09:10',Score=2.5 where (Id=1 and Name is null and Created='2024-01-02 03:04:05' and Score=1.5)
+delete from TestEntity where (Id=1 and Name is null and Created='2024-01-02 03:04:05' and Score=1.5 and )

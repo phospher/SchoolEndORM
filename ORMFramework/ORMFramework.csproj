@@ -4,4 +4,8 @@
     <PackageReference Include="log4net" Version="3.0.4" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
   </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ORMFramework.Test" />
+  </ItemGroup>
 </Project>
