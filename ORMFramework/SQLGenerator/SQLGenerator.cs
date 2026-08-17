@@ -21,27 +21,22 @@ public sealed class SQLGenerator : ISQLGenerator
     ]);
     private static readonly FrozenSet<Type> _stringType = FrozenSet.ToFrozenSet([typeof(char), typeof(string), typeof(DateTime)]);
 
-    public IPersistenceContext PersistenceContext { get; set; }
+    public IPersistenceContext? PersistenceContext { get; set; }
 
     public SQLGenerator() { }
 
+    private IPersistenceContext PersistenceContextOrThrow =>
+        PersistenceContext ?? throw new InvalidOperationException("PersistenceContext is not configured");
+
     public string GetSelectSQL(Type type) => GetSelectSQL(type, null);
 
-    public string GetSelectSQL(Type type, QueryExpression queryExpression)
+    public string GetSelectSQL(Type type, QueryExpression? queryExpression)
     {
         var sql = new StringBuilder("select * from ");
-        EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(type.FullName);
+        EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(type.FullName ?? throw new OrmConfigurationException($"Type '{type}' has no full name."));
         string tableName = mapping.TableName;
         sql.Append(tableName);
-        List<StatElement> expression;
-        if (queryExpression != null)
-        {
-            expression = queryExpression.NifixExpression;
-        }
-        else
-        {
-            expression = null;
-        }
+        List<StatElement>? expression = queryExpression?.NifixExpression;
         if (expression != null && expression.Count > 0)
         {
             sql.Append(" where (");
@@ -78,7 +73,7 @@ public sealed class SQLGenerator : ISQLGenerator
 
         var sql = new StringBuilder("update ");
         var where = new StringBuilder(" where (");
-        EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(newObject.GetType().FullName);
+        EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(newObject.GetType().FullName ?? throw new OrmConfigurationException($"Type '{newObject.GetType()}' has no full name."));
         string tableName = mapping.TableName;
         PropertyInfo[] properties = oldObject.GetType().GetProperties();
         sql.Append(tableName);
@@ -130,7 +125,7 @@ public sealed class SQLGenerator : ISQLGenerator
     public string GetDeleteSQL(object @object)
     {
         var parts = new List<string>();
-        EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
+        EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(@object.GetType().FullName ?? throw new OrmConfigurationException($"Type '{@object.GetType()}' has no full name."));
         string tableName = mapping.TableName;
         foreach (PropertyInfo property in @object.GetType().GetProperties())
         {
@@ -150,7 +145,7 @@ public sealed class SQLGenerator : ISQLGenerator
     {
         var columns = new List<string>();
         var values = new List<string>();
-        EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
+        EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(@object.GetType().FullName ?? throw new OrmConfigurationException($"Type '{@object.GetType()}' has no full name."));
         string tableName = mapping.TableName;
         foreach (PropertyInfo property in @object.GetType().GetProperties())
         {
@@ -188,12 +183,12 @@ public sealed class SQLGenerator : ISQLGenerator
 
     private bool IsStringType(Type type) => _stringType.Contains(type);
 
-    private object GetObjectPropertyValue(object @object, string propertyName)
+    private object? GetObjectPropertyValue(object @object, string propertyName)
     {
         if (@object == null)
         {
             return null;
         }
-        return @object.GetType().GetProperty(propertyName).GetValue(@object);
+        return @object.GetType().GetProperty(propertyName)?.GetValue(@object);
     }
 }

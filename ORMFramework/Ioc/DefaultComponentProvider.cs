@@ -46,6 +46,6 @@ public sealed class DefaultComponentProvider(IDictionary<Type, Type> componentIm
         return services.BuildServiceProvider();
     }
 
-    public T GetComponent<T>() => _serviceProvider.GetService<T>();
+    public T GetComponent<T>() => _serviceProvider.GetService<T>() ?? throw new InvalidOperationException($"No component is registered for {typeof(T)}.");
 }
 

@@ -12,7 +12,7 @@ internal static class SqlLiteral
         null => "NULL",
         string or char => $"'{value}'",
         DateTime dt => FormattableString.Invariant($"'{dt:yyyy-MM-dd HH:mm:ss}'"),
-        _ => Convert.ToString(value, CultureInfo.InvariantCulture),
+        _ => Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty,
     };
 
     public static string Comparison(string column, object? value) =>
