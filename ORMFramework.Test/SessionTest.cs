@@ -46,7 +46,7 @@ public class SessionTest
         var driverFactory = new FakeDbDriverFactory { Connection = connection };
         var persistenceContext = new FakePersistenceContext { Connection = connection, DbDriverFactory = driverFactory };
         Type entityType = typeof(SharedConnectionProbe);
-        persistenceContext.Mappings[entityType.FullName] = new EntityMapping { ClassName = entityType.FullName, TableName = "SharedConnectionProbe" };
+        persistenceContext.Mappings[entityType.FullName!] = new EntityMapping { ClassName = entityType.FullName!, TableName = "SharedConnectionProbe" };
         persistenceContext.SQLGenerator = new SQLGenerator { PersistenceContext = persistenceContext };
 
         GlobalCache.Search(entityType, null, persistenceContext, new List<Guid>());

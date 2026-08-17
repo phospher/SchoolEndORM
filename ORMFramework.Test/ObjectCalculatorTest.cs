@@ -11,12 +11,12 @@ public class ObjectCalculatorTest
     private sealed class CalcEntity
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public DateTime Created { get; set; }
         public bool Active { get; set; }
         public char Grade { get; set; }
         public bool Other { get; set; }
-        public string Nickname { get; set; }
+        public string? Nickname { get; set; }
     }
 
     private static bool IsTarget(CalcEntity entity, string query)

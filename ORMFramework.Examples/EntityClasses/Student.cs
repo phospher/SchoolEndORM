@@ -1,11 +1,11 @@
 ﻿namespace ORMFramework.Examples;
 public class Student
 {
-    public string StudentId { get; set; }
+    public string? StudentId { get; set; }
 
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
-    public string Gender { get; set; }
+    public string? Gender { get; set; }
 
     public override bool Equals(object obj)
     {
@@ -20,6 +20,6 @@ public class Student
 
     public override int GetHashCode()
     {
-        return StudentId.GetHashCode();
+        return StudentId!.GetHashCode();
     }
 }

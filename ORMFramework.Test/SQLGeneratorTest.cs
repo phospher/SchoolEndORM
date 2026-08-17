@@ -13,10 +13,10 @@ public class SQLGeneratorTest
     private sealed class TestEntity
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public string? Name { get; set; }
         public DateTime Created { get; set; }
         public double Score { get; set; }
-        public IList<TestEntity> Children { get; set; }
+        public IList<TestEntity>? Children { get; set; }
     }
 
     private static SQLGenerator CreateGenerator()
@@ -24,11 +24,11 @@ public class SQLGeneratorTest
         var persistenceContext = new FakePersistenceContext();
         var mapping = new EntityMapping
         {
-            ClassName = typeof(TestEntity).FullName,
+            ClassName = typeof(TestEntity).FullName!,
             TableName = "TestEntity",
             Keys = new[] { "Id" }
         };
-        persistenceContext.Mappings[typeof(TestEntity).FullName] = mapping;
+        persistenceContext.Mappings[typeof(TestEntity).FullName!] = mapping;
         return new SQLGenerator { PersistenceContext = persistenceContext };
     }
 

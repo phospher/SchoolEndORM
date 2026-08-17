@@ -25,9 +25,9 @@ public class StatementAnalystTest
         return string.Join("|", parts);
     }
 
-    private static QueryExpression Parse(string query)
+    private static QueryExpression Parse(string? query)
     {
-        return new StatementAnalyst(query).GetQueryExpression();
+        return new StatementAnalyst(query!).GetQueryExpression();
     }
 
     [TestMethod]

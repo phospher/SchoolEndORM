@@ -11,7 +11,7 @@ public sealed class FakeDbConnection : IDbConnection
 
     public int CloseCount { get; private set; }
 
-    public string ConnectionString { get; set; }
+    public string ConnectionString { get; set; } = "";
 
     public int ConnectionTimeout => 0;
 
@@ -52,17 +52,17 @@ public sealed class FakeDbCommand : IDbCommand
 {
     public bool IsDisposed { get; private set; }
 
-    public string CommandText { get; set; }
+    public string CommandText { get; set; } = "";
 
     public int CommandTimeout { get; set; }
 
     public CommandType CommandType { get; set; }
 
-    public IDbConnection Connection { get; set; }
+    public IDbConnection Connection { get; set; } = null!;
 
-    public IDataParameterCollection Parameters => null;
+    public IDataParameterCollection Parameters => null!;
 
-    public IDbTransaction Transaction { get; set; }
+    public IDbTransaction Transaction { get; set; } = null!;
 
     public UpdateRowSource UpdatedRowSource { get; set; }
 
@@ -72,15 +72,15 @@ public sealed class FakeDbCommand : IDbCommand
     {
     }
 
-    public IDbDataParameter CreateParameter() => null;
+    public IDbDataParameter CreateParameter() => null!;
 
     public int ExecuteNonQuery() => ExecuteNonQueryResult;
 
-    public IDataReader ExecuteReader() => null;
+    public IDataReader ExecuteReader() => null!;
 
-    public IDataReader ExecuteReader(CommandBehavior behavior) => null;
+    public IDataReader ExecuteReader(CommandBehavior behavior) => null!;
 
-    public object ExecuteScalar() => null;
+    public object ExecuteScalar() => null!;
 
     public void Prepare()
     {
@@ -130,19 +130,19 @@ public sealed class FakeDbTransaction : IDbTransaction
 
 public sealed class FakeDbDataAdapter : IDbDataAdapter
 {
-    public IDbCommand SelectCommand { get; set; }
+    public IDbCommand SelectCommand { get; set; } = null!;
 
-    public IDbCommand InsertCommand { get; set; }
+    public IDbCommand InsertCommand { get; set; } = null!;
 
-    public IDbCommand UpdateCommand { get; set; }
+    public IDbCommand UpdateCommand { get; set; } = null!;
 
-    public IDbCommand DeleteCommand { get; set; }
+    public IDbCommand DeleteCommand { get; set; } = null!;
 
     public MissingMappingAction MissingMappingAction { get; set; }
 
     public MissingSchemaAction MissingSchemaAction { get; set; }
 
-    public ITableMappingCollection TableMappings => null;
+    public ITableMappingCollection TableMappings => null!;
 
     public int Fill(DataSet dataSet)
     {
@@ -150,16 +150,16 @@ public sealed class FakeDbDataAdapter : IDbDataAdapter
         return 0;
     }
 
-    public DataTable[] FillSchema(DataSet dataSet, SchemaType schemaType) => null;
+    public DataTable[] FillSchema(DataSet dataSet, SchemaType schemaType) => null!;
 
-    public IDataParameter[] GetFillParameters() => null;
+    public IDataParameter[] GetFillParameters() => null!;
 
     public int Update(DataSet dataSet) => 0;
 }
 
 public sealed class FakeDbDriverFactory : IDbDriverFactory
 {
-    public string ConnectionString { get; set; }
+    public string ConnectionString { get; set; } = "";
 
     public FakeDbConnection Connection { get; set; } = new();
 

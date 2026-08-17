@@ -6,8 +6,8 @@ namespace ORMFramework.Test.Fakes;
 public class FakePersistenceContext : IPersistenceContext
 {
     private IDictionary<string, EntityMapping> _mappings = new Dictionary<string, EntityMapping>();
-    private IDbConnection _connection;
-    private IDbDriverFactory _dbDriverFactory;
+    private IDbConnection _connection = null!;
+    private IDbDriverFactory _dbDriverFactory = null!;
 
     public IDbDriverFactory DbDriverFactory
     {
@@ -27,14 +27,10 @@ public class FakePersistenceContext : IPersistenceContext
         set { _mappings = value; }
     }
 
-    public ISQLGenerator SQLGenerator { get; set; }
+    public ISQLGenerator SQLGenerator { get; set; } = null!;
 
-    public EntityMapping GetEntityMappingByClassName(string className)
+    public EntityMapping? GetEntityMappingByClassName(string className)
     {
-        if (_mappings.TryGetValue(className, out EntityMapping mapping))
-        {
-            return mapping;
-        }
-        return null;
+        return _mappings.TryGetValue(className, out var mapping) ? mapping : null;
     }
 }

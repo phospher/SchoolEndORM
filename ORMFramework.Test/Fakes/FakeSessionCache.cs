@@ -29,14 +29,14 @@ public sealed class FakeSessionCache : ISessionCache
         set { _searchResult = value; }
     }
 
-    public IEnumerable<object> Search(Type objType, QueryExpression expression)
+    public IEnumerable<object> Search(Type objType, QueryExpression? expression)
     {
         _searchTypes.Add(objType);
-        _searchExpressions.Add(expression);
+        _searchExpressions.Add(expression!);
         return _searchResult;
     }
 
-    public IPersistenceContext PersistenceContext { get; set; }
+    public IPersistenceContext PersistenceContext { get; set; } = null!;
 
     public void Commit()
     {
