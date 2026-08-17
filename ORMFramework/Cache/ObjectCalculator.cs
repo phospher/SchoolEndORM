@@ -163,10 +163,10 @@ public static class ObjectCalculator
         StatElement x = resultStack.Pop();
         var element = new StatElement();
         element.Type = StatElementType.Result;
-        object xValue = x.Type == StatElementType.Variable
+        object? xValue = x.Type == StatElementType.Variable
             ? GetObjectProperty(@object, (string)x.Value).GetValue(@object)
             : x.Value;
-        object yValue = y.Type == StatElementType.Variable
+        object? yValue = y.Type == StatElementType.Variable
             ? GetObjectProperty(@object, (string)y.Value).GetValue(@object)
             : y.Value;
         if (IsString(x, @object) && IsString(y, @object))
@@ -197,12 +197,12 @@ public static class ObjectCalculator
             }
             else
             {
-                xStr = (string)property.GetValue(@object);
+                xStr = (string)property.GetValue(@object)!;
             }
         }
         else
         {
-            xStr = x.Value.ToString();
+            xStr = x.Value.ToString()!;
         }
         if (y.Type == StatElementType.Variable)
         {
@@ -213,12 +213,12 @@ public static class ObjectCalculator
             }
             else
             {
-                yStr = y.Value.ToString();
+                yStr = y.Value.ToString()!;
             }
         }
         else
         {
-            yStr = y.Value.ToString();
+            yStr = y.Value.ToString()!;
         }
         if (xStr is ['\'', .., '\''])
         {
@@ -290,7 +290,7 @@ public static class ObjectCalculator
 
     private static PropertyInfo GetObjectProperty(object @object, string propertyName)
     {
-        PropertyInfo property = @object.GetType().GetProperty(propertyName);
+        PropertyInfo? property = @object.GetType().GetProperty(propertyName);
         if (property != null)
         {
             return property;
@@ -305,7 +305,7 @@ public static class ObjectCalculator
     {
         if (element.Type == StatElementType.Variable && element.Value is string name)
         {
-            Type type = @object.GetType().GetProperty(name).PropertyType;
+            Type type = GetObjectProperty(@object, name).PropertyType;
             return type == typeof(string) || type == typeof(DateTime) || type == typeof(char);
         }
         else if (element.Type == StatElementType.Constant)

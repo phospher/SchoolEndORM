@@ -1,6 +1,7 @@
 using System.Data;
 using System.Text;
 using ORMFramework.Configuration;
+using ORMFramework.Exceptions;
 using ORMFramework.SQL;
 using ORMFramework.Statment;
 
@@ -13,11 +14,11 @@ public sealed class SessionCache : ISessionCache
     private readonly List<CacheEntity> _updateList = new();
     private readonly List<CacheEntity> _deleteList = new();
 
-    public IPersistenceContext PersistenceContext { get; set; }
+    public IPersistenceContext PersistenceContext { get; set; } = null!;
 
     private bool _disposed;
 
-    public IEnumerable<object> Search(Type objType, QueryExpression expression)
+    public IEnumerable<object> Search(Type objType, QueryExpression? expression)
     {
         var ignoreIds = new List<Guid>();
         var result = new List<object>();
@@ -27,9 +28,10 @@ public sealed class SessionCache : ISessionCache
             foreach (CacheEntity cacheEntity in entities)
             {
                 RefreshCacheEntity(cacheEntity);
-                if (ObjectCalculator.IsTargetObject(cacheEntity.Value, expression))
+                if (ObjectCalculator.IsTargetObject(cacheEntity.Value, expression!))
                 {
-                    EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(objType.FullName);
+                    EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(objType.FullName ?? throw new OrmConfigurationException($"Type '{objType}' has no full name."))
+                        ?? throw new OrmConfigurationException($"No mapping is registered for type '{objType}'.");
                     result.Add((object)cacheEntity.Value);
                     ignoreIds.Add(cacheEntity.ObjectId);
                 }
@@ -53,12 +55,13 @@ public sealed class SessionCache : ISessionCache
         {
             bool hasTarget = false;
             Type objType = soruceObject.GetType();
-            EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(objType.FullName);
+            EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(objType.FullName ?? throw new OrmConfigurationException($"Type '{objType}' has no full name."))
+                ?? throw new OrmConfigurationException($"No mapping is registered for type '{objType}'.");
             foreach (var (_, relation) in mapping.Relations)
             {
                 if (sourceEntity.ForeignKeys.TryGetValue(relation.KeyColum, out var foreignKeyValue))
                 {
-                    Type referenceType = objType.GetProperty(relation.Property).PropertyType;
+                    Type referenceType = (objType.GetProperty(relation.Property) ?? throw new OrmConfigurationException($"Mapping references unknown property '{relation.Property}' on {objType}.")).PropertyType;
                     if (relation.Type == RelationType.ManyToOne || relation.Type == RelationType.OneToOne)
                     {
                         var expressionStr = new StringBuilder();
@@ -74,7 +77,7 @@ public sealed class SessionCache : ISessionCache
                                 RefreshCacheEntity(cacheEntity);
                                 if (ObjectCalculator.IsTargetObject(cacheEntity.Value, expression))
                                 {
-                                    objType.GetProperty(relation.Property).SetValue(soruceObject, cacheEntity.Value);
+                                    (objType.GetProperty(relation.Property) ?? throw new OrmConfigurationException($"Mapping references unknown property '{relation.Property}' on {objType}.")).SetValue(soruceObject, cacheEntity.Value);
                                     hasTarget = true;
                                     break;
                                 }
@@ -83,20 +86,20 @@ public sealed class SessionCache : ISessionCache
                         if (!hasTarget)
                         {
                             IList<object> globalCacheResult = GetObjectsFromGlobalCache(referenceType, expression, null);
-                            objType.GetProperty(relation.Property).SetValue(soruceObject, globalCacheResult[0]);
+                            (objType.GetProperty(relation.Property) ?? throw new OrmConfigurationException($"Mapping references unknown property '{relation.Property}' on {objType}.")).SetValue(soruceObject, globalCacheResult[0]);
                         }
                     }
                     else
                     {
                         referenceType = (referenceType.GetGenericArguments())[0];
                         Type loadListType = typeof(LoadList<>).MakeGenericType(referenceType);
-                        object loadList = Activator.CreateInstance(loadListType);
-                        var foreignKeyValues = (List<object>)loadListType.GetProperty(nameof(LoadList<object>.ForeignKeyValues)).GetValue(loadList);
-                        loadListType.GetProperty(nameof(LoadList<object>.SessionCache)).SetValue(loadList, this);
+                        object loadList = Activator.CreateInstance(loadListType) ?? throw new InvalidOperationException($"Activator.CreateInstance returned null for {loadListType}");
+                        var foreignKeyValues = (List<object>)(loadListType.GetProperty(nameof(LoadList<object>.ForeignKeyValues)) ?? throw new OrmConfigurationException($"Mapping references unknown property '{nameof(LoadList<object>.ForeignKeyValues)}' on {loadListType}.")).GetValue(loadList)!;
+                        (loadListType.GetProperty(nameof(LoadList<object>.SessionCache)) ?? throw new OrmConfigurationException($"Mapping references unknown property '{nameof(LoadList<object>.SessionCache)}' on {loadListType}.")).SetValue(loadList, this);
                         if (relation.Type == RelationType.OneToMany)
                         {
                             foreignKeyValues.Add(foreignKeyValue);
-                            loadListType.GetProperty(nameof(LoadList<object>.ForeignKeyName)).SetValue(loadList, relation.ReferenceColum);
+                            (loadListType.GetProperty(nameof(LoadList<object>.ForeignKeyName)) ?? throw new OrmConfigurationException($"Mapping references unknown property '{nameof(LoadList<object>.ForeignKeyName)}' on {loadListType}.")).SetValue(loadList, relation.ReferenceColum);
                         }
                         else
                         {
@@ -108,9 +111,9 @@ public sealed class SessionCache : ISessionCache
                             sql.Append(" where ");
                             sql.Append(SqlLiteral.Comparison(relation2.ReferenceColum, foreignKeyValue));
                             foreignKeyValues.AddRange(ProcessQueryCommand(sql.ToString()));
-                            loadListType.GetProperty(nameof(LoadList<object>.ForeignKeyName)).SetValue(loadList, relation2.ReferenceClassKeyColum);
+                            (loadListType.GetProperty(nameof(LoadList<object>.ForeignKeyName)) ?? throw new OrmConfigurationException($"Mapping references unknown property '{nameof(LoadList<object>.ForeignKeyName)}' on {loadListType}.")).SetValue(loadList, relation2.ReferenceClassKeyColum);
                         }
-                        objType.GetProperty(relation.Property).SetValue(soruceObject, loadList);
+                        (objType.GetProperty(relation.Property) ?? throw new OrmConfigurationException($"Mapping references unknown property '{relation.Property}' on {objType}.")).SetValue(soruceObject, loadList);
                     }
                 }
             }
@@ -233,7 +236,7 @@ public sealed class SessionCache : ISessionCache
 
     private void ResetEntity(CacheEntity cacheEntity)
     {
-        GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId);
+        GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId) ?? throw new ConcurrencyException("object has been deleted");
         _objList.Remove(cacheEntity.Value);
         cacheEntity.Value = globalCacheResult.Value;
         cacheEntity.Version = globalCacheResult.Version;
@@ -305,7 +308,7 @@ public sealed class SessionCache : ISessionCache
     {
         foreach (CacheEntity cacheEntity in _updateList)
         {
-            GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId);
+            GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId) ?? throw new ConcurrencyException("object has been deleted");
             string sql = PersistenceContext.SQLGenerator.GetUpdateSQL(globalCacheResult.Value, cacheEntity.Value);
             cmd.CommandText = sql;
             cmd.ExecuteNonQuery();
@@ -324,7 +327,7 @@ public sealed class SessionCache : ISessionCache
     {
         foreach (CacheEntity cacheEntity in _deleteList)
         {
-            GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId);
+            GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId) ?? throw new ConcurrencyException("object has been deleted");
             string sql = PersistenceContext.SQLGenerator.GetDeleteSQL(globalCacheResult.Value);
             cmd.CommandText = sql;
             cmd.ExecuteNonQuery();
@@ -355,14 +358,14 @@ public sealed class SessionCache : ISessionCache
     {
         if (GlobalCache.GetObjectVersion(cacheEntity.ObjectId) > cacheEntity.Version)
         {
-            GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId);
+            GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId) ?? throw new ConcurrencyException("object has been deleted");
             cacheEntity.Value = globalCacheResult.Value;
             cacheEntity.Version = globalCacheResult.Version;
             cacheEntity.ForeignKeys = globalCacheResult.ForeignKeys;
         }
     }
 
-    private IList<object> GetObjectsFromGlobalCache(Type objType, QueryExpression expression, IList<Guid> ignoreIds)
+    private IList<object> GetObjectsFromGlobalCache(Type objType, QueryExpression? expression, IList<Guid>? ignoreIds)
     {
         var result = new List<object>();
         IEnumerable<GlobalCacheResult> globalCacheResults;

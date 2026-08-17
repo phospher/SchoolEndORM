@@ -8,6 +8,6 @@ public interface ISessionCache : IDisposable
     void GetReferenceClasses(object soruceObject);
     void Insert(object @object);
     IPersistenceContext PersistenceContext { get; set; }
-    IEnumerable<object> Search(Type objType, QueryExpression expression);
+    IEnumerable<object> Search(Type objType, QueryExpression? expression);
     void Update(object @object);
 }

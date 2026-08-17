@@ -21,15 +21,16 @@ public static class GlobalCache
         typeof(ulong), typeof(short), typeof(ushort), typeof(char), typeof(string), typeof(byte[])
     ]);
 
-    public static IEnumerable<GlobalCacheResult> Search<T>(QueryExpression queryExpression, IPersistenceContext persistenceContext, IList<Guid> ignoreIds)
+    public static IEnumerable<GlobalCacheResult> Search<T>(QueryExpression? queryExpression, IPersistenceContext persistenceContext, IList<Guid> ignoreIds)
     {
         return Search(typeof(T), queryExpression, persistenceContext, ignoreIds);
     }
 
-    public static IEnumerable<GlobalCacheResult> Search(Type objType, QueryExpression queryExpression, IPersistenceContext persistenceContext, IList<Guid> ignoreIds)
+    public static IEnumerable<GlobalCacheResult> Search(Type objType, QueryExpression? queryExpression, IPersistenceContext persistenceContext, IList<Guid> ignoreIds)
     {
         var result = new List<GlobalCacheResult>();
-        EntityMapping mapping = persistenceContext.GetEntityMappingByClassName(objType.FullName);
+        EntityMapping mapping = persistenceContext.GetEntityMappingByClassName(objType.FullName ?? throw new OrmConfigurationException($"Type '{objType}' has no full name."))
+            ?? throw new OrmConfigurationException($"No mapping is registered for type '{objType}'.");
         var ignorePrimaryKey = new Dictionary<string, List<object>>();
         StringBuilder sql;
         ISQLGenerator sqlGenerator = persistenceContext.SQLGenerator;
@@ -54,7 +55,7 @@ public static class GlobalCache
                             values = [];
                             ignorePrimaryKey[key] = values;
                         }
-                        values.Add(objType.GetProperty(key).GetValue(entity.Value));
+                        values.Add((objType.GetProperty(key) ?? throw new OrmConfigurationException($"Mapping references unknown property '{key}' on {objType}.")).GetValue(entity.Value)!);
                     }
                 }
                 else
@@ -75,7 +76,7 @@ public static class GlobalCache
         return result;
     }
 
-    public static GlobalCacheResult Search(Guid objectId)
+    public static GlobalCacheResult? Search(Guid objectId)
     {
         if (_objList.TryGetValue(objectId, out var cacheEntity))
         {
@@ -142,7 +143,7 @@ public static class GlobalCache
     public static void Update(Guid objectId, object newObj, Dictionary<string, object> foreignKeys, IPersistenceContext persistenceContext)
     {
         object @object = CloneObject(newObj);
-        EntityMapping mapping = persistenceContext.GetEntityMappingByClassName(newObj.GetType().FullName);
+        EntityMapping? mapping = persistenceContext.GetEntityMappingByClassName(newObj.GetType().FullName ?? throw new OrmConfigurationException($"Type '{newObj.GetType()}' has no full name."));
         GlobalCacheEntity cacheEntity = _objList[objectId];
         if (cacheEntity.Lock != Lock.WriteLock || cacheEntity.WriteLockThreadId != Thread.CurrentThread.ManagedThreadId)
         {
@@ -296,7 +297,7 @@ public static class GlobalCache
         }
     }
 
-    private static void ReadObject(GlobalCacheEntity entity, QueryExpression queryExpression, List<GlobalCacheResult> resultList, Dictionary<string, List<object>> ignoreKeys, EntityMapping mapping)
+    private static void ReadObject(GlobalCacheEntity entity, QueryExpression? queryExpression, List<GlobalCacheResult> resultList, Dictionary<string, List<object>> ignoreKeys, EntityMapping mapping)
     {
         if (!ProcessDeletedObject(entity))
         {
@@ -325,7 +326,7 @@ public static class GlobalCache
                             values = [];
                             ignoreKeys[key] = values;
                         }
-                        values.Add(entity.Value.GetType().GetProperty(key).GetValue(entity.Value));
+                        values.Add((entity.Value.GetType().GetProperty(key) ?? throw new OrmConfigurationException($"Mapping references unknown property '{key}' on {entity.Value.GetType()}.")).GetValue(entity.Value)!);
                     }
                     lock (entity)
                     {
@@ -354,12 +355,12 @@ public static class GlobalCache
     private static object CloneObject(object @object)
     {
         Type objType = @object.GetType();
-        object newobject = Activator.CreateInstance(objType);
+        object newobject = Activator.CreateInstance(objType) ?? throw new InvalidOperationException($"Activator.CreateInstance returned null for {objType}");
         foreach (PropertyInfo property in objType.GetProperties())
         {
             if (IsBasicType(property.PropertyType))
             {
-                object value = property.GetValue(@object);
+                object? value = property.GetValue(@object);
                 property.SetValue(newobject, value);
             }
         }
@@ -418,8 +419,9 @@ public static class GlobalCache
             {
                 foreach (DataRow row in dt.Rows)
                 {
-                    object newObj = Activator.CreateInstance(objType);
-                    EntityMapping mapping = persistenceContext.GetEntityMappingByClassName(objType.FullName);
+                    object newObj = Activator.CreateInstance(objType) ?? throw new InvalidOperationException($"Activator.CreateInstance returned null for {objType}");
+                    EntityMapping mapping = persistenceContext.GetEntityMappingByClassName(objType.FullName ?? throw new OrmConfigurationException($"Type '{objType}' has no full name."))
+                        ?? throw new OrmConfigurationException($"No mapping is registered for type '{objType}'.");
                     foreach (PropertyInfo property in objType.GetProperties())
                     {
                         if (IsBasicType(property.PropertyType))
