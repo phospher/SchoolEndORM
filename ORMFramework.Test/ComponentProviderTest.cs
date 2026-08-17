@@ -5,13 +5,13 @@ namespace ORMFramework.Test;
 [TestClass]
 public class ComponentProviderTest
 {
-	[TestMethod]
-	public void TestGetSession()
-	{
-		IComponentProvider componentProvider = new ComponentProviderBuilder()
-			.Build();
-		ISession session = componentProvider.GetComponent<ISession>();
-		Assert.AreEqual<Type>(typeof(Session), session.GetType());
-	}
+    [TestMethod]
+    public void TestGetSession()
+    {
+        IComponentProvider componentProvider = new ComponentProviderBuilder()
+            .Build();
+        ISession session = componentProvider.GetComponent<ISession>();
+        Assert.IsInstanceOfType<Session>(session);
+    }
 }
 
