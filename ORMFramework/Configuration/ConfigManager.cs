@@ -14,7 +14,7 @@ public sealed class ConfigManager(string? configFilePath = null)
             throw new OrmConfigurationException("Invalid config file: missing XML declaration");
         if (!reader.Read() || reader.NodeType != XmlNodeType.Element || reader.Name != "Configuration")
             throw new OrmConfigurationException("Invalid config file: root element is not 'Configuration'");
-        var configuration = new Configuration();
+        var configuration = new Configuration { ConnectionString = string.Empty, ProviderName = string.Empty };
         var result = true;
         while (result && reader.Read() && reader.NodeType == XmlNodeType.Element)
         {
@@ -91,28 +91,29 @@ public sealed class ConfigManager(string? configFilePath = null)
     private bool ReadMap(XmlTextReader reader, Configuration configuration)
     {
         var xmlDoc = new XmlDocument();
-        var map = new EntityMapping();
-        XmlNode mapNode;
         xmlDoc.Load(reader.ReadSubtree());
-        mapNode = xmlDoc.ChildNodes.Item(0);
-        map.ClassName = mapNode.Attributes["ClassName"].Value;
-        map.Keys = mapNode.Attributes["Key"].Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-        map.TableName = mapNode.Attributes["TableName"].Value;
+        XmlNode mapNode = xmlDoc.ChildNodes.Item(0) ?? throw new OrmConfigurationException("Invalid config file: empty Map element");
+        var map = new EntityMapping
+        {
+            ClassName = GetRequiredAttribute(mapNode, "ClassName"),
+            Keys = GetRequiredAttribute(mapNode, "Key").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
+            TableName = GetRequiredAttribute(mapNode, "TableName"),
+        };
         for (int i = 0; i < mapNode.ChildNodes.Count; i++)
         {
-            XmlNode node = mapNode.ChildNodes.Item(i);
+            XmlNode node = mapNode.ChildNodes.Item(i) ?? throw new OrmConfigurationException("Invalid config file: empty relation element");
             EntityRelation relation;
             if (node.Name == "Many-to-Many")
             {
-                relation = GetManyToManyRelation(node);
-                if (relation == null)
+                EntityRelation? manyRelation = GetManyToManyRelation(node);
+                if (manyRelation == null)
                 {
                     return false;
                 }
+                relation = manyRelation;
             }
             else
             {
-                relation = new EntityRelation();
                 RelationType? relationType = node.Name switch
                 {
                     "One-to-Many" => RelationType.OneToMany,
@@ -124,11 +125,14 @@ public sealed class ConfigManager(string? configFilePath = null)
                 {
                     return false;
                 }
-                relation.Type = relationType.Value;
-                relation.KeyColum = node.Attributes["KeyColum"].Value;
-                relation.Property = node.Attributes["Property"].Value;
-                relation.ReferenceClassName = node.Attributes["ReferenceClass"].Value;
-                relation.ReferenceColum = node.Attributes["ReferenceColum"].Value;
+                relation = new EntityRelation
+                {
+                    Type = relationType.Value,
+                    KeyColum = GetRequiredAttribute(node, "KeyColum"),
+                    Property = GetRequiredAttribute(node, "Property"),
+                    ReferenceClassName = GetRequiredAttribute(node, "ReferenceClass"),
+                    ReferenceColum = GetRequiredAttribute(node, "ReferenceColum"),
+                };
             }
             map.Relations.Add(relation.Property, relation);
         }
@@ -136,35 +140,49 @@ public sealed class ConfigManager(string? configFilePath = null)
         return true;
     }
 
-    private EntityRelation GetManyToManyRelation(XmlNode node)
+    private EntityRelation? GetManyToManyRelation(XmlNode node)
     {
         if (node.ChildNodes.Count != 2)
         {
             return null;
         }
 
-        var relation = new ManyToManyRelation();
-        relation.Type = RelationType.MantToMany;
-        relation.KeyColum = node.Attributes["KeyColum"].Value;
-        relation.Property = node.Attributes["Property"].Value;
+        string? referenceClassName = null;
+        string? referenceClassKeyColum = null;
+        string? referenceTableName = null;
+        string? referenceColum = null;
+        string? referenceClassColum = null;
         for (int i = 0; i < node.ChildNodes.Count; i++)
         {
-            XmlNode childNote = node.ChildNodes.Item(i);
+            XmlNode childNote = node.ChildNodes.Item(i) ?? throw new OrmConfigurationException("Invalid config file: empty child element");
             switch (childNote.Name)
             {
                 case "ReferenceClass":
-                    relation.ReferenceClassName = childNote.Attributes["Name"].Value;
-                    relation.ReferenceClassKeyColum = childNote.Attributes["KeyColum"].Value;
+                    referenceClassName = GetRequiredAttribute(childNote, "Name");
+                    referenceClassKeyColum = GetRequiredAttribute(childNote, "KeyColum");
                     break;
                 case "ReferenceTable":
-                    relation.ReferenceTableName = childNote.Attributes["Name"].Value;
-                    relation.ReferenceColum = childNote.Attributes["ReferenceColum"].Value;
-                    relation.ReferenceClassColum = childNote.Attributes["ReferenceClassColum"].Value;
+                    referenceTableName = GetRequiredAttribute(childNote, "Name");
+                    referenceColum = GetRequiredAttribute(childNote, "ReferenceColum");
+                    referenceClassColum = GetRequiredAttribute(childNote, "ReferenceClassColum");
                     break;
                 default:
                     return null;
             }
         }
-        return relation;
+        return new ManyToManyRelation
+        {
+            KeyColum = GetRequiredAttribute(node, "KeyColum"),
+            Property = GetRequiredAttribute(node, "Property"),
+            ReferenceClassName = referenceClassName ?? throw new OrmConfigurationException("Invalid config file: missing ReferenceClass element"),
+            ReferenceColum = referenceColum ?? throw new OrmConfigurationException("Invalid config file: missing ReferenceTable element"),
+            ReferenceTableName = referenceTableName ?? throw new OrmConfigurationException("Invalid config file: missing ReferenceTable element"),
+            ReferenceClassKeyColum = referenceClassKeyColum ?? throw new OrmConfigurationException("Invalid config file: missing ReferenceClass element"),
+            ReferenceClassColum = referenceClassColum ?? throw new OrmConfigurationException("Invalid config file: missing ReferenceTable element"),
+            Type = RelationType.MantToMany,
+        };
     }
+
+    private static string GetRequiredAttribute(XmlNode node, string name) =>
+        node.Attributes?[name]?.Value ?? throw new OrmConfigurationException($"Element '{node.Name}' is missing required attribute '{name}'.");
 }

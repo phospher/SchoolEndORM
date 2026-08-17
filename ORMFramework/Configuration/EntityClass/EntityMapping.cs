@@ -4,9 +4,9 @@ public class EntityMapping
     private IEnumerable<string> _keys = [];
     private IDictionary<string, EntityRelation> _relations = new Dictionary<string, EntityRelation>();
 
-    public string ClassName { get; set; }
+    public string ClassName { get; set; } = "";
 
-    public string TableName { get; set; }
+    public string TableName { get; set; } = "";
 
     public IEnumerable<string> Keys
     {
