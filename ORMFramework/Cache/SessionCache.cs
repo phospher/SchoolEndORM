@@ -1,5 +1,4 @@
 using System.Data;
-using System.Reflection;
 using System.Text;
 using ORMFramework.Configuration;
 using ORMFramework.SQL;
@@ -75,7 +74,7 @@ public sealed class SessionCache : ISessionCache
                                 RefreshCacheEntity(cacheEntity);
                                 if (ObjectCalculator.IsTargetObject(cacheEntity.Value, expression))
                                 {
-                                    objType.GetProperty(relation.Property).SetValue(soruceObject, cacheEntity.Value, null);
+                                    objType.GetProperty(relation.Property).SetValue(soruceObject, cacheEntity.Value);
                                     hasTarget = true;
                                     break;
                                 }
@@ -84,20 +83,20 @@ public sealed class SessionCache : ISessionCache
                         if (!hasTarget)
                         {
                             IList<object> globalCacheResult = GetObjectsFromGlobalCache(referenceType, expression, null);
-                            objType.GetProperty(relation.Property).SetValue(soruceObject, globalCacheResult[0], null);
+                            objType.GetProperty(relation.Property).SetValue(soruceObject, globalCacheResult[0]);
                         }
                     }
                     else
                     {
                         referenceType = (referenceType.GetGenericArguments())[0];
-                        Type loadListType = Assembly.Load("ORMFramework").GetType("ORMFramework.LoadList`1").MakeGenericType(referenceType);
+                        Type loadListType = typeof(LoadList<>).MakeGenericType(referenceType);
                         object loadList = Activator.CreateInstance(loadListType);
-                        var foreignKeyValues = (List<object>)loadListType.GetProperty("ForeignKeyValues").GetValue(loadList, null);
-                        loadListType.GetProperty("SessionCache").SetValue(loadList, this, null);
+                        var foreignKeyValues = (List<object>)loadListType.GetProperty(nameof(LoadList<object>.ForeignKeyValues)).GetValue(loadList);
+                        loadListType.GetProperty(nameof(LoadList<object>.SessionCache)).SetValue(loadList, this);
                         if (relation.Type == RelationType.OneToMany)
                         {
                             foreignKeyValues.Add(foreignKeyValue);
-                            loadListType.GetProperty("ForeignKeyName").SetValue(loadList, relation.ReferenceColum, null);
+                            loadListType.GetProperty(nameof(LoadList<object>.ForeignKeyName)).SetValue(loadList, relation.ReferenceColum);
                         }
                         else
                         {
@@ -109,9 +108,9 @@ public sealed class SessionCache : ISessionCache
                             sql.Append(" where ");
                             sql.Append(SqlLiteral.Comparison(relation2.ReferenceColum, foreignKeyValue));
                             foreignKeyValues.AddRange(ProcessQueryCommand(sql.ToString()));
-                            loadListType.GetProperty("ForeignKeyName").SetValue(loadList, relation2.ReferenceClassKeyColum, null);
+                            loadListType.GetProperty(nameof(LoadList<object>.ForeignKeyName)).SetValue(loadList, relation2.ReferenceClassKeyColum);
                         }
-                        objType.GetProperty(relation.Property).SetValue(soruceObject, loadList, null);
+                        objType.GetProperty(relation.Property).SetValue(soruceObject, loadList);
                     }
                 }
             }

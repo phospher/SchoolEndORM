@@ -157,7 +157,7 @@ public sealed class SQLGenerator : ISQLGenerator
             if (IsBasicType(property.PropertyType) || IsStringType(property.PropertyType))
             {
                 columns.Add(property.Name);
-                values.Add(SqlLiteral.Format(property.GetValue(@object, null)));
+                values.Add(SqlLiteral.Format(property.GetValue(@object)));
             }
         }
         return $"insert into {tableName}({string.Join(",", columns)}) values({string.Join(",", values)})";
@@ -172,7 +172,7 @@ public sealed class SQLGenerator : ISQLGenerator
             throw new ArgumentException("Invalid property type", nameof(property));
         }
 
-        return SqlLiteral.Comparison(property.Name, property.GetValue(@object, null));
+        return SqlLiteral.Comparison(property.Name, property.GetValue(@object));
     }
 
     private string GenerateStatementByStringProperty(PropertyInfo property, object @object)
@@ -181,7 +181,7 @@ public sealed class SQLGenerator : ISQLGenerator
         {
             throw new ArgumentException("Invalid property type", nameof(property));
         }
-        return SqlLiteral.Comparison(property.Name, property.GetValue(@object, null));
+        return SqlLiteral.Comparison(property.Name, property.GetValue(@object));
     }
 
     private bool IsBasicType(Type type) => _basicType.Contains(type);
@@ -194,6 +194,6 @@ public sealed class SQLGenerator : ISQLGenerator
         {
             return null;
         }
-        return @object.GetType().GetProperty(propertyName).GetValue(@object, null);
+        return @object.GetType().GetProperty(propertyName).GetValue(@object);
     }
 }

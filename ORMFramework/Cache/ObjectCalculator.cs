@@ -95,7 +95,7 @@ public static class ObjectCalculator
         else if (element.Type == StatElementType.Variable)
         {
             PropertyInfo property = GetObjectProperty(@object, (string)element.Value);
-            if (property.GetValue(@object, null) is bool b)
+            if (property.GetValue(@object) is bool b)
             {
                 element = new StatElement();
                 element.Type = StatElementType.Result;
@@ -164,10 +164,10 @@ public static class ObjectCalculator
         var element = new StatElement();
         element.Type = StatElementType.Result;
         object xValue = x.Type == StatElementType.Variable
-            ? GetObjectProperty(@object, (string)x.Value).GetValue(@object, null)
+            ? GetObjectProperty(@object, (string)x.Value).GetValue(@object)
             : x.Value;
         object yValue = y.Type == StatElementType.Variable
-            ? GetObjectProperty(@object, (string)y.Value).GetValue(@object, null)
+            ? GetObjectProperty(@object, (string)y.Value).GetValue(@object)
             : y.Value;
         if (IsString(x, @object) && IsString(y, @object))
         {
@@ -191,13 +191,13 @@ public static class ObjectCalculator
         if (x.Type == StatElementType.Variable)
         {
             PropertyInfo property = GetObjectProperty(@object, (string)x.Value);
-            if (property.GetValue(@object, null) is DateTime xDateTime)
+            if (property.GetValue(@object) is DateTime xDateTime)
             {
                 xStr = FormattableString.Invariant($"'{xDateTime:yyyy-MM-dd HH:mm:ss}'");
             }
             else
             {
-                xStr = (string)property.GetValue(@object, null);
+                xStr = (string)property.GetValue(@object);
             }
         }
         else
@@ -207,7 +207,7 @@ public static class ObjectCalculator
         if (y.Type == StatElementType.Variable)
         {
             PropertyInfo property = GetObjectProperty(@object, (string)y.Value);
-            if (property.GetValue(@object, null) is DateTime yDateTime)
+            if (property.GetValue(@object) is DateTime yDateTime)
             {
                 yStr = FormattableString.Invariant($"'{yDateTime:yyyy-MM-dd HH:mm:ss}'");
             }

@@ -54,7 +54,7 @@ public static class GlobalCache
                             values = [];
                             ignorePrimaryKey[key] = values;
                         }
-                        values.Add(objType.GetProperty(key).GetValue(entity.Value, null));
+                        values.Add(objType.GetProperty(key).GetValue(entity.Value));
                     }
                 }
                 else
@@ -325,7 +325,7 @@ public static class GlobalCache
                             values = [];
                             ignoreKeys[key] = values;
                         }
-                        values.Add(entity.Value.GetType().GetProperty(key).GetValue(entity.Value, null));
+                        values.Add(entity.Value.GetType().GetProperty(key).GetValue(entity.Value));
                     }
                     lock (entity)
                     {
@@ -359,8 +359,8 @@ public static class GlobalCache
         {
             if (IsBasicType(property.PropertyType))
             {
-                object value = property.GetValue(@object, null);
-                property.SetValue(newobject, value, null);
+                object value = property.GetValue(@object);
+                property.SetValue(newobject, value);
             }
         }
         return newobject;
@@ -424,7 +424,7 @@ public static class GlobalCache
                     {
                         if (IsBasicType(property.PropertyType))
                         {
-                            property.SetValue(newObj, row[property.Name], null);
+                            property.SetValue(newObj, row[property.Name]);
                         }
                     }
                     var cacheEntity = new GlobalCacheEntity(newObj);
