@@ -7,55 +7,25 @@ public sealed class ConfigManager(string? configFilePath = null)
 
     public Configuration GetSystemConfiguration()
     {
-        var fs = new FileStream(ConfigFilePath, FileMode.Open);
-        var reader = new XmlTextReader(fs);
-        var configuration = new Configuration();
-        bool result = true;
-        reader.WhitespaceHandling = WhitespaceHandling.None;
-        if (reader.Read() && reader.NodeType == XmlNodeType.XmlDeclaration)
-        {
-            if (reader.Read() && reader.NodeType == XmlNodeType.Element && reader.Name == "Configuration")
-            {
-                while (result && reader.Read() && reader.NodeType == XmlNodeType.Element)
-                {
-                    switch (reader.Name)
-                    {
-                        case "SessionFactory":
-                            result = ReadSessionFactory(reader, configuration);
-                            break;
-                        case "Mappings":
-                            result = ReadMappings(reader, configuration);
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                reader.Close();
-                fs.Close();
-                if (result)
-                {
-                    return configuration;
-                }
-                else
-                {
-                    reader.Close();
-                    fs.Close();
-                    throw new Exception("Invail Config File");
-                }
-            }
-            else
-            {
-                reader.Close();
-                fs.Close();
-                throw new Exception("Invail Config File");
-            }
-        }
-        else
-        {
-            reader.Close();
-            fs.Close();
+        using var fs = new FileStream(ConfigFilePath, FileMode.Open, FileAccess.Read);
+        using var reader = new XmlTextReader(fs) { WhitespaceHandling = WhitespaceHandling.None };
+        if (!reader.Read() || reader.NodeType != XmlNodeType.XmlDeclaration)
             throw new Exception("Invail Config File");
+        if (!reader.Read() || reader.NodeType != XmlNodeType.Element || reader.Name != "Configuration")
+            throw new Exception("Invail Config File");
+        var configuration = new Configuration();
+        var result = true;
+        while (result && reader.Read() && reader.NodeType == XmlNodeType.Element)
+        {
+            result = reader.Name switch
+            {
+                "SessionFactory" => ReadSessionFactory(reader, configuration),
+                "Mappings" => ReadMappings(reader, configuration),
+                _ => result,
+            };
         }
+        if (!result) throw new Exception("Invail Config File");
+        return configuration;
     }
 
     private bool ReadSessionFactory(XmlTextReader reader, Configuration configuration)
