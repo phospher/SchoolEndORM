@@ -91,24 +91,6 @@ public sealed class SQLGenerator : ISQLGenerator
             {
                 sql.Append(GenerateStatementByStringProperty(properties[i], newObject));
                 where.Append(GenerateStatementByStringProperty(properties[i], oldObject));
-                //} else if ( properties[i].PropertyType.GetInterface ( "System.Collections.ICollection" ) == null ) {
-                //    object newValue = properties[i].GetValue ( newObject, null );
-                //    object oldValue = properties[i].GetValue ( oldObject, null );
-                //    EntityRelation relation = mapping.Relations[properties[i].Name];
-                //    sql.Append ( relation.KeyColum );
-                //    sql.Append ( "=" );
-                //    where.Append ( relation.KeyColum );
-                //    if ( newValue != null ) {
-                //        sql.Append ( GetObjectPropertyValue ( newValue, relation.ReferenceColum ) );
-                //    } else {
-                //        sql.Append ( "NULL" );
-                //    }
-                //    if ( oldValue != null ) {
-                //        where.Append ( "=" );
-                //        where.Append ( GetObjectPropertyValue ( oldValue, relation.ReferenceColum ) );
-                //    } else {
-                //        where.Append ( " is NULL" );
-                //    }
             }
             else
             {
@@ -186,13 +168,4 @@ public sealed class SQLGenerator : ISQLGenerator
     private bool IsBasicType(Type type) => _basicType.Contains(type);
 
     private bool IsStringType(Type type) => _stringType.Contains(type);
-
-    private object? GetObjectPropertyValue(object @object, string propertyName)
-    {
-        if (@object == null)
-        {
-            return null;
-        }
-        return @object.GetType().GetProperty(propertyName)?.GetValue(@object);
-    }
 }
