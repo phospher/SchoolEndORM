@@ -1,0 +1,113 @@
+## 1. 工程基础设施（方案第 3 章 / 提交 #1）
+
+- [ ] 1.1 三个 `.csproj` 的 `net6.0` → 由仓库根统一提供；新增 `Directory.Build.props`，声明 `TargetFramework=net8.0`、`LangVersion=12.0`、`ImplicitUsings=enable`、`Nullable=annotations`、`EnableNETAnalyzers=true`、`AnalysisLevel=latest-recommended`、`EnforceCodeStyleInBuild=true`、`GenerateDocumentationFile=false`
+- [ ] 1.2 从三个 `.csproj` 中删除已由 `Directory.Build.props` 提供的属性，并清理冗余项：`Microsoft.NETCore.Platforms` 包引用、`<None Remove="Ioc\" />`、`<ItemGroup><Folder Include="Ioc\" /></ItemGroup>`、`ORMFramework.Examples` 的 `<WarningLevel>4</WarningLevel>` 与 Debug|AnyCPU 条件段
+- [ ] 1.3 升级依赖到 net8 兼容版本：`MySql.Data` 8.0.32.1 → 9.x、`MSTest` 3.0.2 → 3.6+、`log4net` 2.0.15 → 3.x；确认 `LogHelper` 现有调用面在 log4net 3.x 下编译通过
+- [ ] 1.4 新增 `.editorconfig`：4 空格缩进、Allman 大括号、file-scoped namespace（IDE0161 warning）、`var` 偏好（类型显然时用、其余保留显式）、对象/集合初始化器、自动属性（IDE0032 warning）、`readonly` 字段、switch 表达式与模式匹配偏好、索引/范围运算符、简化 using 语句、IDE0005 warning、不使用 `this.` 前缀（warning）、私有字段 `_camelCase` 命名规则（warning）
+- [ ] 1.5 清理 `obj/Debug/net5.0`、`obj/Debug/net6.0` 残留产物（工作区清理，不入库），确认 `.gitignore` 覆盖
+- [ ] 1.6 验证：`dotnet build SchoolEndORM.sln` 成功（允许警告）；`dotnet test` 结果与改造前一致（`ConfigManagerTest` 仍为既有失败）
+
+## 2. 阻塞缺陷修复（方案 13.1 / 13.2 — 提交 #2、#3）
+
+- [ ] 2.1 修 `Cache/SessionCache.cs:428`：`foreach (Guid objectId in _objList.Keys)` 遍历的是 `Dictionary<object, CacheEntity>` 的键，改为遍历 `_objList.Values` 取 `ObjectId`；补一条断言"释放持有多个对象的工作单元不抛 `InvalidCastException`"（对应 `session-lifecycle` 规格）
+- [ ] 2.2 修 `Cache/SessionCache.cs:399-406`：`GetObjectsFromGlobalCache` 在 `ignoreIds` 为 null 时立即 `Add` 导致 NRE，改为先 `ignoreIds ??= []`；补一条断言"调用方未提供排除集合时搜索正常且排除已删除对象"
+
+## 3. 回归测试安全网（方案 11.4 — 提交 #4，必须先于第 6–9 组）
+
+- [ ] 3.1 新增 `ORMFramework.Test/TestData/Config.xml` 夹具并配置 `CopyToOutputDirectory`；重写 `ConfigManagerTest` 改用 `Path.Combine(AppContext.BaseDirectory, "TestData", "Config.xml")`，断言 mapping 数量、`Keys`、四种 Relation 类型与全部列名（对应 `build-configuration` 的"测试项目脱离机器环境"）
+- [ ] 3.2 扩充 `StatementAnalystTest`：对 `"Id==1"`、`"a==1 && b like 'x%'"`、`"! ( b== 3 )"`、`"Student like '%' && a=='2' || ! ( b== 3 )"` 断言中缀/后缀序列快照（元素种类 + 值 + 顺序）
+- [ ] 3.3 扩充 `StatementAnalystTest` 的异常用例：空串/null/纯空白、末尾含空格、括号不匹配、未闭合引号、无法识别的运算符、非法数值常量（对应 `query-parsing` 规格；当前部分用例会因既有缺陷 13.11/13.12 失败，先按现状记录为待修，第 11 组修复）
+- [ ] 3.4 重写 `SQLGeneratorTest`：用内存构造的 `IPersistenceContext` + 手写 `EntityMapping`，对 `GetSelectSQL`（含/不含查询表达式）、`GetInsertSQL`、`GetUpdateSQL`、`GetDeleteSQL` 建立 SQL 文本快照基线，不连接数据库
+- [ ] 3.5 重写 `ObjectCalculatorTest`：`IsTargetObject` 的运算符 × 类型（int/string/DateTime/bool/char）真值表，含 `like` 的 `%`/`_`/`[...]` 通配符与带引号常量剥离
+- [ ] 3.6 新增 `LoadListTest`：以假 `ISessionCache` 断言懒加载只触发一次、生成的谓词串为 `fk==v1 || fk==v2`
+- [ ] 3.7 验证：`dotnet test` 通过（含修好的 `ConfigManagerTest`），并把 3.2/3.4/3.5 的基线输出记录为后续比对依据
+
+## 4. 机械化语法现代化（方案第 4 章 — 提交 #5–#8）
+
+- [ ] 4.1 全部 57 个 .cs 转 file-scoped namespace（多类型文件不拆分）
+- [ ] 4.2 依赖隐式 using 清理冗余 using：删除各文件的 `System` / `System.Collections.Generic` / 未使用的 `System.Text`；删除 `SessionFactory/DefaultDbDriverFactory.cs` 的 `using System.Configuration.Provider;`；保留 `System.Data`、`System.Data.Common`、`System.Reflection`、`System.Text.RegularExpressions`、`System.Xml`、`System.IO`、`log4net.*`、`Microsoft.*`、项目自身命名空间
+- [ ] 4.3 目标类型 `new`（约 60 处）+ 给从未重新赋值的字段加 `readonly`（`SessionCache` 的 5 个集合字段、`Session` 的 4 个 listener 列表、`GlobalCache._objTable/_objList`、`Configuration._mappings`）；`GlobalCache.CACHEMAXCOUNT` 因 `Collect()` 会改写故不加 `readonly`
+- [ ] 4.4 局部变量 `var` 化（约 200 处，仅右侧类型显然时）+ 变量声明就近化（`SessionCache.Commit` / `ProcessQueryCommand`、`GlobalCache.ReadDataFromDatabase`、`Session.Search<T>`、`LoadList.GetItems`、`ObjectCalculator.ProcessNotBooleanOperator`、`SQLGenerator.GetSelectSQL`、`StatementAnalyst.ReadElement`）
+- [ ] 4.5 统一去掉 `this.` 前缀（`DefaultDbDriverFactory`、`SessionFactoryIoc`、`PersistenceContext`、`Ioc/*`）+ 私有标识符命名/拼写修正（`GlobalCache` 的 `CACHEMAXCOUNT`/`INCREASE` → `_cacheMaxCount`/`const CacheIncrease`、`componentImplTypes` → `_componentImplTypes`、`componentLiftimeDict` → `_componentLifetimes`、`serviceProvider` → `_serviceProvider`、`pesistenceContext`、`foreingKeyValue`、`pattenRegex`、`ReadNotOpeartion`、`_epxression`）；`ContartMenu.cs` 重命名为 `ContactMenu.cs`
+- [ ] 4.6 验证：`dotnet format --verify-no-changes` 通过；`dotnet build -warnaserror`、`dotnet test` 通过；`git diff --stat` 呈净减（预计 400+ 行）
+
+## 5. 类型与成员声明现代化（方案第 5 章 — 提交 #9–#11）
+
+- [ ] 5.1 手写属性 → 自动属性（8 个类约 30 个属性）：`StatElement`、`QueryExpression`、`ConfigManager.ConfigFilePath`、`Configuration.Mappings`、`LoadList` 的 4 个属性、`PersistenceContext.DbDriverFactory`、`Session` 的 7 个属性、`GlobalCacheEntity.BlockThreads`、Examples 的 `Course`/`Teacher`/`Department`/`ContactMenu`
+- [ ] 5.2 `EntityMapping.Keys` / `Relations` 的延迟初始化改字段初始化器，`set` 保留空值合并以维持"赋 null 后 get 仍返回空集合"的等价语义
+- [ ] 5.3 只读成员改表达式体：`Session` 的转发属性、`SQLGenerator.GetSelectSQL(Type)` / `GetSQLOperator`、`Ioc` 两个类、5 个 Listener 的 `OnXxx`、`SessionFactory.GetEntityMappingByClassName`、`SessionFactoryIoc.Initialize`、`ObjectCalculator.IsBooleanOperator`
+- [ ] 5.4 主构造函数：`ConfigManager`（含 `Path.Combine` 替代手工拼接，`LogHelper.InitLog` 同样处理）、`GlobalCacheResult`、`QueryExpression`、`DefaultComponentProvider`；`Session` 的链式构造函数与 `PersistenceContext` 的两个重载保持不变
+- [ ] 5.5 `LoadList<T>` 的 12 处 `if (_items == null) GetItems();` 守卫收敛为 `private List<T> Items => _items ??= LoadItems();`，`GetItems()` 改为返回 `List<T>` 的 `LoadItems()`；`ForeignKeyName` / `ForeignKeyValues` / `SessionCache` 三个属性名保持不变（第 9 组之前是红线）
+- [ ] 5.6 `QueryExpression` 改 `internal sealed record`；给无派生的类型加 `sealed`（全部 Listener 实现、`SessionCache`、`Session`、`PersistenceContext`、`DefaultDbDriverFactory`、`LoadList<T>`、`SQLGenerator`、`ConfigManager`、`DefaultComponentProvider`、`ComponentProviderBuilder`、`SessionFactory`、`SessionFactoryIoc`）；`EntityRelation`、`CacheEntity`、`ActionEvent` 不加；`StatElement`、`CacheEntity`、`GlobalCacheEntity`、`*Event`、实体类一律不改 `record`
+- [ ] 5.7 `LogHelper` → `public static class`（CA1052）
+- [ ] 5.8 验证：`dotnet build -warnaserror` 无新增警告；`dotnet test` 通过；SQL 快照与序列快照未变化
+
+## 6. 控制流与模式匹配现代化（方案第 6 章 — 提交 #12–#15）
+
+- [ ] 6.1 6 处纯映射 switch 改 switch 表达式：`StatementAnalyst.GetOperatorByString`（同时 `ToLower()` → `ToLowerInvariant()`，`CreateElement:134` 同样处理）、`ObjectCalculator` 的 3 处、`ConfigManager.ReadMap` 的 `node.Name`；`DefaultComponentProvider` 生命周期 switch 与 `ConfigManager.GetSystemConfiguration`/`ReadSessionFactory` 因有副作用保留语句形式
+- [ ] 6.2 8 处 `if(...) return true; else return false;` 折叠为布尔表达式：`StatementAnalyst.IsVariableChar`/`IsVariableFirstChar` 改 `char.IsAsciiLetterOrDigit` / `char.IsAsciiLetter`（**不得**用 `char.IsLetterOrDigit`，会改变词法行为）、`ReadNotOpeartion`/`ReadLeftParenthesis`/`ReadRightParenthesis`/`ReadVariableOrConstant`/`ReadOperator`、`ObjectCalculator.IsString`、`ConfigManager` 的 3 处、`GlobalCache.GetObjectVersion` 改 `TryGetValue` 三元
+- [ ] 6.3 新增 `ORMFramework/SQL/SqlLiteral.cs`，抽取 5 份重复的字面量格式化（`GlobalCache.ReadIgnoreKeys`、`SessionCache.GetReferenceClasses` 两处、`LoadList.GetItems`、`SQLGenerator` 两处），统一改为不变文化，并把 null 从 `'NULL'` 改为 SQL 空值语义（where 用 `is null`、insert 用 `NULL`）
+- [ ] 6.4 新增 `SqlLiteralTest`：null / string / char / DateTime / int / double / bool，并在 `de-DE` culture 下断言不变文化输出（对应 `sql-generation` 规格）
+- [ ] 6.5 同步更新 3.4 的 SQL 快照基线以反映 6.3 的空值与不变文化变化，逐条列出预期变化的文本形态
+- [ ] 6.6 模式匹配化：`DefaultDbDriverFactory` 的 `is not DbDataAdapter adapter` 声明模式、`ObjectCalculator` 的强制转换改声明模式、`StatementAnalyst` 约 20 处 `(Operator)element.Value == Operator.Xxx` 改属性模式 `element is { Type: ..., Value: ... }`
+- [ ] 6.7 索引/范围与列表模式：`ObjectCalculator` 首尾引号剥离改 `xStr is ['\'', .., '\''] → xStr[1..^1]`（顺带消除空串越界，提交信息注明）、`ObjectCalculator.IsString`、`StatementAnalyst.CreateElement` 的 `[Length - 1]` 改 `[^1]`
+- [ ] 6.8 `ConfigManager.GetSystemConfiguration` 卫语句化 + `using var`（消除 8 处手写 `Close()` 与 4 组重复的 close+throw，修掉 `ReadSessionFactory` 抛异常时 `fs` 不关闭的泄漏路径）；`GlobalCache.Search(Guid)`、`GlobalCache.ProcessDeletedObject`、`GlobalCache.ReadObject`、`ObjectCalculator.IsTargetObject` 的嵌套反转**本组不做**（含 `Monitor`，见 design D9）
+- [ ] 6.9 验证：`dotnet test` 通过；序列快照与真值表全绿；SQL 快照与 6.5 更新后的基线逐字节一致
+
+## 7. 集合、字符串与 API 现代化（方案第 7 章 — 提交 #16–#19）
+
+- [ ] 7.1 约 30 处 `ContainsKey` + 索引器双查找改 `TryGetValue`（`GlobalCache`、`SessionCache`、`PersistenceContext` 的完整位置见方案 7.3 清单）；`DefaultDbDriverFactory.SetProviderName` 的字段类型改具体 `ConcurrentDictionary<string, byte>` 并用 `TryAdd`（修 13.14 非原子注册）
+- [ ] 7.2 一维查找表改集合表达式；`SQLGenerator._basicType`/`_stringType` 与 `GlobalCache._basicType` 各自改 `FrozenSet<Type>`（**不合并**这两个集合，内容差异是有意的）；`StatementAnalyst._operatorChars` 改 `SearchValues<char>`；线性查找方法改 `Contains`
+- [ ] 7.3 `_sqlOperators` 保持元素顺序与个数不变；`_priorityTable` 保持 `int[,]` 与 10×10 维度不变，仅重排版为每行一行并加注释标明行列对应的 `Operator`，并注明"枚举有 12 值而表为 10×10、括号由 `ProcessOperatorStack` 提前分流"这一约束
+- [ ] 7.4 约 20 处 `string.Format` 改插值字符串并显式不变文化（`FormattableString.Invariant` / `string.Create(CultureInfo.InvariantCulture, ...)`）：`SQLGenerator`、`SessionCache`、`LoadList`、`StatementAnalyst`、`ObjectCalculator`；`Program.cs` 的约 17 处 `Console.WriteLine("{0}...", ...)` 改插值
+- [ ] 7.5 在 README 与 SQL 生成相关类型的文档注释中显式声明"SQL 由字符串拼接生成、不参数化、不提供注入防护、需调用方约束输入"（对应 `sql-generation` 规格）
+- [ ] 7.6 `StatementAnalyst` 的 `_currentElement.Remove(0, Length)` 改 `Clear()`；`double.Parse` + `catch` 控流改 `double.TryParse(..., NumberStyles.Float, CultureInfo.InvariantCulture, out _)`
+- [ ] 7.7 适度 LINQ 与解构：`Session.Search<T>` 改 `Cast<T>().ToArray()`、两个工厂的 mapping 填充改 `ToDictionary`、`KeyValuePair` 遍历改解构（`GlobalCache`、`SessionCache`、`DefaultComponentProvider`）；锁内循环与会修改被遍历集合的循环（`Collect`、`RollBack`、`DeleteCacheEntity`）**不 LINQ 化**
+- [ ] 7.8 修 13.5：`GlobalCache.Collect` 在 `foreach` 中 `Remove` 导致 `InvalidOperationException`，改"先收集待删键、再删除"的两段式，不引入 LINQ、不触碰该方法的锁语句
+- [ ] 7.9 修 13.6：`SQLGenerator.GetSelectSQL` 在无查询表达式时不追加 `where (` 却无条件追加 `)`，改为括号配对；修 13.7：`GetInsertSQL`/`GetUpdateSQL`/`GetDeleteSQL` 用 `i < Length - 1` 判定分隔符导致跳过尾部导航属性时残留 `,` / ` and `，改为收集片段后 `string.Join`
+- [ ] 7.10 验证：`dotnet test` 通过；SQL 快照按 7.9 的预期变化更新并逐字节比对；涉及 `GlobalCache` 的提交额外手工执行 `Program.TestMultitransaction`（取消注释 + 本地 MySQL），比对两线程读写锁交互输出与改造前一致
+
+## 8. 资源管理与异常处理现代化（方案第 8 章 — 提交 #20、#21）
+
+- [ ] 8.1 `using` 声明按所有权逐处判定：`SessionCache.Commit`（连接/事务/命令）、`SessionCache.ProcessQueryCommand`、`GlobalCache.ReadDataFromDatabase` 自建连接加 `using`；`DefaultCommandListener.OnExecute` 从 `PersistenceContext.Connection` 取得的共享连接**不加** `using`，只对 `DataSet` / `IDbCommand` 加
+- [ ] 8.2 删除 `Session` 与 `SessionCache` 的终结器，`Dispose` 加 `_disposed` 守卫实现幂等（CA1063/CA1816）；本项独立提交并在提交信息说明行为变更（对应 `session-lifecycle` 规格）
+- [ ] 8.3 补 `session-lifecycle` 的测试：重复 `Dispose` 只归还一次引用计数、`using` 块退出后连接不再打开、连续两次通过会话执行原始查询均成功
+- [ ] 8.4 `throw ex;` → `throw;`（`SessionCache` 的 `Update`/`Insert`/`Commit` 三处）；未使用的异常变量去掉（`GlobalCache` 3 处、`SessionCache` 4 处）
+- [ ] 8.5 新增 `ORMFramework/Exceptions/`：`OrmException` 基类 + `QuerySyntaxException` + `OrmConfigurationException` + `ConcurrencyException`；按方案 8.5 的映射表替换 28 处 `throw new Exception`，参数/状态错误改 `ArgumentException`（带 `nameof`）/ `InvalidOperationException`，空串校验改 `ArgumentException.ThrowIfNullOrWhiteSpace`
+- [ ] 8.6 把测试中只能断言 `Exception` 的用例改为断言具体异常类型（`Assert.ThrowsException<QuerySyntaxException>` 等），覆盖 `error-reporting` 规格的各条场景
+- [ ] 8.7 验证：`dotnet build -warnaserror`、`dotnet test` 通过
+
+## 9. 反射强类型化（方案第 9 章 — 提交 #22）
+
+- [ ] 9.1 `SessionCache.GetReferenceClasses` 的 `Assembly.Load("ORMFramework").GetType("ORMFramework.LoadList\`1")` 改 `typeof(LoadList<>).MakeGenericType(itemType)`，三个属性名改 `nameof(LoadList<object>.Xxx)`；不引入 `ILoadList` 接口（留作后续提案）
+- [ ] 9.2 约 25 处 `PropertyInfo.GetValue(obj, null)` / `SetValue(obj, value, null)` 改单参重载（位置见方案 9.2 清单）
+- [ ] 9.3 验证：`dotnet test` 通过；额外取消注释并手工运行 `Program` 的 `TestOneToMany` / `TestManyToMany`（需本地 MySQL），确认一对多与多对多懒加载路径正常（该路径无单元测试，仅有 3.6 的 `LoadListTest` 覆盖谓词生成）
+
+## 10. 启用可空引用类型（方案第 10 章 — 提交 #23）
+
+- [ ] 10.1 `Directory.Build.props` 的 `<Nullable>` 由 `annotations` 切为 `enable`
+- [ ] 10.2 按目录分批消警（每目录一个子提交）：`Statment` → `Configuration` → `Ioc` → `SQLGenerator` → `Listener`/`Event` → `Session` → `Cache`
+- [ ] 10.3 公开签名显式标注可空（方案 10.2 清单）：`IPersistenceContext.GetEntityMappingByClassName` → `EntityMapping?`、`ISQLGenerator.GetSelectSQL` 与 `ISessionCache.Search` 的表达式参数 → `QueryExpression?`、`StatementAnalyst.CreateElement` → `StatElement?`、`ISession.SessionFactory` → `ISessionFactory?`、`LoadList<T>._items` → `List<T>?`、`CacheEntity.ForeignKeys`/`Value`、`GlobalCache.Search(Guid)` → `GlobalCacheResult?`
+- [ ] 10.4 `EntityRelation` / `Configuration` 改 `required` 属性并把 `ConfigManager` 的逐行赋值改对象初始化器；实体类一律不用 `required` / `init`，保留 public 无参构造与可读写公开属性（反射契约）
+- [ ] 10.5 反射返回值的 null 处理：已有 null 检查的保持；无检查的（`GlobalCache` 2 处、`SessionCache` 8 处）改 `?? throw new OrmConfigurationException($"...'{name}' on {type}...")`，落地 `error-reporting` 的"配置引用了不存在的属性时给出可读错误"
+- [ ] 10.6 补一条测试：映射引用了实体上不存在的属性名时抛配置异常且消息含属性名与类型名
+- [ ] 10.7 验证：`dotnet build SchoolEndORM.sln -warnaserror:CS8600,CS8601,CS8602,CS8603,CS8604,CS8618,CS8625` 通过
+
+## 11. 测试工程与死代码清理（方案第 11 / 13.13 章 — 提交 #24、#25）
+
+- [ ] 11.1 删除 4 个测试文件的 VS2005 样板：文件头注释、`testContextInstance` + 手写 `TestContext` 属性、`#region 附加测试属性` 的全注释模板；`[TestClass()]` / `[TestMethod()]` 改无括号形式（约 −200 行）
+- [ ] 11.2 删除测试死代码：`StatementAnalystTest` 的 `List2` 类、各文件被注释的测试块、`SQLGeneratorTest` 的未使用字段
+- [ ] 11.3 `ComponentProviderTest` 的 Tab 缩进改空格；`Assert.AreEqual<Type>(typeof(Session), session.GetType())` 改 `Assert.IsInstanceOfType<Session>(session)`
+- [ ] 11.4 删除框架死代码：`Cache/ObjectCache.cs`、`Configuration/EntityClass/DatabaseType.cs`、`SQLGenerator.GetObjectPropertyValue`、`SQLGenerator` 中三大块被注释的导航属性逻辑
+- [ ] 11.5 验证：`dotnet test` 全绿；`dotnet test --collect:"XPlat Code Coverage"` 中 `StatementAnalyst` / `SQLGenerator` / `ObjectCalculator` 行覆盖率 ≥ 70%
+
+## 12. 其余既有缺陷与文档收尾（方案 13.3–13.20 — 提交 #26）
+
+- [ ] 12.1 修 13.11：`StatementAnalyst` 的 `while (currentChar == ' ') currentChar = _queryString[++_stringIndex];` 在查询串以空格结尾时越界；修 13.12：构造函数中 `QueryString` setter 已调 `Init()` 后又重复调用导致分析跑两遍，以及 `value.Trim()` 对 null NRE 改 `IsNullOrWhiteSpace`（落地 `query-parsing` 的"设置查询串只触发一次分析"与"末尾空格"场景，解锁 3.3 中记录为待修的用例）
+- [ ] 12.2 修 13.9：`ObjectCalculator` 在 `y` 为变量且非 `DateTime` 时取的是属性名而非属性值，改为 `property.GetValue(...)`（落地 `query-parsing` 的"两个属性做字符串比较"场景）
+- [ ] 12.3 修 13.4：`GlobalCache.Update` 在 `_objList` 无该键时抛 `KeyNotFoundException`，改 `TryGetValue` + 明确异常（不触碰锁语句）
+- [ ] 12.4 修 13.17：`DefaultComponentProvider` 生命周期表缺键时抛 `KeyNotFoundException`，改 `TryGetValue` + 默认 `Transient`，并使 `ISubmitListener` 的注册状态与实现表一致；修 13.18：`ComponentProviderBuilder.SetSession<T>()` 的键应为 `typeof(ISession)` 而非 `typeof(Session)`
+- [ ] 12.5 修 13.19：`Examples/Program.cs` 硬编码绝对路径改为依赖 `Config.xml` 的输出目录副本，并为 `ORMFramework.Examples.csproj` 的 `Config.xml` 配置 `CopyToOutputDirectory`（落地 `build-configuration` 的"示例项目配置自包含可运行"）；保留 `Main` 与 `<StartupObject>`，不改 top-level statements
+- [ ] 12.6 Examples 实体类的 `Equals` 现代化为 `obj is Course other && Id == other.Id` 形式，局部变量统一命名为 `other`；不改成 `record`、导航属性保持 `IList<T>`
+- [ ] 12.7 更新 `AGENTS.md`：`ConfigManagerTest` 不再是预期失败、目标框架为 net8.0、程序集名硬依赖已解除（9.1）、新增 `Directory.Build.props` / `.editorconfig` / `Exceptions` / `SqlLiteral` 的说明；`docs/modern-csharp-migration-plan.md` 第 12/16.4 节的 8 项记为后续提案
+- [ ] 12.8 最终验证：`dotnet format --verify-no-changes SchoolEndORM.sln`、`dotnet build SchoolEndORM.sln -warnaserror`、`dotnet test` 三项全绿；SQL 快照与序列快照与各阶段记录的基线一致；手工执行 `Program.TestMultitransaction` 确认并发行为未变

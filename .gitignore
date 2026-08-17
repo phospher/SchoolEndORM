@@ -7,3 +7,5 @@ ORMFramework.Test/bin/
 ORMFramework.Test/obj/
 **/dist/
 .vscode/
+.codebuddy/
+ORMFramework.Test/TestResults/

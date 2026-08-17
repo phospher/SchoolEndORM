@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Configuration>
     <SessionFactory>
-        <ConnectionString>server=xxxx;port=3306;database=test;uid=test;pwd=xxxx;Charset=utf8</ConnectionString>
+        <ConnectionString>server=9.134.177.46;port=3306;database=test;uid=root;pwd=Lqm19890204!(*(;Charset=utf8</ConnectionString>
         <ProviderName>MySql.Data.MySqlClient.MySqlClientFactory,MySql.Data</ProviderName>
     </SessionFactory>
     <Mappings>
