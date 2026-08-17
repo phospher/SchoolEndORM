@@ -50,9 +50,6 @@ public class DefaultComponentProvider : IComponentProvider
         _serviceProvider = services.BuildServiceProvider();
     }
 
-    public T GetComponent<T>()
-    {
-        return _serviceProvider.GetService<T>();
-    }
+    public T GetComponent<T>() => _serviceProvider.GetService<T>();
 }
 

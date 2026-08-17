@@ -3,27 +3,21 @@ using System.Xml;
 namespace ORMFramework.Configuration;
 public class ConfigManager
 {
-    private string _configFilePath;
-
-    public string ConfigFilePath
-    {
-        get { return _configFilePath; }
-        set { _configFilePath = value; }
-    }
+    public string ConfigFilePath { get; set; }
 
     public ConfigManager()
     {
-        _configFilePath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + "Config.xml";
+        ConfigFilePath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + "Config.xml";
     }
 
     public ConfigManager(string configFilePath)
     {
-        _configFilePath = configFilePath;
+        ConfigFilePath = configFilePath;
     }
 
     public Configuration GetSystemConfiguration()
     {
-        var fs = new FileStream(_configFilePath, FileMode.Open);
+        var fs = new FileStream(ConfigFilePath, FileMode.Open);
         var reader = new XmlTextReader(fs);
         var configuration = new Configuration();
         bool result = true;

@@ -13,15 +13,9 @@ public class SessionFactoryIoc : ISessionFactory
         get; private set;
     }
 
-    public void Initialize()
-    {
-        Initialize(string.Empty);
-    }
+    public void Initialize() => Initialize(string.Empty);
 
-    public void Initialize(string configFilePath)
-    {
-        Initialize(configFilePath, new ComponentProviderBuilder().Build());   
-    }
+    public void Initialize(string configFilePath) => Initialize(configFilePath, new ComponentProviderBuilder().Build());
 
     public void Initialize(string configFilePath, IComponentProvider componentProvider)
     {

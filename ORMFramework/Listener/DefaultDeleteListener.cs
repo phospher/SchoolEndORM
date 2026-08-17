@@ -4,8 +4,5 @@ namespace ORMFramework.Listener;
 public class DefaultDeleteListener : IDeleteListener
 {
 
-    public void OnDelete(UpdateEvent @event, object sender)
-    {
-        @event.Cache.Delete(@event.Entity);
-    }
+    public void OnDelete(UpdateEvent @event, object sender) => @event.Cache.Delete(@event.Entity);
 }

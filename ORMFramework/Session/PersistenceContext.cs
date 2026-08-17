@@ -5,7 +5,6 @@ using ORMFramework.SQL;
 namespace ORMFramework;
 public class PersistenceContext : IPersistenceContext
 {
-    private IDbDriverFactory _driverFactory;
     private IDbConnection _connection;
 
     public IDictionary<string, EntityMapping> Mappings { get; set; }
@@ -16,7 +15,7 @@ public class PersistenceContext : IPersistenceContext
         {
             if (_connection == null || _connection.State == ConnectionState.Closed)
             {
-                _connection = _driverFactory.GetDbConnection();
+                _connection = DbDriverFactory.GetDbConnection();
             }
             return _connection;
         }
@@ -24,20 +23,17 @@ public class PersistenceContext : IPersistenceContext
 
     public ISQLGenerator SQLGenerator { get; set; }
 
-    public IDbDriverFactory DbDriverFactory
-    {
-        get { return _driverFactory; }
-    }
+    public IDbDriverFactory DbDriverFactory { get; }
 
     public PersistenceContext(IDbDriverFactory driverFactory, ISQLGenerator sqlGenerator)
     {
-        _driverFactory = driverFactory;
+        DbDriverFactory = driverFactory;
         SQLGenerator = sqlGenerator;
     }
 
     public PersistenceContext(IDbDriverFactory driverFactory, IDictionary<string, EntityMapping> mappings)
     {
-        _driverFactory = driverFactory;
+        DbDriverFactory = driverFactory;
         Mappings = mappings;
     }
 

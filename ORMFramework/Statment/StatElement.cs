@@ -1,20 +1,9 @@
 namespace ORMFramework.Statment;
 public class StatElement
 {
-    private object _value;
-    private StatElementType _type;
+    public object Value { get; set; }
 
-    public object Value
-    {
-        get { return _value; }
-        set { _value = value; }
-    }
-
-    public StatElementType Type
-    {
-        get { return _type; }
-        set { _type = value; }
-    }
+    public StatElementType Type { get; set; }
 }
 
 public enum StatElementType

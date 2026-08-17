@@ -18,10 +18,7 @@ public class SQLGenerator : ISQLGenerator
 
     public SQLGenerator() { }
 
-    public string GetSelectSQL(Type type)
-    {
-        return GetSelectSQL(type, null);
-    }
+    public string GetSelectSQL(Type type) => GetSelectSQL(type, null);
 
     public string GetSelectSQL(Type type, QueryExpression queryExpression)
     {
@@ -230,10 +227,7 @@ public class SQLGenerator : ISQLGenerator
         return sql.ToString();
     }
 
-    private string GetSQLOperator(Operator @operator)
-    {
-        return _sqlOperators[(int)@operator];
-    }
+    private static string GetSQLOperator(Operator @operator) => _sqlOperators[(int)@operator];
 
     private string GenerateStatmentByProperty(PropertyInfo property, object @object)
     {

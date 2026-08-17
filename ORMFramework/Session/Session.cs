@@ -7,56 +7,25 @@ using ORMFramework.Statment;
 namespace ORMFramework;
 public class Session : ISession, IDisposable
 {
-    private ISelectListener _selectListener;
-    private readonly List<IInsertListener> _insertListeners = new();
-    private readonly List<IDeleteListener> _deleteListeners = new();
-    private readonly List<IUpdateListener> _updateListeners = new();
-    private readonly List<ISubmitListener> _submitListeners = new();
-    private ICommandListener _commandListener;
-    private IPersistenceContext _persistenceContext;
     private ISessionCache _sessionCache;
 
     public ISessionFactory SessionFactory { get; set; }
 
-    public ISelectListener SelectListener
-    {
-        get { return _selectListener; }
-    }
+    public ISelectListener SelectListener { get; }
 
-    public List<IInsertListener> InsertListeners
-    {
-        get { return _insertListeners; }
-    }
+    public List<IInsertListener> InsertListeners { get; } = new();
 
-    public List<IDeleteListener> DeleteListeners
-    {
-        get { return _deleteListeners; }
-    }
+    public List<IDeleteListener> DeleteListeners { get; } = new();
 
-    public List<IUpdateListener> UpdateListeners
-    {
-        get { return _updateListeners; }
-    }
+    public List<IUpdateListener> UpdateListeners { get; } = new();
 
-    public List<ISubmitListener> SubmitListeners
-    {
-        get { return _submitListeners; }
-    }
+    public List<ISubmitListener> SubmitListeners { get; } = new();
 
-    public ICommandListener CommandListener
-    {
-        get { return _commandListener; }
-    }
+    public ICommandListener CommandListener { get; }
 
-    public IDbConnection Connection
-    {
-        get { return _persistenceContext.Connection; }
-    }
+    public IDbConnection Connection => PersistenceContext.Connection;
 
-    public IPersistenceContext PersistenceContext
-    {
-        get { return _persistenceContext; }
-    }
+    public IPersistenceContext PersistenceContext { get; }
 
 
     public Session(IPersistenceContext persistenceContext) : this(null, persistenceContext)
@@ -74,15 +43,15 @@ public class Session : ISession, IDisposable
         IUpdateListener updateListener, IDeleteListener deleteListener, ISubmitListener submitListener, ICommandListener commandListener)
     {
         SessionFactory = sessionFactory;
-        _persistenceContext = persistenceContext;
+        PersistenceContext = persistenceContext;
         _sessionCache = sessionCache;
         _sessionCache.PersistenceContext = persistenceContext;
-        _selectListener = selectListener;
-        _insertListeners.Add(insertListener);
-        _updateListeners.Add(updateListener);
-        _deleteListeners.Add(deleteListener);
-        _submitListeners.Add(submitListener);
-        _commandListener = commandListener;
+        SelectListener = selectListener;
+        InsertListeners.Add(insertListener);
+        UpdateListeners.Add(updateListener);
+        DeleteListeners.Add(deleteListener);
+        SubmitListeners.Add(submitListener);
+        CommandListener = commandListener;
     }
 
     ~Session()
@@ -115,7 +84,7 @@ public class Session : ISession, IDisposable
         var @event = new UpdateEvent();
         @event.Cache = _sessionCache;
         @event.Entity = @object;
-        foreach (IUpdateListener listener in _updateListeners)
+        foreach (IUpdateListener listener in UpdateListeners)
         {
             listener.OnUpdate(@event, this);
         }
@@ -126,7 +95,7 @@ public class Session : ISession, IDisposable
         var @event = new UpdateEvent();
         @event.Cache = _sessionCache;
         @event.Entity = @object;
-        foreach (IDeleteListener listener in _deleteListeners)
+        foreach (IDeleteListener listener in DeleteListeners)
         {
             listener.OnDelete(@event, this);
         }
@@ -137,7 +106,7 @@ public class Session : ISession, IDisposable
         var @event = new UpdateEvent();
         @event.Cache = _sessionCache;
         @event.Entity = @object;
-        foreach (IInsertListener listener in _insertListeners)
+        foreach (IInsertListener listener in InsertListeners)
         {
             listener.OnInsert(@event, this);
         }
@@ -147,7 +116,7 @@ public class Session : ISession, IDisposable
     {
         var @event = new ActionEvent();
         @event.Cache = _sessionCache;
-        foreach (ISubmitListener listener in _submitListeners)
+        foreach (ISubmitListener listener in SubmitListeners)
         {
             listener.OnSubmit(@event, this);
         }
@@ -157,9 +126,9 @@ public class Session : ISession, IDisposable
     {
         var @event = new CommandEvent();
         @event.CommandText = commandText;
-        @event.PersistenceContext = _persistenceContext;
+        @event.PersistenceContext = PersistenceContext;
         @event.IsQuery = false;
-        _commandListener.OnExecute(@event, this);
+        CommandListener.OnExecute(@event, this);
         return (int)@event.Result;
     }
 
@@ -167,9 +136,9 @@ public class Session : ISession, IDisposable
     {
         var @event = new CommandEvent();
         @event.CommandText = commandText;
-        @event.PersistenceContext = _persistenceContext;
+        @event.PersistenceContext = PersistenceContext;
         @event.IsQuery = true;
-        _commandListener.OnExecute(@event, this);
+        CommandListener.OnExecute(@event, this);
         return (DataSet)@event.Result;
     }
 
@@ -180,7 +149,7 @@ public class Session : ISession, IDisposable
         @event.Cache = _sessionCache;
         @event.QueryExpression = expression;
         @event.SearchType = objType;
-        _selectListener.OnSelect(@event, this);
+        SelectListener.OnSelect(@event, this);
         return (IEnumerable<object>)@event.Result;
     }
 

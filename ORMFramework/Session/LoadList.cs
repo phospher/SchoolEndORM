@@ -9,38 +9,20 @@ namespace ORMFramework;
 public class LoadList<T> : IList<T>
 {
     private List<T> _items;
-    private ISessionCache _sessionCache;
-    private string _foreignKeyName;
-    private List<object> _foreignKeyValues;
-    private ISelectListener _selectListener;
 
-    public ISessionCache SessionCache
-    {
-        get { return _sessionCache; }
-        set { _sessionCache = value; }
-    }
+    public ISessionCache SessionCache { get; set; }
 
-    public string ForeignKeyName
-    {
-        get { return _foreignKeyName; }
-        set { _foreignKeyName = value; }
-    }
+    public string ForeignKeyName { get; set; }
 
-    public List<object> ForeignKeyValues
-    {
-        get { return _foreignKeyValues; }
-    }
+    public List<object> ForeignKeyValues { get; }
 
-    public ISelectListener SelectListener
-    {
-        get { return _selectListener; }
-    }
+    public ISelectListener SelectListener { get; }
 
     public LoadList()
     {
         _items = null;
-        _foreignKeyValues = new List<object>();
-        _selectListener = new DefaultSelectListener();
+        ForeignKeyValues = new List<object>();
+        SelectListener = new DefaultSelectListener();
     }
 
     public int IndexOf(T item)
@@ -175,32 +157,32 @@ public class LoadList<T> : IList<T>
         var statement = new StringBuilder();
         var @event = new SelectEvent();
         _items = new List<T>();
-        for (int i = 0; i < _foreignKeyValues.Count; i++)
+        for (int i = 0; i < ForeignKeyValues.Count; i++)
         {
             statement.Append(ForeignKeyName);
             statement.Append("==");
-            if (_foreignKeyValues[i] is string || _foreignKeyValues[i] is char)
+            if (ForeignKeyValues[i] is string || ForeignKeyValues[i] is char)
             {
-                statement.Append(string.Format("'{0}'", _foreignKeyValues[i]));
+                statement.Append(string.Format("'{0}'", ForeignKeyValues[i]));
             }
-            else if (_foreignKeyValues[i] is DateTime)
+            else if (ForeignKeyValues[i] is DateTime)
             {
-                statement.Append(string.Format("'{0}'", ((DateTime)_foreignKeyValues[i]).ToString("yyyy-MM-dd HH:mm:ss")));
+                statement.Append(string.Format("'{0}'", ((DateTime)ForeignKeyValues[i]).ToString("yyyy-MM-dd HH:mm:ss")));
             }
             else
             {
-                statement.Append(_foreignKeyValues[i]);
+                statement.Append(ForeignKeyValues[i]);
             }
-            if (i < _foreignKeyValues.Count - 1)
+            if (i < ForeignKeyValues.Count - 1)
             {
                 statement.Append(" || ");
             }
         }
         QueryExpression expression = new StatementAnalyst(statement.ToString()).GetQueryExpression();
-        @event.Cache = _sessionCache;
+        @event.Cache = SessionCache;
         @event.QueryExpression = expression;
         @event.SearchType = typeof(T);
-        _selectListener.OnSelect(@event, this);
+        SelectListener.OnSelect(@event, this);
         foreach (object item in (IEnumerable<object>)@event.Result)
         {
             _items.Add((T)item);

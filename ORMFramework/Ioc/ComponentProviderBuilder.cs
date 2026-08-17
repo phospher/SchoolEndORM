@@ -33,9 +33,6 @@ public class ComponentProviderBuilder
         return this;
     }
 
-    public IComponentProvider Build()
-    {
-        return new DefaultComponentProvider(_componentImplTypes);
-    }
+    public IComponentProvider Build() => new DefaultComponentProvider(_componentImplTypes);
 }
 

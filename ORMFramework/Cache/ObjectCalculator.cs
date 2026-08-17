@@ -77,12 +77,7 @@ public static class ObjectCalculator
         }
     }
 
-    private static bool IsBooleanOperator(Operator @operator)
-    {
-        return @operator == Operator.And ||
-            @operator == Operator.Not ||
-            @operator == Operator.Or;
-    }
+    private static bool IsBooleanOperator(Operator @operator) => @operator == Operator.And || @operator == Operator.Not || @operator == Operator.Or;
 
     private static void ProcessNotOperator(Stack<StatElement> resultStack, object @object)
     {

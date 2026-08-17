@@ -41,10 +41,7 @@ public class SessionFactory : ISessionFactory
         LogHelper.LogHelper.InitLog(configFilePath);
     }
 
-    public EntityMapping GetEntityMappingByClassName(string className)
-    {
-        return _mappings[className];
-    }
+    public EntityMapping GetEntityMappingByClassName(string className) => _mappings[className];
 
     public ISession CreateSession()
     {

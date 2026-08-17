@@ -1,8 +1,8 @@
 namespace ORMFramework.Configuration;
 public class EntityMapping
 {
-    private IEnumerable<string> _keys;
-    private IDictionary<string, EntityRelation> _relations;
+    private IEnumerable<string> _keys = [];
+    private IDictionary<string, EntityRelation> _relations = new Dictionary<string, EntityRelation>();
 
     public string ClassName { get; set; }
 
@@ -10,27 +10,13 @@ public class EntityMapping
 
     public IEnumerable<string> Keys
     {
-        get
-        {
-            if (_keys == null)
-            {
-                _keys = new List<string>();
-            }
-            return _keys;
-        }
-        set { _keys = value; }
+        get => _keys;
+        set => _keys = value ?? [];
     }
 
     public IDictionary<string, EntityRelation> Relations
     {
-        get
-        {
-            if (_relations == null)
-            {
-                _relations = new Dictionary<string, EntityRelation>();
-            }
-            return _relations;
-        }
-        set { _relations = value; }
+        get => _relations;
+        set => _relations = value ?? new Dictionary<string, EntityRelation>();
     }
 }
