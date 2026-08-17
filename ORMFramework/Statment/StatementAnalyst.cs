@@ -46,7 +46,7 @@ public class StatementAnalyst
         set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value);
-            _queryString = value.ToCharArray();
+            _queryString = value.Trim().ToCharArray();
             Init();
         }
     }
@@ -57,7 +57,6 @@ public class StatementAnalyst
         _currentElement = new StringBuilder();
         _suffixExpression = new List<StatElement>();
         QueryString = queryString;
-        Init();
     }
 
     public QueryExpression GetQueryExpression()

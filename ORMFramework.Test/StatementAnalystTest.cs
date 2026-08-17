@@ -113,21 +113,18 @@ public class StatementAnalystTest
     }
 
     [TestMethod]
-    public void QueryString_TrailingSpaceAfterConstant_RecordsCurrentBehavior()
+    public void QueryString_TrailingSpaceAfterConstant_TreatedAsEndOfInput()
     {
-        // TODO(12.1): 修复 13.11 后，"Id==1 " 应断言与 "Id==1" 相同的序列（末尾空白视为输入结束）。
-        // 注意：任务书预期此处抛 IndexOutOfRangeException，但当前实现把末尾空格并入常量，
-        // 实际得到常量 "1 "（带尾随空格）；真正触发 IndexOutOfRangeException 的是变量/带引号常量后接末尾空格（见下）。
         QueryExpression expression = Parse("Id==1 ");
-        Assert.AreEqual("Variable:Id|Operator:Equals|Constant:1 ", Render(expression.NifixExpression));
-        Assert.AreEqual("Variable:Id|Constant:1 |Operator:Equals", Render(expression.SuffixExpression));
+        Assert.AreEqual("Variable:Id|Operator:Equals|Constant:1", Render(expression.NifixExpression));
+        Assert.AreEqual("Variable:Id|Constant:1|Operator:Equals", Render(expression.SuffixExpression));
     }
 
     [TestMethod]
-    public void QueryString_TrailingSpaceAfterVariable_ThrowsIndexOutOfRange()
+    public void QueryString_TrailingSpaceAfterVariable_TreatedAsEndOfInput()
     {
-        // TODO(12.1): 修复 13.11 后改为断言与 "Id" 相同的序列（末尾空白视为输入结束）。
-        // 这是缺陷 13.11（while (currentChar == ' ') currentChar = _queryString[++_stringIndex] 越界）的真实触发形态。
-        Assert.ThrowsException<IndexOutOfRangeException>(() => Parse("Id "));
+        QueryExpression expression = Parse("Id ");
+        Assert.AreEqual("Variable:Id", Render(expression.NifixExpression));
+        Assert.AreEqual("Variable:Id", Render(expression.SuffixExpression));
     }
 }
