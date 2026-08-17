@@ -17,8 +17,7 @@ public sealed class DefaultComponentProvider(IDictionary<Type, Type> componentIm
         { typeof(IInsertListener), ServiceLifetime.Singleton },
         { typeof(IUpdateListener), ServiceLifetime.Singleton },
         { typeof(IDeleteListener), ServiceLifetime.Singleton },
-        { typeof(ICommandListener), ServiceLifetime.Singleton },
-        { typeof(ISubmitListener), ServiceLifetime.Singleton }
+        { typeof(ICommandListener), ServiceLifetime.Singleton }
     };
 
     private readonly ServiceProvider _serviceProvider = BuildServiceProvider(componentImplDict);
@@ -29,7 +28,8 @@ public sealed class DefaultComponentProvider(IDictionary<Type, Type> componentIm
 
         foreach (var (serviceType, implementationType) in componentImplDict)
         {
-            switch (_componentLifetimes[serviceType])
+            ServiceLifetime lifetime = _componentLifetimes.TryGetValue(serviceType, out var l) ? l : ServiceLifetime.Transient;
+            switch (lifetime)
             {
                 case ServiceLifetime.Singleton:
                     services.AddSingleton(serviceType, implementationType);

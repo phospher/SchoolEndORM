@@ -23,7 +23,7 @@ public sealed class ComponentProviderBuilder
 
     public ComponentProviderBuilder SetSession<T>() where T : ISession
     {
-        _componentImplTypes[typeof(Session)] = typeof(T);
+        _componentImplTypes[typeof(ISession)] = typeof(T);
         return this;
     }
 
