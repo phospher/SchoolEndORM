@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using ORMFramework;
-using System.Threading;
-
-namespace ORMFramework.Examples;
+﻿namespace ORMFramework.Examples;
 class Program
 {
     static void Main(string[] args)

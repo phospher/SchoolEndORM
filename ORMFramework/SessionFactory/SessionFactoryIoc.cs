@@ -1,6 +1,4 @@
-﻿using System;
-using ORMFramework.Configuration;
-using System.Collections.Generic;
+﻿using ORMFramework.Configuration;
 using ORMFramework.Ioc;
 
 namespace ORMFramework;

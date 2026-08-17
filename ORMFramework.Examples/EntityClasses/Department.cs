@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace ORMFramework.Examples;
+﻿namespace ORMFramework.Examples;
 public class Department
 {
     private int _id;

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ORMFramework;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ORMFramework.Configuration;
 using ORMFramework.SQL;
 using ORMFramework.Statment;

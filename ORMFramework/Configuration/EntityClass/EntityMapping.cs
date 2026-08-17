@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace ORMFramework.Configuration;
 public class EntityMapping
 {

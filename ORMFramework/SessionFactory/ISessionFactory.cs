@@ -1,5 +1,4 @@
-﻿using System;
-namespace ORMFramework;
+﻿namespace ORMFramework;
 public interface ISessionFactory
 {
     void Initialize();

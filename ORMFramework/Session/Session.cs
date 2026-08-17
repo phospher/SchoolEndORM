@@ -1,7 +1,4 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Text;
 using ORMFramework.Cache;
 using ORMFramework.Event;
 using ORMFramework.Listener;

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using ORMFramework.Cache;
 using ORMFramework.Configuration;
 using ORMFramework.SQL;
 

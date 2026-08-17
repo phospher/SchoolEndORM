@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Reflection;
 using System.Text;
 using ORMFramework.Configuration;
-using ORMFramework.SQL;
 using ORMFramework.Statment;
 
 namespace ORMFramework.Cache;

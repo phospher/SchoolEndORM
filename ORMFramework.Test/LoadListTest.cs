@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using ORMFramework;
 using ORMFramework.Test.Fakes;
 
 #pragma warning disable CA1707 // test method names are specified with underscores by the task spec

@@ -1,6 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Generic;
+﻿using Microsoft.Extensions.DependencyInjection;
 using ORMFramework.SQL;
 using ORMFramework.Cache;
 using ORMFramework.Listener;

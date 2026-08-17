@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
-
 namespace ORMFramework.Cache;
 public class GlobalCacheEntity : CacheEntity
 {
