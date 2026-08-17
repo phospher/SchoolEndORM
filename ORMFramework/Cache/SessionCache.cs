@@ -26,9 +26,9 @@ public sealed class SessionCache : ISessionCache
         var ignoreIds = new List<Guid>();
         var result = new List<object>();
         IList<object> globalCacheObjects;
-        if (_objTable.ContainsKey(objType))
+        if (_objTable.TryGetValue(objType, out var entities))
         {
-            foreach (CacheEntity cacheEntity in _objTable[objType])
+            foreach (CacheEntity cacheEntity in entities)
             {
                 RefreshCacheEntity(cacheEntity);
                 if (ObjectCalculator.IsTargetObject(cacheEntity.Value, expression))
@@ -50,7 +50,7 @@ public sealed class SessionCache : ISessionCache
 
     public void GetReferenceClasses(object soruceObject)
     {
-        if (_objList.ContainsKey(soruceObject))
+        if (_objList.TryGetValue(soruceObject, out var sourceEntity))
         {
             bool hasTarget = false;
             Type objType = soruceObject.GetType();
@@ -58,21 +58,20 @@ public sealed class SessionCache : ISessionCache
             foreach (KeyValuePair<string, EntityRelation> item in mapping.Relations)
             {
                 EntityRelation relation = item.Value;
-                if (_objList[soruceObject].ForeignKeys.ContainsKey(relation.KeyColum))
+                if (sourceEntity.ForeignKeys.TryGetValue(relation.KeyColum, out var foreignKeyValue))
                 {
                     Type referenceType = objType.GetProperty(relation.Property).PropertyType;
                     if (relation.Type == RelationType.ManyToOne || relation.Type == RelationType.OneToOne)
                     {
                         var expressionStr = new StringBuilder();
                         QueryExpression expression;
-                        object foreignKeysValue = _objList[soruceObject].ForeignKeys[relation.KeyColum];
                         expressionStr.Append(relation.ReferenceColum);
                         expressionStr.Append("==");
-                        expressionStr.Append(SqlLiteral.Format(foreignKeysValue));
+                        expressionStr.Append(SqlLiteral.Format(foreignKeyValue));
                         expression = new StatementAnalyst(expressionStr.ToString()).GetQueryExpression();
-                        if (_objTable.ContainsKey(referenceType))
+                        if (_objTable.TryGetValue(referenceType, out var referenceEntities))
                         {
-                            foreach (CacheEntity cacheEntity in _objTable[referenceType])
+                            foreach (CacheEntity cacheEntity in referenceEntities)
                             {
                                 RefreshCacheEntity(cacheEntity);
                                 if (ObjectCalculator.IsTargetObject(cacheEntity.Value, expression))
@@ -98,14 +97,13 @@ public sealed class SessionCache : ISessionCache
                         loadListType.GetProperty("SessionCache").SetValue(loadList, this, null);
                         if (relation.Type == RelationType.OneToMany)
                         {
-                            foreignKeyValues.Add(_objList[soruceObject].ForeignKeys[relation.KeyColum]);
+                            foreignKeyValues.Add(foreignKeyValue);
                             loadListType.GetProperty("ForeignKeyName").SetValue(loadList, relation.ReferenceColum, null);
                         }
                         else
                         {
                             var relation2 = (ManyToManyRelation)relation;
                             var sql = new StringBuilder("select ");
-                            object foreignKeyValue = _objList[soruceObject].ForeignKeys[relation2.KeyColum];
                             sql.Append(relation2.ReferenceClassColum);
                             sql.Append(" from ");
                             sql.Append(relation2.ReferenceTableName);
@@ -187,11 +185,12 @@ public sealed class SessionCache : ISessionCache
                 cacheEntity.Value = @object;
                 cacheEntity.Version = DateTime.UtcNow.Ticks;
                 _objList.Add(cacheEntity.Value, cacheEntity);
-                if (!_objTable.ContainsKey(cacheEntity.Value.GetType()))
+                if (!_objTable.TryGetValue(cacheEntity.Value.GetType(), out var list))
                 {
-                    _objTable.Add(cacheEntity.Value.GetType(), new List<CacheEntity>());
+                    list = [];
+                    _objTable[cacheEntity.Value.GetType()] = list;
                 }
-                _objTable[cacheEntity.Value.GetType()].Add(cacheEntity);
+                list.Add(cacheEntity);
                 _insertList.Add(cacheEntity);
             }
         }
@@ -212,11 +211,12 @@ public sealed class SessionCache : ISessionCache
         foreach (CacheEntity cacheEntity in _deleteList)
         {
             ResetEntity(cacheEntity);
-            if (!_objTable.ContainsKey(cacheEntity.Value.GetType()))
+            if (!_objTable.TryGetValue(cacheEntity.Value.GetType(), out var list))
             {
-                _objTable.Add(cacheEntity.Value.GetType(), new List<CacheEntity>());
+                list = [];
+                _objTable[cacheEntity.Value.GetType()] = list;
             }
-            _objTable[cacheEntity.Value.GetType()].Add(cacheEntity);
+            list.Add(cacheEntity);
             GlobalCache.ReleaseWriteLock(cacheEntity.ObjectId);
         }
         foreach (CacheEntity cacheEntity in _insertList)
@@ -236,10 +236,7 @@ public sealed class SessionCache : ISessionCache
     private void ResetEntity(CacheEntity cacheEntity)
     {
         GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId);
-        if (_objList.ContainsKey(cacheEntity.Value))
-        {
-            _objList.Remove(cacheEntity.Value);
-        }
+        _objList.Remove(cacheEntity.Value);
         cacheEntity.Value = globalCacheResult.Value;
         cacheEntity.Version = globalCacheResult.Version;
         _objList.Add(cacheEntity.Value, cacheEntity);
@@ -384,11 +381,12 @@ public sealed class SessionCache : ISessionCache
             cacheEntity.Version = globalCacheResult.Version;
             cacheEntity.ForeignKeys = globalCacheResult.ForeignKeys;
             _objList.Add(cacheEntity.Value, cacheEntity);
-            if (!_objTable.ContainsKey(objType))
+            if (!_objTable.TryGetValue(objType, out var list))
             {
-                _objTable.Add(objType, new List<CacheEntity>());
+                list = [];
+                _objTable[objType] = list;
             }
-            _objTable[objType].Add(cacheEntity);
+            list.Add(cacheEntity);
             result.Add(cacheEntity.Value);
         }
         return result;

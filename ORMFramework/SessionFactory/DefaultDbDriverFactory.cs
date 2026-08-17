@@ -10,7 +10,7 @@ public sealed class DefaultDbDriverFactory : IDbDriverFactory
 
     private DbProviderFactory _dbProviderFactory;
 
-    private readonly static IDictionary<string, object> _registedProviderName = new ConcurrentDictionary<string, object>();
+    private readonly static ConcurrentDictionary<string, byte> _registeredProviderName = new();
 
     public DefaultDbDriverFactory()
     {
@@ -30,10 +30,9 @@ public sealed class DefaultDbDriverFactory : IDbDriverFactory
 
     public void SetProviderName(string providerName)
     {
-        if (!_registedProviderName.ContainsKey(providerName))
+        if (_registeredProviderName.TryAdd(providerName, 0))
         {
             DbProviderFactories.RegisterFactory(providerName, providerName);
-            _registedProviderName.Add(providerName, new object());
         }
         _dbProviderFactory = DbProviderFactories.GetFactory(providerName);
     }

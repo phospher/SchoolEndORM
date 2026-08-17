@@ -39,13 +39,6 @@ public sealed class PersistenceContext : IPersistenceContext
 
     public EntityMapping GetEntityMappingByClassName(string className)
     {
-        if (Mappings != null && Mappings.ContainsKey(className))
-        {
-            return Mappings[className];
-        }
-        else
-        {
-            return null;
-        }
+        return Mappings != null && Mappings.TryGetValue(className, out var mapping) ? mapping : null;
     }
 }

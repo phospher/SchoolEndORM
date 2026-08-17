@@ -38,19 +38,20 @@ public static class GlobalCache
         {
             sql = new StringBuilder(sqlGenerator.GetSelectSQL(objType, queryExpression));
         }
-        if (_objTable.ContainsKey(objType))
+        if (_objTable.TryGetValue(objType, out var entities))
         {
-            foreach (GlobalCacheEntity entity in _objTable[objType])
+            foreach (GlobalCacheEntity entity in entities)
             {
                 if (ignoreIds != null && ignoreIds.Contains(entity.ObjectId))
                 {
                     foreach (string key in mapping.Keys)
                     {
-                        if (!ignorePrimaryKey.ContainsKey(key))
+                        if (!ignorePrimaryKey.TryGetValue(key, out var values))
                         {
-                            ignorePrimaryKey.Add(key, new List<object>());
+                            values = [];
+                            ignorePrimaryKey[key] = values;
                         }
-                        ignorePrimaryKey[key].Add(objType.GetProperty(key).GetValue(entity.Value, null));
+                        values.Add(objType.GetProperty(key).GetValue(entity.Value, null));
                     }
                 }
                 else
@@ -73,9 +74,8 @@ public static class GlobalCache
 
     public static GlobalCacheResult Search(Guid objectId)
     {
-        if (_objList.ContainsKey(objectId))
+        if (_objList.TryGetValue(objectId, out var cacheEntity))
         {
-            GlobalCacheEntity cacheEntity = _objList[objectId];
             if (!ProcessDeletedObject(cacheEntity))
             {
                 if (cacheEntity.Lock == Lock.WriteLock && cacheEntity.WriteLockThreadId != Thread.CurrentThread.ManagedThreadId)
@@ -224,11 +224,12 @@ public static class GlobalCache
         cacheEntity.ReferenceCount++;
         CheckCache();
         _objList.Add(cacheEntity.ObjectId, cacheEntity);
-        if (!_objTable.ContainsKey(cacheEntity.Value.GetType()))
+        if (!_objTable.TryGetValue(cacheEntity.Value.GetType(), out var list))
         {
-            _objTable.Add(cacheEntity.Value.GetType(), new List<GlobalCacheEntity>());
+            list = [];
+            _objTable[cacheEntity.Value.GetType()] = list;
         }
-        _objTable[cacheEntity.Value.GetType()].Add(cacheEntity);
+        list.Add(cacheEntity);
     }
 
     public static void ReleaseWriteLock(Guid objectId)
@@ -316,11 +317,12 @@ public static class GlobalCache
                     resultList.Add(cacheResult);
                     foreach (string key in mapping.Keys)
                     {
-                        if (!ignoreKeys.ContainsKey(key))
+                        if (!ignoreKeys.TryGetValue(key, out var values))
                         {
-                            ignoreKeys.Add(key, new List<object>());
+                            values = [];
+                            ignoreKeys[key] = values;
                         }
-                        ignoreKeys[key].Add(entity.Value.GetType().GetProperty(key).GetValue(entity.Value, null));
+                        values.Add(entity.Value.GetType().GetProperty(key).GetValue(entity.Value, null));
                     }
                     lock (entity)
                     {
@@ -411,11 +413,12 @@ public static class GlobalCache
         DataTable dt = ds.Tables[0];
         if (dt.Rows.Count > 0)
         {
-            if (!_objTable.ContainsKey(objType))
+            if (!_objTable.TryGetValue(objType, out var objectList))
             {
-                _objTable.Add(objType, new List<GlobalCacheEntity>());
+                objectList = [];
+                _objTable[objType] = objectList;
             }
-            lock (_objTable[objType])
+            lock (objectList)
             {
                 foreach (DataRow row in dt.Rows)
                 {
@@ -435,11 +438,12 @@ public static class GlobalCache
                     }
                     CheckCache();
                     _objList.Add(cacheEntity.ObjectId, cacheEntity);
-                    if (!_objTable.ContainsKey(objType))
+                    if (!_objTable.TryGetValue(objType, out objectList))
                     {
-                        _objTable.Add(objType, new List<GlobalCacheEntity>());
+                        objectList = [];
+                        _objTable[objType] = objectList;
                     }
-                    _objTable[objType].Add(cacheEntity);
+                    objectList.Add(cacheEntity);
                     var cacheResult = new GlobalCacheResult(cacheEntity.ObjectId, CloneObject(newObj), cacheEntity.Version);
                     cacheResult.ForeignKeys = cacheEntity.ForeignKeys;
                     cacheEntity.ReferenceCount++;
