@@ -144,7 +144,10 @@ public static class GlobalCache
     {
         object @object = CloneObject(newObj);
         EntityMapping? mapping = persistenceContext.GetEntityMappingByClassName(newObj.GetType().FullName ?? throw new OrmConfigurationException($"Type '{newObj.GetType()}' has no full name."));
-        GlobalCacheEntity cacheEntity = _objList[objectId];
+        if (!_objList.TryGetValue(objectId, out var cacheEntity))
+        {
+            throw new ConcurrencyException("object is not in the second-level cache");
+        }
         if (cacheEntity.Lock != Lock.WriteLock || cacheEntity.WriteLockThreadId != Thread.CurrentThread.ManagedThreadId)
         {
             throw new ConcurrencyException("You must get a WriteLock before updating object");
