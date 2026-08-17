@@ -7,19 +7,7 @@ public class Student
 
     public string? Gender { get; set; }
 
-    public override bool Equals(object obj)
-    {
-        if (obj == null || GetType() != obj.GetType())
-        {
-            return false;
-        }
+    public override bool Equals(object? obj) => obj is Student other && StudentId == other.StudentId;
 
-        Student student = (Student)obj;
-        return StudentId == student.StudentId;
-    }
-
-    public override int GetHashCode()
-    {
-        return StudentId!.GetHashCode();
-    }
+    public override int GetHashCode() => StudentId!.GetHashCode();
 }

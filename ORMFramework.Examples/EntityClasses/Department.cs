@@ -7,19 +7,7 @@ public class Department
 
     public IList<Teacher>? Teachers { get; set; }
 
-    public override bool Equals(object obj)
-    {
-        if (obj == null || GetType() != obj.GetType())
-        {
-            return false;
-        }
+    public override bool Equals(object? obj) => obj is Department other && Id == other.Id;
 
-        Department student = (Department)obj;
-        return Id == student.Id;
-    }
-
-    public override int GetHashCode()
-    {
-        return Id.GetHashCode();
-    }
+    public override int GetHashCode() => Id.GetHashCode();
 }

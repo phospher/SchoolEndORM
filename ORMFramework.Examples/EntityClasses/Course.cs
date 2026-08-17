@@ -9,19 +9,7 @@ public class Course
 
     public IList<Student>? Students { get; set; }
 
-    public override bool Equals(object obj)
-    {
-        if (obj == null || GetType() != obj.GetType())
-        {
-            return false;
-        }
+    public override bool Equals(object? obj) => obj is Course other && Id == other.Id;
 
-        Course student = (Course)obj;
-        return Id == student.Id;
-    }
-
-    public override int GetHashCode()
-    {
-        return Id.GetHashCode();
-    }
+    public override int GetHashCode() => Id.GetHashCode();
 }

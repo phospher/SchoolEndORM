@@ -11,19 +11,7 @@ public class ContactMenu
 
     public Student? Student { get; set; }
 
-    public override bool Equals(object obj)
-    {
-        if (obj == null || GetType() != obj.GetType())
-        {
-            return false;
-        }
+    public override bool Equals(object? obj) => obj is ContactMenu other && Id == other.Id;
 
-        ContactMenu student = (ContactMenu)obj;
-        return Id == student.Id;
-    }
-
-    public override int GetHashCode()
-    {
-        return Id.GetHashCode();
-    }
+    public override int GetHashCode() => Id.GetHashCode();
 }
