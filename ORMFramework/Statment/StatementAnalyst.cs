@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Text;
 
 namespace ORMFramework.Statment;
@@ -9,8 +10,32 @@ public class StatementAnalyst
     private char[] _queryString;
     private int _stringIndex;
     private int _expressionIndex;
-    private readonly char[] _operatorChars = new char[] { '=', '>', '<', '!', '&', '|', 'l', 'i', 'k', 'e', '(', ')' };
-    private readonly int[,] _priorityTable = new int[,] { { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 }, { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 }, { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 }, { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 }, { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 }, { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 }, {-1, -1, -1, -1, -1, -1, 0, 1, -1, -1 }, {-1, -1, -1, -1, -1, -1, -1, 0, -1, -1 }, {-1, -1, -1, -1, -1, -1, 1, 1, 0, -1 }, { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 }
+    private static readonly SearchValues<char> _operatorChars = SearchValues.Create("=><!&|like()");
+
+    // `Operator` has 12 values but this table is 10×10; LeftParenthesis(10)/RightParenthesis(11)
+    // are diverted by ProcessOperatorStack early — do not enlarge the table, do not reorder the enum.
+    private readonly int[,] _priorityTable = new int[,]
+    {
+        // Equals (0)
+        { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 },
+        // UnEquals (1)
+        { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 },
+        // Greater (2)
+        { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 },
+        // GreaterEquals (3)
+        { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 },
+        // Less (4)
+        { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 },
+        // LessEquals (5)
+        { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 },
+        // And (6)
+        { -1, -1, -1, -1, -1, -1, 0, 1, -1, -1 },
+        // Or (7)
+        { -1, -1, -1, -1, -1, -1, -1, 0, -1, -1 },
+        // Not (8)
+        { -1, -1, -1, -1, -1, -1, 1, 1, 0, -1 },
+        // Like (9)
+        { 0, 0, 0, 0, 0, 0, 1, 1, 1, 0 }
     };
 
     public string QueryString
@@ -76,10 +101,7 @@ public class StatementAnalyst
 
     private static bool IsVariableChar(char c) => char.IsAsciiLetterOrDigit(c) || c == '_';
 
-    private bool IsOperatorChar(char c)
-    {
-        return Array.IndexOf<char>(_operatorChars, c) != -1;
-    }
+    private bool IsOperatorChar(char c) => _operatorChars.Contains(c);
 
     private StatElement CreateElement(StatElementType type)
     {

@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Reflection;
 using System.Text;
 using ORMFramework.Configuration;
@@ -6,13 +7,14 @@ using ORMFramework.Statment;
 namespace ORMFramework.SQL;
 public sealed class SQLGenerator : ISQLGenerator
 {
-    private static readonly string[] _sqlOperators = new string[] { "=", "!=", ">", ">=", "<", "<=", " and ", " or ", " like ", "(", ")" };
-    private static readonly Type[] _basicType = new Type[] {
-        typeof (bool), typeof (byte), typeof (sbyte),
-        typeof (decimal), typeof (double), typeof (float), typeof (int), typeof (uint), typeof (long),
-        typeof (ulong), typeof (short), typeof (ushort), typeof (byte[])
-    };
-    private static readonly Type[] _stringType = new Type[] { typeof(char), typeof(string), typeof(DateTime) };
+    private static readonly string[] _sqlOperators = ["=", "!=", ">", ">=", "<", "<=", " and ", " or ", " like ", "(", ")"];
+    private static readonly FrozenSet<Type> _basicType = FrozenSet.ToFrozenSet(
+    [
+        typeof(bool), typeof(byte), typeof(sbyte),
+        typeof(decimal), typeof(double), typeof(float), typeof(int), typeof(uint), typeof(long),
+        typeof(ulong), typeof(short), typeof(ushort), typeof(byte[])
+    ]);
+    private static readonly FrozenSet<Type> _stringType = FrozenSet.ToFrozenSet([typeof(char), typeof(string), typeof(DateTime)]);
 
     public IPersistenceContext PersistenceContext { get; set; }
 
@@ -230,29 +232,9 @@ public sealed class SQLGenerator : ISQLGenerator
         return SqlLiteral.Comparison(property.Name, property.GetValue(@object, null));
     }
 
-    private bool IsBasicType(Type type)
-    {
-        for (int i = 0; i < _basicType.Length; i++)
-        {
-            if (type == _basicType[i])
-            {
-                return true;
-            }
-        }
-        return false;
-    }
+    private bool IsBasicType(Type type) => _basicType.Contains(type);
 
-    private bool IsStringType(Type type)
-    {
-        for (int i = 0; i < _stringType.Length; i++)
-        {
-            if (type == _stringType[i])
-            {
-                return true;
-            }
-        }
-        return false;
-    }
+    private bool IsStringType(Type type) => _stringType.Contains(type);
 
     private object GetObjectPropertyValue(object @object, string propertyName)
     {

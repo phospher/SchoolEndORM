@@ -1,3 +1,4 @@
+using System.Collections.Frozen;
 using System.Data;
 using System.Reflection;
 using System.Text;
@@ -12,11 +13,12 @@ public static class GlobalCache
     private const int CacheIncrease = 100;
     private static readonly Dictionary<Type, List<GlobalCacheEntity>> _objTable = new();
     private static readonly Dictionary<Guid, GlobalCacheEntity> _objList = new();
-    private static readonly Type[] _basicType = new Type[] {
-        typeof (bool), typeof (byte), typeof (sbyte),
-        typeof (decimal), typeof (double), typeof (float), typeof (int), typeof (uint), typeof (long),
-        typeof (ulong), typeof (short), typeof (ushort), typeof (char), typeof (string), typeof (byte[])
-    };
+    private static readonly FrozenSet<Type> _basicType = FrozenSet.ToFrozenSet(
+    [
+        typeof(bool), typeof(byte), typeof(sbyte),
+        typeof(decimal), typeof(double), typeof(float), typeof(int), typeof(uint), typeof(long),
+        typeof(ulong), typeof(short), typeof(ushort), typeof(char), typeof(string), typeof(byte[])
+    ]);
 
     public static IEnumerable<GlobalCacheResult> Search<T>(QueryExpression queryExpression, IPersistenceContext persistenceContext, IList<Guid> ignoreIds)
     {
@@ -363,17 +365,7 @@ public static class GlobalCache
         return newobject;
     }
 
-    private static bool IsBasicType(Type type)
-    {
-        foreach (Type t in _basicType)
-        {
-            if (t == type)
-            {
-                return true;
-            }
-        }
-        return false;
-    }
+    private static bool IsBasicType(Type type) => _basicType.Contains(type);
 
     private static void ReadIgnoreKeys(Dictionary<string, List<object>> ignoreKeys, StringBuilder sql, bool hasExpression)
     {
