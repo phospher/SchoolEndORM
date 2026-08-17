@@ -1,88 +1,100 @@
-﻿// 以下代码由 Microsoft Visual Studio 2005 生成。
-// 测试所有者应该检查每个测试的有效性。
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Text;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ORMFramework.Configuration;
+using SystemConfiguration = ORMFramework.Configuration.Configuration;
+
+#pragma warning disable CA1707 // test method names are specified with underscores by the task spec
+
 namespace ORMFramework.Test
 {
-    /// <summary>
-    ///这是 ORMFramework.Configuration.ConfigManager 的测试类，旨在
-    ///包含所有 ORMFramework.Configuration.ConfigManager 单元测试
-    ///</summary>
-    [TestClass()]
+    [TestClass]
     public class ConfigManagerTest
     {
-
-
-        private TestContext testContextInstance;
-
-        /// <summary>
-        ///获取或设置测试上下文，上下文提供
-        ///有关当前测试运行及其功能的信息。
-        ///</summary>
-        public TestContext TestContext
+        private static SystemConfiguration GetConfiguration()
         {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
-        }
-        #region 附加测试属性
-        // 
-        //编写测试时，可使用以下附加属性:
-        //
-        //使用 ClassInitialize 在运行类中的第一个测试前先运行代码
-        //
-        //[ClassInitialize()]
-        //public static void MyClassInitialize(TestContext testContext)
-        //{
-        //}
-        //
-        //使用 ClassCleanup 在运行完类中的所有测试后再运行代码
-        //
-        //[ClassCleanup()]
-        //public static void MyClassCleanup()
-        //{
-        //}
-        //
-        //使用 TestInitialize 在运行每个测试前先运行代码
-        //
-        //[TestInitialize()]
-        //public void MyTestInitialize()
-        //{
-        //}
-        //
-        //使用 TestCleanup 在运行完每个测试后运行代码
-        //
-        //[TestCleanup()]
-        //public void MyTestCleanup()
-        //{
-        //}
-        //
-        #endregion
-
-
-        /// <summary>
-        ///GetSystemConfiguration () 的测试
-        ///</summary>
-        [TestMethod()]
-        public void GetSystemConfigurationTest()
-        {
-            ConfigManager target = new ConfigManager("E:\\毕业设计\\ORMFramework\\ORMFramework\\Configuration\\Config.xml");
-
-            Configuration.Configuration expected = null;
-            Configuration.Configuration actual;
-
-            actual = target.GetSystemConfiguration();
+            string path = Path.Combine(AppContext.BaseDirectory, "TestData", "Config.xml");
+            return new ConfigManager(path).GetSystemConfiguration();
         }
 
+        [TestMethod]
+        public void GetSystemConfiguration_ParsesFiveMappings()
+        {
+            SystemConfiguration config = GetConfiguration();
+            Assert.AreEqual(5, config.Mappings.Count);
+        }
+
+        [TestMethod]
+        public void GetSystemConfiguration_Mappings_HaveExpectedClassAndTableNames()
+        {
+            Dictionary<string, EntityMapping> mappings = GetConfiguration().Mappings.ToDictionary(m => m.ClassName);
+
+            Assert.AreEqual("Student", mappings["ORMFramework.Examples.Student"].TableName);
+            Assert.AreEqual("Department", mappings["ORMFramework.Examples.Department"].TableName);
+            Assert.AreEqual("Teacher", mappings["ORMFramework.Examples.Teacher"].TableName);
+            Assert.AreEqual("ContactMenu", mappings["ORMFramework.Examples.ContactMenu"].TableName);
+            Assert.AreEqual("Course", mappings["ORMFramework.Examples.Course"].TableName);
+        }
+
+        [TestMethod]
+        public void GetSystemConfiguration_Mappings_HaveExpectedKeys()
+        {
+            Dictionary<string, EntityMapping> mappings = GetConfiguration().Mappings.ToDictionary(m => m.ClassName);
+
+            Assert.AreEqual("StudentId", mappings["ORMFramework.Examples.Student"].Keys.Single());
+            Assert.AreEqual("Id", mappings["ORMFramework.Examples.Department"].Keys.Single());
+            Assert.AreEqual("Id", mappings["ORMFramework.Examples.Teacher"].Keys.Single());
+            Assert.AreEqual("StudentId", mappings["ORMFramework.Examples.ContactMenu"].Keys.Single());
+            Assert.AreEqual("Id", mappings["ORMFramework.Examples.Course"].Keys.Single());
+        }
+
+        [TestMethod]
+        public void GetSystemConfiguration_ContainsAllFourRelationTypes()
+        {
+            List<RelationType> types = GetConfiguration().Mappings
+                .SelectMany(m => m.Relations.Values)
+                .Select(r => r.Type)
+                .ToList();
+
+            CollectionAssert.Contains(types, RelationType.OneToOne);
+            CollectionAssert.Contains(types, RelationType.OneToMany);
+            CollectionAssert.Contains(types, RelationType.ManyToOne);
+            CollectionAssert.Contains(types, RelationType.MantToMany);
+        }
+
+        [TestMethod]
+        public void GetSystemConfiguration_Relations_HaveExpectedColumns()
+        {
+            Dictionary<string, EntityMapping> mappings = GetConfiguration().Mappings.ToDictionary(m => m.ClassName);
+
+            EntityRelation oneToMany = mappings["ORMFramework.Examples.Department"].Relations["Teachers"];
+            Assert.AreEqual(RelationType.OneToMany, oneToMany.Type);
+            Assert.AreEqual("Id", oneToMany.KeyColum);
+            Assert.AreEqual("DepartmentId", oneToMany.ReferenceColum);
+            Assert.AreEqual("ORMFramework.Examples.Teacher", oneToMany.ReferenceClassName);
+
+            EntityRelation manyToOne = mappings["ORMFramework.Examples.Teacher"].Relations["Department"];
+            Assert.AreEqual(RelationType.ManyToOne, manyToOne.Type);
+            Assert.AreEqual("DepartmentId", manyToOne.KeyColum);
+            Assert.AreEqual("Id", manyToOne.ReferenceColum);
+            Assert.AreEqual("Department", manyToOne.ReferenceClassName);
+
+            EntityRelation oneToOne = mappings["ORMFramework.Examples.ContactMenu"].Relations["Student"];
+            Assert.AreEqual(RelationType.OneToOne, oneToOne.Type);
+            Assert.AreEqual("StudentId", oneToOne.KeyColum);
+            Assert.AreEqual("StudentId", oneToOne.ReferenceColum);
+            Assert.AreEqual("ORMFramework.Examples.Student", oneToOne.ReferenceClassName);
+
+            var manyToMany = (ManyToManyRelation)mappings["ORMFramework.Examples.Course"].Relations["Students"];
+            Assert.AreEqual(RelationType.MantToMany, manyToMany.Type);
+            Assert.AreEqual("Id", manyToMany.KeyColum);
+            Assert.AreEqual("Course_Student", manyToMany.ReferenceTableName);
+            Assert.AreEqual("CourseId", manyToMany.ReferenceColum);
+            Assert.AreEqual("StudentId", manyToMany.ReferenceClassColum);
+            Assert.AreEqual("StudentId", manyToMany.ReferenceClassKeyColum);
+            Assert.AreEqual("Student", manyToMany.ReferenceClassName);
+        }
     }
-
-
 }

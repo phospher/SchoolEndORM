@@ -1,89 +1,147 @@
-﻿// 以下代码由 Microsoft Visual Studio 2005 生成。
-// 测试所有者应该检查每个测试的有效性。
+﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Text;
-using System.Collections.Generic;
+using ORMFramework.Cache;
 using ORMFramework.Statment;
+
+#pragma warning disable CA1707 // test method names are specified with underscores by the task spec
+
 namespace ORMFramework.Test
 {
-    /// <summary>
-    ///这是 ORMFramework.Cache.ObjectCalculator 的测试类，旨在
-    ///包含所有 ORMFramework.Cache.ObjectCalculator 单元测试
-    ///</summary>
-    [TestClass()]
+    [TestClass]
     public class ObjectCalculatorTest
     {
-
-
-        private TestContext testContextInstance;
-
-        /// <summary>
-        ///获取或设置测试上下文，上下文提供
-        ///有关当前测试运行及其功能的信息。
-        ///</summary>
-        public TestContext TestContext
+        private sealed class CalcEntity
         {
-            get
-            {
-                return testContextInstance;
-            }
-            set
-            {
-                testContextInstance = value;
-            }
+            public int Id { get; set; }
+            public string Name { get; set; }
+            public DateTime Created { get; set; }
+            public bool Active { get; set; }
+            public char Grade { get; set; }
+            public bool Other { get; set; }
+            public string Nickname { get; set; }
         }
-        #region 附加测试属性
-        // 
-        //编写测试时，可使用以下附加属性:
-        //
-        //使用 ClassInitialize 在运行类中的第一个测试前先运行代码
-        //
-        //[ClassInitialize()]
-        //public static void MyClassInitialize(TestContext testContext)
-        //{
-        //}
-        //
-        //使用 ClassCleanup 在运行完类中的所有测试后再运行代码
-        //
-        //[ClassCleanup()]
-        //public static void MyClassCleanup()
-        //{
-        //}
-        //
-        //使用 TestInitialize 在运行每个测试前先运行代码
-        //
-        //[TestInitialize()]
-        //public void MyTestInitialize()
-        //{
-        //}
-        //
-        //使用 TestCleanup 在运行完每个测试后运行代码
-        //
-        //[TestCleanup()]
-        //public void MyTestCleanup()
-        //{
-        //}
-        //
-        #endregion
 
+        private static bool IsTarget(CalcEntity entity, string query)
+        {
+            QueryExpression expression = new StatementAnalyst(query).GetQueryExpression();
+            return ObjectCalculator.IsTargetObject(entity, expression);
+        }
 
-        /// <summary>
-        ///IsTargetObject (object, List&lt;StatElement&gt;) 的测试
-        ///</summary>
-        //[TestMethod ()]
-        //public void IsTargetObjectTest () {
-        //    Student @object = new Student ( 1 ); // TODO: 初始化为适当的值
-        //    @object.Name = "Name";
-        //    StatementAnalyst sa = new StatementAnalyst ( "Id==1 && Name like '[ ]ame'" );
-        //    List<StatElement> suffixExpression = sa.GetQueryExpression ().SuffixExpression;
-        //    bool expected = false;
-        //    bool actual;
+        [TestMethod]
+        public void IsTargetObject_IntComparisons_ReturnExpectedTruthTable()
+        {
+            var entity = new CalcEntity { Id = 1 };
 
-        //    actual = ORMFramework.Cache.ObjectCalculator.IsTargetObject ( @object, suffixExpression );
+            Assert.IsTrue(IsTarget(entity, "Id==1"));
+            Assert.IsFalse(IsTarget(entity, "Id==2"));
+            Assert.IsFalse(IsTarget(entity, "Id!=1"));
+            Assert.IsTrue(IsTarget(entity, "Id!=2"));
+            Assert.IsTrue(IsTarget(entity, "Id>0"));
+            Assert.IsFalse(IsTarget(entity, "Id>1"));
+            Assert.IsTrue(IsTarget(entity, "Id>=1"));
+            Assert.IsFalse(IsTarget(entity, "Id>=2"));
+            Assert.IsTrue(IsTarget(entity, "Id<2"));
+            Assert.IsFalse(IsTarget(entity, "Id<1"));
+            Assert.IsTrue(IsTarget(entity, "Id<=1"));
+            Assert.IsFalse(IsTarget(entity, "Id<=0"));
+        }
 
-        //    Assert.AreEqual ( expected, actual, "ORMFramework.Cache.ObjectCalculator.IsTargetObject 未返回所需的值。" );
-        //}
+        [TestMethod]
+        public void IsTargetObject_StringComparisons_ReturnExpectedTruthTable()
+        {
+            var entity = new CalcEntity { Name = "abc" };
 
+            Assert.IsTrue(IsTarget(entity, "Name=='abc'"));
+            Assert.IsFalse(IsTarget(entity, "Name=='xyz'"));
+            Assert.IsFalse(IsTarget(entity, "Name!='abc'"));
+        }
+
+        [TestMethod]
+        public void IsTargetObject_DateTimeComparisons_ReturnExpectedTruthTable()
+        {
+            var entity = new CalcEntity { Created = new DateTime(2024, 1, 2, 3, 4, 5) };
+
+            Assert.IsTrue(IsTarget(entity, "Created=='2024-01-02 03:04:05'"));
+            Assert.IsFalse(IsTarget(entity, "Created=='2024-01-02 03:04:06'"));
+        }
+
+        [TestMethod]
+        public void IsTargetObject_BoolComparisons_RecordCurrentBehavior()
+        {
+            var entity = new CalcEntity { Active = true, Other = true };
+
+            // TODO(12.2): bool 常量参与 == 当前抛 InvalidCastException（IsString 对 bool 常量做强转），
+            // 后续阶段修复后应断言 true/false 而非异常。
+            Assert.ThrowsException<InvalidCastException>(() => IsTarget(entity, "Active==true"));
+            Assert.ThrowsException<InvalidCastException>(() => IsTarget(entity, "Active==false"));
+
+            // 两个 bool 属性比较时走数值路径（Convert.ToDouble），当前返回 true。
+            Assert.IsTrue(IsTarget(entity, "Active==Other"));
+        }
+
+        [TestMethod]
+        public void IsTargetObject_CharComparisons_RecordCurrentBehavior()
+        {
+            var entity = new CalcEntity { Grade = 'A' };
+
+            // TODO(12.2): char 属性参与 == 当前抛 InvalidCastException（CalculateStringOperator 对 char 值强转为 string），
+            // 后续阶段修复后应断言 true/false 而非异常。
+            Assert.ThrowsException<InvalidCastException>(() => IsTarget(entity, "Grade=='A'"));
+            Assert.ThrowsException<InvalidCastException>(() => IsTarget(entity, "Grade=='B'"));
+        }
+
+        [TestMethod]
+        public void IsTargetObject_LogicalCombinations_ReturnExpectedResults()
+        {
+            var entity = new CalcEntity { Id = 1, Name = "abc", Active = true };
+
+            Assert.IsTrue(IsTarget(entity, "Name=='abc' && Id==1"));
+            Assert.IsTrue(IsTarget(entity, "Name=='abc' || Id==2"));
+            Assert.IsTrue(IsTarget(entity, "!(Name=='xyz')"));
+            Assert.IsFalse(IsTarget(entity, "!(Name=='abc')"));
+            Assert.IsTrue(IsTarget(entity, "Id==1 && Id!=2"));
+            Assert.IsTrue(IsTarget(entity, "Id==1 || Id==2"));
+            Assert.IsFalse(IsTarget(entity, "Id==2 || Id==2"));
+            Assert.IsTrue(IsTarget(entity, "!(Id==2)"));
+            Assert.IsFalse(IsTarget(entity, "!(Id==1)"));
+
+            // bool 常量参与 == 抛 InvalidCastException，导致整个 && 表达式抛异常。
+            Assert.ThrowsException<InvalidCastException>(() => IsTarget(entity, "Name=='abc' && Active==true"));
+        }
+
+        [TestMethod]
+        public void IsTargetObject_LikePatterns_ReturnExpectedResults()
+        {
+            var entity = new CalcEntity { Id = 1, Name = "abc" };
+
+            Assert.IsTrue(IsTarget(entity, "Name like 'a%'"));      // % 前缀
+            Assert.IsTrue(IsTarget(entity, "Name like '%c'"));      // % 后缀
+            Assert.IsTrue(IsTarget(entity, "Name like '%b%'"));     // % 双侧
+            Assert.IsFalse(IsTarget(entity, "Name like 'a_'"));     // _ 单字符：'a_' 共 2 字符
+            Assert.IsTrue(IsTarget(entity, "Name like 'ab_'"));     // 'ab' + 单字符
+            Assert.IsTrue(IsTarget(entity, "Name like '[a-c]bc'")); // 字符组命中
+            Assert.IsFalse(IsTarget(entity, "Name like '[x-z]bc'"));// 字符组未命中
+            Assert.IsTrue(IsTarget(entity, "Name=='abc'"));         // 单引号剥离
+            Assert.IsTrue(IsTarget(entity, "Name like 'a%' && Id==1"));
+            Assert.IsTrue(IsTarget(entity, "Name like 'x%' || Id==1"));
+        }
+
+        [TestMethod]
+        public void IsTargetObject_TwoPropertyComparison_RecordsCurrentBug()
+        {
+            // TODO(12.2): 修复 13.9 后，Name==Nickname 应比较两个属性值（此处 Name="abc"、Nickname="abc" 应相等）。
+            // 当前实现把 y 为 Variable 时的属性名（"Nickname"）当作值参与比较，故返回 false。
+            var entity = new CalcEntity { Name = "abc", Nickname = "abc" };
+            Assert.IsFalse(IsTarget(entity, "Name==Nickname"));
+        }
+
+        [TestMethod]
+        public void IsTargetObject_EmptyStringProperty_RecordsCurrentBug()
+        {
+            // TODO(12.2): 修复后空串属性参与比较不应越界（当前 CalculateStringOperator 的 xStr[0] 空串越界抛 IndexOutOfRangeException）。
+            var entity = new CalcEntity { Name = "" };
+            Assert.ThrowsException<IndexOutOfRangeException>(() => IsTarget(entity, "Name=='abc'"));
+            Assert.ThrowsException<IndexOutOfRangeException>(() => IsTarget(entity, "Name==''"));
+        }
     }
 }

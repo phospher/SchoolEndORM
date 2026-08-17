@@ -1,201 +1,137 @@
-﻿// 以下代码由 Microsoft Visual Studio 2005 生成。
-// 测试所有者应该检查每个测试的有效性。
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System;
-using System.Text;
+﻿using System;
 using System.Collections.Generic;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ORMFramework.Statment;
-using System.Collections;
-using ORMFramework;
-using System.Reflection;
+
+#pragma warning disable CA1707 // test method names are specified with underscores by the task spec
+
 namespace ORMFramework.Test
 {
-    /// <summary>
-    ///这是 ORMFramework.Statment.StatementAnalyst 的测试类，旨在
-    ///包含所有 ORMFramework.Statment.StatementAnalyst 单元测试
-    ///</summary>
-    [TestClass()]
+    [TestClass]
     public class StatementAnalystTest
     {
-
-
-        private TestContext testContextInstance;
-
-        /// <summary>
-        ///获取或设置测试上下文，上下文提供
-        ///有关当前测试运行及其功能的信息。
-        ///</summary>
-        public TestContext TestContext
+        private static string Render(List<StatElement> expression)
         {
-            get
+            var parts = new List<string>();
+            foreach (StatElement element in expression)
             {
-                return testContextInstance;
+                if (element.Type == StatElementType.Operator)
+                {
+                    parts.Add("Operator:" + (Operator)element.Value);
+                }
+                else
+                {
+                    parts.Add(element.Type + ":" + element.Value);
+                }
             }
-            set
-            {
-                testContextInstance = value;
-            }
+            return string.Join("|", parts);
         }
-        #region 附加测试属性
-        // 
-        //编写测试时，可使用以下附加属性:
-        //
-        //使用 ClassInitialize 在运行类中的第一个测试前先运行代码
-        //
-        //[ClassInitialize()]
-        //public static void MyClassInitialize(TestContext testContext)
-        //{
-        //}
-        //
-        //使用 ClassCleanup 在运行完类中的所有测试后再运行代码
-        //
-        //[ClassCleanup()]
-        //public static void MyClassCleanup()
-        //{
-        //}
-        //
-        //使用 TestInitialize 在运行每个测试前先运行代码
-        //
-        //[TestInitialize()]
-        //public void MyTestInitialize()
-        //{
-        //}
-        //
-        //使用 TestCleanup 在运行完每个测试后运行代码
-        //
-        //[TestCleanup()]
-        //public void MyTestCleanup()
-        //{
-        //}
-        //
-        #endregion
 
-
-        /// <summary>
-        ///Analysis (string) 的测试
-        ///</summary>
-        //[TestMethod ()]
-        //public void AnalysisTest () {
-        //    StatementAnalyst target = new StatementAnalyst ();
-
-        //    string queryString = "Student like '%' && a=='2' || ! ( b== 3 )"; // TODO: 初始化为适当的值
-
-        //    System.Collections.Generic.List<ORMFramework.Statment.StatElement> expected = null;
-        //    System.Collections.Generic.List<ORMFramework.Statment.StatElement> actual;
-
-        //    target.QueryString = queryString;
-        //    actual = target.GetSuffixExpression ();
-        //    foreach ( StatElement element in actual ) {
-        //        if ( element.Type == StatElementType.Variable || element.Type == StatElementType.Constant ) {
-        //            Console.Write ( "{0} ", element.Value );
-        //        } else {
-        //            switch ( ( Operator ) element.Value ) {
-        //                case Operator.And: Console.Write ( "{0} ", "&&" );
-        //                    break;
-        //                case Operator.Equals: Console.Write ( "{0} ", "==" );
-        //                    break;
-        //                case Operator.Greater: Console.Write ( "{0} ", ">" );
-        //                    break;
-        //                case Operator.GreaterEquals: Console.Write ( "{0} ", ">=" );
-        //                    break;
-        //                case Operator.LeftParenthesis: Console.Write ( "{0} ", "(" );
-        //                    break;
-        //                case Operator.Less: Console.Write ( "{0} ", "<" );
-        //                    break;
-        //                case Operator.LessEquals: Console.Write ( "{0} ", "<=" );
-        //                    break;
-        //                case Operator.Like: Console.Write ( "{0} ", "like" );
-        //                    break;
-        //                case Operator.Not: Console.Write ( "{0} ", "!" );
-        //                    break;
-        //                case Operator.Or: Console.Write ( "{0} ", "||" );
-        //                    break;
-        //                case Operator.RightParenthesis: Console.Write ( "{0} ", ")" );
-        //                    break;
-        //                case Operator.UnEquals: Console.Write ( "{0} ", "!=" );
-        //                    break;
-        //            }
-        //        }
-        //    }
-        //    return;
-        //}
-
-        //[TestMethod ()]
-        //public void test () {
-        //    Dictionary<int, char> d = new Dictionary<int, char> ();
-        //    d.Add ( 1, 'a' );
-        //    d.Add ( 2, 'b' );
-        //    d.Add ( 3, 'c' );
-        //    d.Add ( 4, 'd' );
-        //    for ( int i = d.Values.Count - 1; i >= 0; i-- ) {
-        //        if ( d.Values[i] == 'b' ) {
-        //            d.Remove ( 2 );
-        //        }
-        //    }
-        //    foreach ( KeyValuePair<int, char> item in d ) {
-        //        Console.WriteLine ( "{0}--{1}", item.Key, item.Value );
-        //    }
-        //}
-
-    }
-
-    public class List2 : ICollection<int>
-    {
-        #region ICollection<int> 成员
-
-        public void Add(int item)
+        private static QueryExpression Parse(string query)
         {
-            throw new Exception("The method or operation is not implemented.");
+            return new StatementAnalyst(query).GetQueryExpression();
         }
 
-        public void Clear()
+        [TestMethod]
+        public void GetQueryExpression_IdEquals1_ProducesExpectedInfixAndSuffix()
         {
-            throw new Exception("The method or operation is not implemented.");
+            QueryExpression expression = Parse("Id==1");
+            Assert.AreEqual("Variable:Id|Operator:Equals|Constant:1", Render(expression.NifixExpression));
+            Assert.AreEqual("Variable:Id|Constant:1|Operator:Equals", Render(expression.SuffixExpression));
         }
 
-        public bool Contains(int item)
+        [TestMethod]
+        public void GetQueryExpression_AndLike_ProducesExpectedInfixAndSuffix()
         {
-            throw new Exception("The method or operation is not implemented.");
+            QueryExpression expression = Parse("a==1 && b like 'x%'");
+            Assert.AreEqual("Variable:a|Operator:Equals|Constant:1 |Operator:And|Variable:b|Operator:Like|Constant:'x%'", Render(expression.NifixExpression));
+            Assert.AreEqual("Variable:a|Constant:1 |Operator:Equals|Variable:b|Constant:'x%'|Operator:Like|Operator:And", Render(expression.SuffixExpression));
         }
 
-        public void CopyTo(int[] array, int arrayIndex)
+        [TestMethod]
+        public void GetQueryExpression_NotParenthesized_ProducesExpectedInfixAndSuffix()
         {
-            throw new Exception("The method or operation is not implemented.");
+            QueryExpression expression = Parse("! ( b== 3 )");
+            Assert.AreEqual("Operator:Not|Operator:LeftParenthesis|Variable:b|Operator:Equals|Constant:3 |Operator:RightParenthesis", Render(expression.NifixExpression));
+            Assert.AreEqual("Variable:b|Constant:3 |Operator:Equals|Operator:Not", Render(expression.SuffixExpression));
         }
 
-        public int Count
+        [TestMethod]
+        public void GetQueryExpression_MixedExpression_ProducesExpectedInfixAndSuffix()
         {
-            get { throw new Exception("The method or operation is not implemented."); }
+            QueryExpression expression = Parse("Student like '%' && a=='2' || ! ( b== 3 )");
+            Assert.AreEqual("Variable:Student|Operator:Like|Constant:'%'|Operator:And|Variable:a|Operator:Equals|Constant:'2'|Operator:Or|Operator:Not|Operator:LeftParenthesis|Variable:b|Operator:Equals|Constant:3 |Operator:RightParenthesis", Render(expression.NifixExpression));
+            Assert.AreEqual("Variable:Student|Constant:'%'|Operator:Like|Variable:a|Constant:'2'|Operator:Equals|Operator:And|Variable:b|Constant:3 |Operator:Equals|Operator:Not|Operator:Or", Render(expression.SuffixExpression));
         }
 
-        public bool IsReadOnly
+        [TestMethod]
+        public void QueryString_Empty_ThrowsGenericException()
         {
-            get { throw new Exception("The method or operation is not implemented."); }
+            // TODO(12.1): 修复 13.12 后改为断言 ArgumentException（当前抛通用 Exception "QueryString is empty"）。
+            var ex = Assert.ThrowsException<Exception>(() => Parse(""));
+            Assert.AreEqual("QueryString is empty", ex.Message);
         }
 
-        public bool Remove(int item)
+        [TestMethod]
+        public void QueryString_WhitespaceOnly_ThrowsGenericException()
         {
-            throw new Exception("The method or operation is not implemented.");
+            // TODO(12.1): 修复 13.12 后改为断言 ArgumentException（当前抛通用 Exception "QueryString is empty"）。
+            var ex = Assert.ThrowsException<Exception>(() => Parse("   "));
+            Assert.AreEqual("QueryString is empty", ex.Message);
         }
 
-        #endregion
-
-        #region IEnumerable<int> 成员
-
-        public IEnumerator<int> GetEnumerator()
+        [TestMethod]
+        public void QueryString_Null_ThrowsNullReferenceException()
         {
-            throw new Exception("The method or operation is not implemented.");
+            // TODO(12.1): 修复 13.12 后改为断言 ArgumentException（当前 value.Trim() 对 null 抛 NullReferenceException）。
+            Assert.ThrowsException<NullReferenceException>(() => Parse(null));
         }
 
-        #endregion
-
-        #region IEnumerable 成员
-
-        IEnumerator IEnumerable.GetEnumerator()
+        [TestMethod]
+        public void QueryString_UnbalancedParenthesis_ThrowsExpected()
         {
-            throw new Exception("The method or operation is not implemented.");
+            var ex = Assert.ThrowsException<Exception>(() => Parse("! ( b== 3"));
+            Assert.AreEqual(") is expected", ex.Message);
         }
 
-        #endregion
+        [TestMethod]
+        public void QueryString_UnclosedQuote_ThrowsExpected()
+        {
+            var ex = Assert.ThrowsException<Exception>(() => Parse("a=='x"));
+            Assert.AreEqual("' is expected", ex.Message);
+        }
+
+        [TestMethod]
+        public void QueryString_UnrecognizedOperator_ThrowsExpected()
+        {
+            var ex = Assert.ThrowsException<Exception>(() => Parse("a=<1"));
+            Assert.AreEqual("Invaild Operator:=<", ex.Message);
+        }
+
+        [TestMethod]
+        public void QueryString_InvalidNumericConstant_ThrowsExpected()
+        {
+            var ex = Assert.ThrowsException<Exception>(() => Parse("a==1x"));
+            Assert.AreEqual("Invalid Vairable:1x", ex.Message);
+        }
+
+        [TestMethod]
+        public void QueryString_TrailingSpaceAfterConstant_RecordsCurrentBehavior()
+        {
+            // TODO(12.1): 修复 13.11 后，"Id==1 " 应断言与 "Id==1" 相同的序列（末尾空白视为输入结束）。
+            // 注意：任务书预期此处抛 IndexOutOfRangeException，但当前实现把末尾空格并入常量，
+            // 实际得到常量 "1 "（带尾随空格）；真正触发 IndexOutOfRangeException 的是变量/带引号常量后接末尾空格（见下）。
+            QueryExpression expression = Parse("Id==1 ");
+            Assert.AreEqual("Variable:Id|Operator:Equals|Constant:1 ", Render(expression.NifixExpression));
+            Assert.AreEqual("Variable:Id|Constant:1 |Operator:Equals", Render(expression.SuffixExpression));
+        }
+
+        [TestMethod]
+        public void QueryString_TrailingSpaceAfterVariable_ThrowsIndexOutOfRange()
+        {
+            // TODO(12.1): 修复 13.11 后改为断言与 "Id" 相同的序列（末尾空白视为输入结束）。
+            // 这是缺陷 13.11（while (currentChar == ' ') currentChar = _queryString[++_stringIndex] 越界）的真实触发形态。
+            Assert.ThrowsException<IndexOutOfRangeException>(() => Parse("Id "));
+        }
     }
 }

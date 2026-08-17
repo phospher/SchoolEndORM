@@ -16,4 +16,8 @@
   <ItemGroup>
     <ProjectReference Include="..\ORMFramework\ORMFramework.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="TestData\Config.xml"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></None>
+  </ItemGroup>
 </Project>
