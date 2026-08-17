@@ -430,12 +430,12 @@ public static class GlobalCache
                     }
                     CheckCache();
                     _objList.Add(cacheEntity.ObjectId, cacheEntity);
-                    if (!_objTable.TryGetValue(objType, out objectList))
+                    if (!_objTable.TryGetValue(objType, out var currentList))
                     {
-                        objectList = [];
-                        _objTable[objType] = objectList;
+                        currentList = [];
+                        _objTable[objType] = currentList;
                     }
-                    objectList.Add(cacheEntity);
+                    currentList.Add(cacheEntity);
                     var cacheResult = new GlobalCacheResult(cacheEntity.ObjectId, CloneObject(newObj), cacheEntity.Version);
                     cacheResult.ForeignKeys = cacheEntity.ForeignKeys;
                     cacheEntity.ReferenceCount++;
