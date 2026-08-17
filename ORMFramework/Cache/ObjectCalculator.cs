@@ -213,7 +213,7 @@ public static class ObjectCalculator
             }
             else
             {
-                yStr = y.Value.ToString()!;
+                yStr = (string)property.GetValue(@object)!;
             }
         }
         else

@@ -125,12 +125,10 @@ public class ObjectCalculatorTest
     }
 
     [TestMethod]
-    public void IsTargetObject_TwoPropertyComparison_RecordsCurrentBug()
+    public void IsTargetObject_TwoPropertyComparison_ComparesValues()
     {
-        // TODO(12.2): 修复 13.9 后，Name==Nickname 应比较两个属性值（此处 Name="abc"、Nickname="abc" 应相等）。
-        // 当前实现把 y 为 Variable 时的属性名（"Nickname"）当作值参与比较，故返回 false。
         var entity = new CalcEntity { Name = "abc", Nickname = "abc" };
-        Assert.IsFalse(IsTarget(entity, "Name==Nickname"));
+        Assert.IsTrue(IsTarget(entity, "Name==Nickname"));
     }
 
     [TestMethod]
