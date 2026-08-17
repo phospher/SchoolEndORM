@@ -472,17 +472,23 @@ public static class GlobalCache
     private static void Collect()
     {
         GC.Collect();
+        var keysToDelete = new List<Guid>();
         foreach (var (objectId, cacheEntity) in _objList)
         {
             if (cacheEntity.ReferenceCount <= 0)
             {
-                List<GlobalCacheEntity> objectList = _objTable[cacheEntity.Value.GetType()];
-                _objList.Remove(objectId);
-                objectList.Remove(cacheEntity);
-                if (objectList.Count == 0)
-                {
-                    _objTable.Remove(cacheEntity.Value.GetType());
-                }
+                keysToDelete.Add(objectId);
+            }
+        }
+        foreach (Guid objectId in keysToDelete)
+        {
+            GlobalCacheEntity cacheEntity = _objList[objectId];
+            List<GlobalCacheEntity> objectList = _objTable[cacheEntity.Value.GetType()];
+            _objList.Remove(objectId);
+            objectList.Remove(cacheEntity);
+            if (objectList.Count == 0)
+            {
+                _objTable.Remove(cacheEntity.Value.GetType());
             }
         }
         GC.Collect();
