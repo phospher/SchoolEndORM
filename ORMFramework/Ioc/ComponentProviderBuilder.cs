@@ -3,7 +3,7 @@ using ORMFramework.Listener;
 using ORMFramework.SQL;
 
 namespace ORMFramework.Ioc;
-public class ComponentProviderBuilder
+public sealed class ComponentProviderBuilder
 {
     private readonly Dictionary<Type, Type> _componentImplTypes = new Dictionary<Type, Type>();
 

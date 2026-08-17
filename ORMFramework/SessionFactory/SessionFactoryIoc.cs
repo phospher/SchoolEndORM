@@ -2,7 +2,7 @@
 using ORMFramework.Ioc;
 
 namespace ORMFramework;
-public class SessionFactoryIoc : ISessionFactory
+public sealed class SessionFactoryIoc : ISessionFactory
 {
     private IDbDriverFactory _driverFactory;
     private Dictionary<string, EntityMapping> _mappings;

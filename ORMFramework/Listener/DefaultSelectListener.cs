@@ -2,7 +2,7 @@ using ORMFramework.Cache;
 using ORMFramework.Event;
 
 namespace ORMFramework.Listener;
-public class DefaultSelectListener : ISelectListener
+public sealed class DefaultSelectListener : ISelectListener
 {
 
     public void OnSelect(SelectEvent @event, object sender)

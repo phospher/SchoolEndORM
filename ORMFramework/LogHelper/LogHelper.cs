@@ -3,7 +3,7 @@ using log4net.Config;
 using log4net.Repository;
 
 namespace ORMFramework.LogHelper;
-public class LogHelper
+public static class LogHelper
 {
     private static ILog _log;
 
@@ -11,7 +11,7 @@ public class LogHelper
     {
         if (string.IsNullOrEmpty(configFilePath))
         {
-            configFilePath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + "Config.xml";
+            configFilePath = Path.Combine(Environment.CurrentDirectory, "Config.xml");
         }
         ILoggerRepository repository = LogManager.CreateRepository("NETCoreRepository");
         XmlConfigurator.Configure(repository, new FileInfo(configFilePath));

@@ -4,11 +4,9 @@ using ORMFramework.Cache;
 using ORMFramework.Listener;
 
 namespace ORMFramework.Ioc;
-public class DefaultComponentProvider : IComponentProvider
+public sealed class DefaultComponentProvider(IDictionary<Type, Type> componentImplDict) : IComponentProvider
 {
-    private readonly IDictionary<Type, Type> _componentImplDict;
-
-    private readonly Dictionary<Type, ServiceLifetime> _componentLifetimes = new Dictionary<Type, ServiceLifetime>()
+    private static readonly Dictionary<Type, ServiceLifetime> _componentLifetimes = new()
     {
         { typeof(ISession), ServiceLifetime.Transient },
         { typeof(IDbDriverFactory), ServiceLifetime.Transient },
@@ -23,15 +21,13 @@ public class DefaultComponentProvider : IComponentProvider
         { typeof(ISubmitListener), ServiceLifetime.Singleton }
     };
 
-    private readonly ServiceProvider _serviceProvider;
+    private readonly ServiceProvider _serviceProvider = BuildServiceProvider(componentImplDict);
 
-    public DefaultComponentProvider(IDictionary<Type, Type> componentImplDict)
+    private static ServiceProvider BuildServiceProvider(IDictionary<Type, Type> componentImplDict)
     {
-        _componentImplDict = componentImplDict;
-
         var services = new ServiceCollection();
 
-        foreach(KeyValuePair<Type,Type> componentImpl in _componentImplDict)
+        foreach (KeyValuePair<Type, Type> componentImpl in componentImplDict)
         {
             switch (_componentLifetimes[componentImpl.Key])
             {
@@ -47,7 +43,7 @@ public class DefaultComponentProvider : IComponentProvider
             }
         }
 
-        _serviceProvider = services.BuildServiceProvider();
+        return services.BuildServiceProvider();
     }
 
     public T GetComponent<T>() => _serviceProvider.GetService<T>();

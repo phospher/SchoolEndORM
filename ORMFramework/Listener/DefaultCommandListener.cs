@@ -2,7 +2,7 @@ using System.Data;
 using ORMFramework.Event;
 
 namespace ORMFramework.Listener;
-class DefaultCommandListener : ICommandListener
+sealed class DefaultCommandListener : ICommandListener
 {
 
     public void OnExecute(CommandEvent @event, object sender)

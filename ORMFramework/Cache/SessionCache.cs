@@ -5,7 +5,7 @@ using ORMFramework.Configuration;
 using ORMFramework.Statment;
 
 namespace ORMFramework.Cache;
-public class SessionCache : ISessionCache
+public sealed class SessionCache : ISessionCache
 {
     private readonly Dictionary<object, CacheEntity> _objList = new();
     private readonly Dictionary<Type, List<CacheEntity>> _objTable = new();

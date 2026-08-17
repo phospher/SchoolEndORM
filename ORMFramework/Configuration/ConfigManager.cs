@@ -1,19 +1,9 @@
 using System.Xml;
 
 namespace ORMFramework.Configuration;
-public class ConfigManager
+public sealed class ConfigManager(string? configFilePath = null)
 {
-    public string ConfigFilePath { get; set; }
-
-    public ConfigManager()
-    {
-        ConfigFilePath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + "Config.xml";
-    }
-
-    public ConfigManager(string configFilePath)
-    {
-        ConfigFilePath = configFilePath;
-    }
+    public string ConfigFilePath { get; set; } = string.IsNullOrEmpty(configFilePath) ? Path.Combine(Environment.CurrentDirectory, "Config.xml") : configFilePath;
 
     public Configuration GetSystemConfiguration()
     {

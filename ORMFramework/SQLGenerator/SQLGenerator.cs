@@ -4,7 +4,7 @@ using ORMFramework.Configuration;
 using ORMFramework.Statment;
 
 namespace ORMFramework.SQL;
-public class SQLGenerator : ISQLGenerator
+public sealed class SQLGenerator : ISQLGenerator
 {
     private static readonly string[] _sqlOperators = new string[] { "=", "!=", ">", ">=", "<", "<=", " and ", " or ", " like ", "(", ")" };
     private static readonly Type[] _basicType = new Type[] {

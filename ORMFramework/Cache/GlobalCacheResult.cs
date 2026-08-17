@@ -1,19 +1,11 @@
 namespace ORMFramework.Cache;
-public class GlobalCacheResult
+public class GlobalCacheResult(Guid objectId, object value, long version)
 {
-    public Guid ObjectId { get; set; }
+    public Guid ObjectId { get; set; } = objectId;
 
-    public object Value { get; set; }
+    public object Value { get; set; } = value;
 
-    public long Version { get; set; }
+    public long Version { get; set; } = version;
 
-    public Dictionary<string, object> ForeignKeys { get; set; }
-
-    public GlobalCacheResult(Guid objectId, object Value, long version)
-    {
-        ObjectId = objectId;
-        this.Value = Value;
-        Version = version;
-        ForeignKeys = new Dictionary<string, object>();
-    }
+    public Dictionary<string, object> ForeignKeys { get; set; } = [];
 }
