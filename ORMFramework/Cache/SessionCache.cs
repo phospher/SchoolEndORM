@@ -400,6 +400,7 @@ namespace ORMFramework.Cache
         {
             List<object> result = new List<object>();
             IEnumerable<GlobalCacheResult> globalCacheResults;
+            ignoreIds ??= [];
             foreach (CacheEntity cacheEntity in _deleteList)
             {
                 ignoreIds.Add(cacheEntity.ObjectId);
