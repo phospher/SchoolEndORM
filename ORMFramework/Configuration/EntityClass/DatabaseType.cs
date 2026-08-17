@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ORMFramework.Configuration
+namespace ORMFramework.Configuration;
+public enum DatabaseType
 {
-    public enum DatabaseType
-    {
-        SQLServer,
-        Odbc,
-        OleDb,
-        Oracle
-    }
+    SQLServer,
+    Odbc,
+    OleDb,
+    Oracle
 }

@@ -4,14 +4,12 @@ using System.Text;
 using ORMFramework.Cache;
 using ORMFramework.Event;
 
-namespace ORMFramework.Listener
+namespace ORMFramework.Listener;
+public class DefaultUpdateListener : IUpdateListener
 {
-    public class DefaultUpdateListener : IUpdateListener
-    {
 
-        public void OnUpdate(UpdateEvent @event, object sender)
-        {
-            @event.Cache.Update(@event.Entity);
-        }
+    public void OnUpdate(UpdateEvent @event, object sender)
+    {
+        @event.Cache.Update(@event.Entity);
     }
 }

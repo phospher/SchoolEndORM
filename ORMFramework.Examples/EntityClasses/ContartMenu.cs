@@ -2,60 +2,58 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ORMFramework.Examples
+namespace ORMFramework.Examples;
+public class ContactMenu
 {
-    public class ContactMenu
+    private int _id;
+    private string _email;
+    private string _phone;
+    private string _address;
+    private Student _student;
+
+    public int Id
     {
-        private int _id;
-        private string _email;
-        private string _phone;
-        private string _address;
-        private Student _student;
+        get { return _id; }
+        set { _id = value; }
+    }
 
-        public int Id
+    public string Email
+    {
+        get { return _email; }
+        set { _email = value; }
+    }
+
+    public string Phone
+    {
+        get { return _phone; }
+        set { _phone = value; }
+    }
+
+    public string Address
+    {
+        get { return _address; }
+        set { _address = value; }
+    }
+
+    public Student Student
+    {
+        get { return _student; }
+        set { _student = value; }
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj == null || this.GetType() != obj.GetType())
         {
-            get { return _id; }
-            set { _id = value; }
+            return false;
         }
 
-        public string Email
-        {
-            get { return _email; }
-            set { _email = value; }
-        }
+        ContactMenu student = (ContactMenu)obj;
+        return this.Id == student.Id;
+    }
 
-        public string Phone
-        {
-            get { return _phone; }
-            set { _phone = value; }
-        }
-
-        public string Address
-        {
-            get { return _address; }
-            set { _address = value; }
-        }
-
-        public Student Student
-        {
-            get { return _student; }
-            set { _student = value; }
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null || this.GetType() != obj.GetType())
-            {
-                return false;
-            }
-
-            ContactMenu student = (ContactMenu)obj;
-            return this.Id == student.Id;
-        }
-
-        public override int GetHashCode()
-        {
-            return this.Id.GetHashCode();
-        }
+    public override int GetHashCode()
+    {
+        return this.Id.GetHashCode();
     }
 }

@@ -2,53 +2,51 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ORMFramework.Examples
+namespace ORMFramework.Examples;
+public class Teacher
 {
-    public class Teacher
+    private int _id;
+    private string _name;
+    private string _gender;
+    private Department _department;
+
+    public int Id
     {
-        private int _id;
-        private string _name;
-        private string _gender;
-        private Department _department;
+        get { return _id; }
+        set { _id = value; }
+    }
 
-        public int Id
+    public string Name
+    {
+        get { return _name; }
+        set { _name = value; }
+    }
+
+    public string Gender
+    {
+        get { return _gender; }
+        set { _gender = value; }
+    }
+
+    public Department Department
+    {
+        get { return _department; }
+        set { _department = value; }
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj == null || this.GetType() != obj.GetType())
         {
-            get { return _id; }
-            set { _id = value; }
+            return false;
         }
 
-        public string Name
-        {
-            get { return _name; }
-            set { _name = value; }
-        }
+        Teacher student = (Teacher)obj;
+        return this.Id == student.Id;
+    }
 
-        public string Gender
-        {
-            get { return _gender; }
-            set { _gender = value; }
-        }
-
-        public Department Department
-        {
-            get { return _department; }
-            set { _department = value; }
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null || this.GetType() != obj.GetType())
-            {
-                return false;
-            }
-
-            Teacher student = (Teacher)obj;
-            return this.Id == student.Id;
-        }
-
-        public override int GetHashCode()
-        {
-            return this.Id.GetHashCode();
-        }
+    public override int GetHashCode()
+    {
+        return this.Id.GetHashCode();
     }
 }

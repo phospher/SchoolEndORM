@@ -1,10 +1,8 @@
 ﻿using System;
 
-namespace ORMFramework.Ioc
+namespace ORMFramework.Ioc;
+public interface IComponentProvider
 {
-    public interface IComponentProvider
-    {
-        T GetComponent<T>();
-    }
+    T GetComponent<T>();
 }
 

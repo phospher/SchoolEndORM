@@ -4,31 +4,29 @@ using System.Data;
 using ORMFramework.Configuration;
 using ORMFramework.SQL;
 
-namespace ORMFramework.Test.Fakes
+namespace ORMFramework.Test.Fakes;
+public class FakePersistenceContext : IPersistenceContext
 {
-    public class FakePersistenceContext : IPersistenceContext
+    private IDictionary<string, EntityMapping> _mappings = new Dictionary<string, EntityMapping>();
+
+    public IDbDriverFactory DbDriverFactory => throw new InvalidOperationException("no database in unit test");
+
+    public IDbConnection Connection => throw new InvalidOperationException("no database in unit test");
+
+    public IDictionary<string, EntityMapping> Mappings
     {
-        private IDictionary<string, EntityMapping> _mappings = new Dictionary<string, EntityMapping>();
+        get { return _mappings; }
+        set { _mappings = value; }
+    }
 
-        public IDbDriverFactory DbDriverFactory => throw new InvalidOperationException("no database in unit test");
+    public ISQLGenerator SQLGenerator { get; set; }
 
-        public IDbConnection Connection => throw new InvalidOperationException("no database in unit test");
-
-        public IDictionary<string, EntityMapping> Mappings
+    public EntityMapping GetEntityMappingByClassName(string className)
+    {
+        if (_mappings.TryGetValue(className, out EntityMapping mapping))
         {
-            get { return _mappings; }
-            set { _mappings = value; }
+            return mapping;
         }
-
-        public ISQLGenerator SQLGenerator { get; set; }
-
-        public EntityMapping GetEntityMappingByClassName(string className)
-        {
-            if (_mappings.TryGetValue(className, out EntityMapping mapping))
-            {
-                return mapping;
-            }
-            return null;
-        }
+        return null;
     }
 }

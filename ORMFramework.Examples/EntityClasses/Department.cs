@@ -2,46 +2,44 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ORMFramework.Examples
+namespace ORMFramework.Examples;
+public class Department
 {
-    public class Department
+    private int _id;
+    private string _name;
+    private IList<Teacher> _teachers;
+
+    public int Id
     {
-        private int _id;
-        private string _name;
-        private IList<Teacher> _teachers;
+        get { return _id; }
+        set { _id = value; }
+    }
 
-        public int Id
+    public string Name
+    {
+        get { return _name; }
+        set { _name = value; }
+    }
+
+    public IList<Teacher> Teachers
+    {
+        get { return _teachers; }
+        set { _teachers = value; }
+    }
+
+    public override bool Equals(object obj)
+    {
+        if (obj == null || this.GetType() != obj.GetType())
         {
-            get { return _id; }
-            set { _id = value; }
+            return false;
         }
 
-        public string Name
-        {
-            get { return _name; }
-            set { _name = value; }
-        }
+        Department student = (Department)obj;
+        return this.Id == student.Id;
+    }
 
-        public IList<Teacher> Teachers
-        {
-            get { return _teachers; }
-            set { _teachers = value; }
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (obj == null || this.GetType() != obj.GetType())
-            {
-                return false;
-            }
-
-            Department student = (Department)obj;
-            return this.Id == student.Id;
-        }
-
-        public override int GetHashCode()
-        {
-            return this.Id.GetHashCode();
-        }
+    public override int GetHashCode()
+    {
+        return this.Id.GetHashCode();
     }
 }

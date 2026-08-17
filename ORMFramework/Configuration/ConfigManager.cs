@@ -4,65 +4,57 @@ using System.IO;
 using System.Text;
 using System.Xml;
 
-namespace ORMFramework.Configuration
+namespace ORMFramework.Configuration;
+public class ConfigManager
 {
-    public class ConfigManager
+    private string _configFilePath;
+
+    public string ConfigFilePath
     {
-        private string _configFilePath;
+        get { return _configFilePath; }
+        set { _configFilePath = value; }
+    }
 
-        public string ConfigFilePath
-        {
-            get { return _configFilePath; }
-            set { _configFilePath = value; }
-        }
+    public ConfigManager()
+    {
+        _configFilePath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + "Config.xml";
+    }
 
-        public ConfigManager()
-        {
-            _configFilePath = Environment.CurrentDirectory + Path.DirectorySeparatorChar + "Config.xml";
-        }
+    public ConfigManager(string configFilePath)
+    {
+        _configFilePath = configFilePath;
+    }
 
-        public ConfigManager(string configFilePath)
+    public Configuration GetSystemConfiguration()
+    {
+        FileStream fs = new FileStream(_configFilePath, FileMode.Open);
+        XmlTextReader reader = new XmlTextReader(fs);
+        Configuration configuration = new Configuration();
+        bool result = true;
+        reader.WhitespaceHandling = WhitespaceHandling.None;
+        if (reader.Read() && reader.NodeType == XmlNodeType.XmlDeclaration)
         {
-            _configFilePath = configFilePath;
-        }
-
-        public Configuration GetSystemConfiguration()
-        {
-            FileStream fs = new FileStream(_configFilePath, FileMode.Open);
-            XmlTextReader reader = new XmlTextReader(fs);
-            Configuration configuration = new Configuration();
-            bool result = true;
-            reader.WhitespaceHandling = WhitespaceHandling.None;
-            if (reader.Read() && reader.NodeType == XmlNodeType.XmlDeclaration)
+            if (reader.Read() && reader.NodeType == XmlNodeType.Element && reader.Name == "Configuration")
             {
-                if (reader.Read() && reader.NodeType == XmlNodeType.Element && reader.Name == "Configuration")
+                while (result && reader.Read() && reader.NodeType == XmlNodeType.Element)
                 {
-                    while (result && reader.Read() && reader.NodeType == XmlNodeType.Element)
+                    switch (reader.Name)
                     {
-                        switch (reader.Name)
-                        {
-                            case "SessionFactory":
-                                result = ReadSessionFactory(reader, configuration);
-                                break;
-                            case "Mappings":
-                                result = ReadMappings(reader, configuration);
-                                break;
-                            default:
-                                break;
-                        }
+                        case "SessionFactory":
+                            result = ReadSessionFactory(reader, configuration);
+                            break;
+                        case "Mappings":
+                            result = ReadMappings(reader, configuration);
+                            break;
+                        default:
+                            break;
                     }
-                    reader.Close();
-                    fs.Close();
-                    if (result)
-                    {
-                        return configuration;
-                    }
-                    else
-                    {
-                        reader.Close();
-                        fs.Close();
-                        throw new Exception("Invail Config File");
-                    }
+                }
+                reader.Close();
+                fs.Close();
+                if (result)
+                {
+                    return configuration;
                 }
                 else
                 {
@@ -78,167 +70,173 @@ namespace ORMFramework.Configuration
                 throw new Exception("Invail Config File");
             }
         }
-
-        private bool ReadSessionFactory(XmlTextReader reader, Configuration configuration)
+        else
         {
-            bool result = true;
-            while (result && reader.Read() && reader.NodeType == XmlNodeType.Element)
+            reader.Close();
+            fs.Close();
+            throw new Exception("Invail Config File");
+        }
+    }
+
+    private bool ReadSessionFactory(XmlTextReader reader, Configuration configuration)
+    {
+        bool result = true;
+        while (result && reader.Read() && reader.NodeType == XmlNodeType.Element)
+        {
+            switch (reader.Name)
             {
-                switch (reader.Name)
-                {
-                    case "ConnectionString":
-                        result = ReadConnectionString(reader, configuration);
-                        break;
-                    case "ProviderName":
-                        result = ReadProviderName(reader, configuration);
-                        break;
-                    default:
-                        return false;
-                }
+                case "ConnectionString":
+                    result = ReadConnectionString(reader, configuration);
+                    break;
+                case "ProviderName":
+                    result = ReadProviderName(reader, configuration);
+                    break;
+                default:
+                    return false;
             }
-            if (result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "SessionFactory")
+        }
+        if (result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "SessionFactory")
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private bool ReadConnectionString(XmlTextReader reader, Configuration configuration)
+    {
+        bool result = false;
+        if (reader.Read() && reader.NodeType == XmlNodeType.Text)
+        {
+            configuration.ConnectionString = reader.ReadString().Trim();
+            result = true;
+        }
+        if (result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "ConnectionString")
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private bool ReadProviderName(XmlTextReader reader, Configuration configuration)
+    {
+        bool result = false;
+        if (reader.Read() && reader.NodeType == XmlNodeType.Text)
+        {
+            configuration.ProviderName = reader.ReadString().Trim();
+            result = true;
+        }
+        if (result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "ProviderName")
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    private bool ReadMappings(XmlTextReader reader, Configuration configuration)
+    {
+        bool result = true;
+        while (result && reader.Read() && reader.NodeType == XmlNodeType.Element)
+        {
+            if (reader.Name == "Map")
             {
-                return true;
+                result = ReadMap(reader, configuration);
             }
             else
             {
                 return false;
             }
         }
+        return true;
+    }
 
-        private bool ReadConnectionString(XmlTextReader reader, Configuration configuration)
+    private bool ReadMap(XmlTextReader reader, Configuration configuration)
+    {
+        XmlDocument xmlDoc = new XmlDocument();
+        EntityMapping map = new EntityMapping();
+        XmlNode mapNode;
+        xmlDoc.Load(reader.ReadSubtree());
+        mapNode = xmlDoc.ChildNodes.Item(0);
+        map.ClassName = mapNode.Attributes["ClassName"].Value;
+        map.Keys = mapNode.Attributes["Key"].Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+        map.TableName = mapNode.Attributes["TableName"].Value;
+        for (int i = 0; i < mapNode.ChildNodes.Count; i++)
         {
-            bool result = false;
-            if (reader.Read() && reader.NodeType == XmlNodeType.Text)
+            XmlNode node = mapNode.ChildNodes.Item(i);
+            EntityRelation relation;
+            if (node.Name == "Many-to-Many")
             {
-                configuration.ConnectionString = reader.ReadString().Trim();
-                result = true;
-            }
-            if (result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "ConnectionString")
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private bool ReadProviderName(XmlTextReader reader, Configuration configuration)
-        {
-            bool result = false;
-            if (reader.Read() && reader.NodeType == XmlNodeType.Text)
-            {
-                configuration.ProviderName = reader.ReadString().Trim();
-                result = true;
-            }
-            if (result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "ProviderName")
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private bool ReadMappings(XmlTextReader reader, Configuration configuration)
-        {
-            bool result = true;
-            while (result && reader.Read() && reader.NodeType == XmlNodeType.Element)
-            {
-                if (reader.Name == "Map")
-                {
-                    result = ReadMap(reader, configuration);
-                }
-                else
+                relation = GetManyToManyRelation(node);
+                if (relation == null)
                 {
                     return false;
                 }
             }
-            return true;
-        }
-
-        private bool ReadMap(XmlTextReader reader, Configuration configuration)
-        {
-            XmlDocument xmlDoc = new XmlDocument();
-            EntityMapping map = new EntityMapping();
-            XmlNode mapNode;
-            xmlDoc.Load(reader.ReadSubtree());
-            mapNode = xmlDoc.ChildNodes.Item(0);
-            map.ClassName = mapNode.Attributes["ClassName"].Value;
-            map.Keys = mapNode.Attributes["Key"].Value.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-            map.TableName = mapNode.Attributes["TableName"].Value;
-            for (int i = 0; i < mapNode.ChildNodes.Count; i++)
+            else
             {
-                XmlNode node = mapNode.ChildNodes.Item(i);
-                EntityRelation relation;
-                if (node.Name == "Many-to-Many")
+                relation = new EntityRelation();
+                switch (node.Name)
                 {
-                    relation = GetManyToManyRelation(node);
-                    if (relation == null)
-                    {
-                        return false;
-                    }
-                }
-                else
-                {
-                    relation = new EntityRelation();
-                    switch (node.Name)
-                    {
-                        case "One-to-Many":
-                            relation.Type = RelationType.OneToMany;
-                            break;
-                        case "One-to-One":
-                            relation.Type = RelationType.OneToOne;
-                            break;
-                        case "Many-to-One":
-                            relation.Type = RelationType.ManyToOne;
-                            break;
-                        default:
-                            return false;
-                    }
-                    relation.KeyColum = node.Attributes["KeyColum"].Value;
-                    relation.Property = node.Attributes["Property"].Value;
-                    relation.ReferenceClassName = node.Attributes["ReferenceClass"].Value;
-                    relation.ReferenceColum = node.Attributes["ReferenceColum"].Value;
-                }
-                map.Relations.Add(relation.Property, relation);
-            }
-            configuration.Mappings.Add(map);
-            return true;
-        }
-
-        private EntityRelation GetManyToManyRelation(XmlNode node)
-        {
-            if (node.ChildNodes.Count != 2)
-            {
-                return null;
-            }
-
-            ManyToManyRelation relation = new ManyToManyRelation();
-            relation.Type = RelationType.MantToMany;
-            relation.KeyColum = node.Attributes["KeyColum"].Value;
-            relation.Property = node.Attributes["Property"].Value;
-            for (int i = 0; i < node.ChildNodes.Count; i++)
-            {
-                XmlNode childNote = node.ChildNodes.Item(i);
-                switch (childNote.Name)
-                {
-                    case "ReferenceClass":
-                        relation.ReferenceClassName = childNote.Attributes["Name"].Value;
-                        relation.ReferenceClassKeyColum = childNote.Attributes["KeyColum"].Value;
+                    case "One-to-Many":
+                        relation.Type = RelationType.OneToMany;
                         break;
-                    case "ReferenceTable":
-                        relation.ReferenceTableName = childNote.Attributes["Name"].Value;
-                        relation.ReferenceColum = childNote.Attributes["ReferenceColum"].Value;
-                        relation.ReferenceClassColum = childNote.Attributes["ReferenceClassColum"].Value;
+                    case "One-to-One":
+                        relation.Type = RelationType.OneToOne;
+                        break;
+                    case "Many-to-One":
+                        relation.Type = RelationType.ManyToOne;
                         break;
                     default:
-                        return null;
+                        return false;
                 }
+                relation.KeyColum = node.Attributes["KeyColum"].Value;
+                relation.Property = node.Attributes["Property"].Value;
+                relation.ReferenceClassName = node.Attributes["ReferenceClass"].Value;
+                relation.ReferenceColum = node.Attributes["ReferenceColum"].Value;
             }
-            return relation;
+            map.Relations.Add(relation.Property, relation);
         }
+        configuration.Mappings.Add(map);
+        return true;
+    }
+
+    private EntityRelation GetManyToManyRelation(XmlNode node)
+    {
+        if (node.ChildNodes.Count != 2)
+        {
+            return null;
+        }
+
+        ManyToManyRelation relation = new ManyToManyRelation();
+        relation.Type = RelationType.MantToMany;
+        relation.KeyColum = node.Attributes["KeyColum"].Value;
+        relation.Property = node.Attributes["Property"].Value;
+        for (int i = 0; i < node.ChildNodes.Count; i++)
+        {
+            XmlNode childNote = node.ChildNodes.Item(i);
+            switch (childNote.Name)
+            {
+                case "ReferenceClass":
+                    relation.ReferenceClassName = childNote.Attributes["Name"].Value;
+                    relation.ReferenceClassKeyColum = childNote.Attributes["KeyColum"].Value;
+                    break;
+                case "ReferenceTable":
+                    relation.ReferenceTableName = childNote.Attributes["Name"].Value;
+                    relation.ReferenceColum = childNote.Attributes["ReferenceColum"].Value;
+                    relation.ReferenceClassColum = childNote.Attributes["ReferenceClassColum"].Value;
+                    break;
+                default:
+                    return null;
+            }
+        }
+        return relation;
     }
 }

@@ -2,41 +2,39 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ORMFramework.Configuration
+namespace ORMFramework.Configuration;
+public class EntityMapping
 {
-    public class EntityMapping
+    private IEnumerable<string> _keys;
+    private IDictionary<string, EntityRelation> _relations;
+
+    public string ClassName { get; set; }
+
+    public string TableName { get; set; }
+
+    public IEnumerable<string> Keys
     {
-        private IEnumerable<string> _keys;
-        private IDictionary<string, EntityRelation> _relations;
-
-        public string ClassName { get; set; }
-
-        public string TableName { get; set; }
-
-        public IEnumerable<string> Keys
+        get
         {
-            get
+            if (_keys == null)
             {
-                if (_keys == null)
-                {
-                    _keys = new List<string>();
-                }
-                return _keys;
+                _keys = new List<string>();
             }
-            set { _keys = value; }
+            return _keys;
         }
+        set { _keys = value; }
+    }
 
-        public IDictionary<string, EntityRelation> Relations
+    public IDictionary<string, EntityRelation> Relations
+    {
+        get
         {
-            get
+            if (_relations == null)
             {
-                if (_relations == null)
-                {
-                    _relations = new Dictionary<string, EntityRelation>();
-                }
-                return _relations;
+                _relations = new Dictionary<string, EntityRelation>();
             }
-            set { _relations = value; }
+            return _relations;
         }
+        set { _relations = value; }
     }
 }

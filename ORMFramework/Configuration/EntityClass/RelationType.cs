@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ORMFramework.Configuration
+namespace ORMFramework.Configuration;
+public enum RelationType
 {
-    public enum RelationType
-    {
-        OneToOne,
-        OneToMany,
-        ManyToOne,
-        MantToMany
-    }
+    OneToOne,
+    OneToMany,
+    ManyToOne,
+    MantToMany
 }

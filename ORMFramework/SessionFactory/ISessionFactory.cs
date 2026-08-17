@@ -1,11 +1,9 @@
 ﻿using System;
-namespace ORMFramework
+namespace ORMFramework;
+public interface ISessionFactory
 {
-	public interface ISessionFactory
-	{
-        void Initialize();
-        void Initialize(string configFilePath);
-        ISession CreateSession();
-    }
+    void Initialize();
+    void Initialize(string configFilePath);
+    ISession CreateSession();
 }
 

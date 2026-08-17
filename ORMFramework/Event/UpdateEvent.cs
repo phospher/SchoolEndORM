@@ -2,10 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace ORMFramework.Event
+namespace ORMFramework.Event;
+public class UpdateEvent : ActionEvent
 {
-    public class UpdateEvent : ActionEvent
-    {
-        public object Entity { get; set; }
-    }
+    public object Entity { get; set; }
 }

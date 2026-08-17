@@ -5,56 +5,54 @@ using System.Text;
 using ORMFramework.Configuration;
 using ORMFramework.SQL;
 
-namespace ORMFramework
+namespace ORMFramework;
+public class PersistenceContext : IPersistenceContext
 {
-    public class PersistenceContext : IPersistenceContext
+    private IDbDriverFactory _driverFactory;
+    private IDbConnection _connection;
+
+    public IDictionary<string, EntityMapping> Mappings { get; set; }
+
+    public IDbConnection Connection
     {
-        private IDbDriverFactory _driverFactory;
-        private IDbConnection _connection;
-
-        public IDictionary<string, EntityMapping> Mappings { get; set; }
-
-        public IDbConnection Connection
+        get
         {
-            get
+            if (_connection == null || _connection.State == ConnectionState.Closed)
             {
-                if (_connection == null || _connection.State == ConnectionState.Closed)
-                {
-                    _connection = _driverFactory.GetDbConnection();
-                }
-                return _connection;
+                _connection = _driverFactory.GetDbConnection();
             }
+            return _connection;
         }
+    }
 
-        public ISQLGenerator SQLGenerator { get; set; }
+    public ISQLGenerator SQLGenerator { get; set; }
 
-        public IDbDriverFactory DbDriverFactory
+    public IDbDriverFactory DbDriverFactory
+    {
+        get { return _driverFactory; }
+    }
+
+    public PersistenceContext(IDbDriverFactory driverFactory, ISQLGenerator sqlGenerator)
+    {
+        this._driverFactory = driverFactory;
+        this.SQLGenerator = sqlGenerator;
+    }
+
+    public PersistenceContext(IDbDriverFactory driverFactory, IDictionary<string, EntityMapping> mappings)
+    {
+        this._driverFactory = driverFactory;
+        this.Mappings = mappings;
+    }
+
+    public EntityMapping GetEntityMappingByClassName(string className)
+    {
+        if (this.Mappings != null && this.Mappings.ContainsKey(className))
         {
-            get { return _driverFactory; }
+            return this.Mappings[className];
         }
-
-        public PersistenceContext(IDbDriverFactory driverFactory, ISQLGenerator sqlGenerator)
+        else
         {
-            this._driverFactory = driverFactory;
-            this.SQLGenerator = sqlGenerator;
-        }
-
-        public PersistenceContext(IDbDriverFactory driverFactory, IDictionary<string, EntityMapping> mappings)
-        {
-            this._driverFactory = driverFactory;
-            this.Mappings = mappings;
-        }
-
-        public EntityMapping GetEntityMappingByClassName(string className)
-        {
-            if (this.Mappings != null && this.Mappings.ContainsKey(className))
-            {
-                return this.Mappings[className];
-            }
-            else
-            {
-                return null;
-            }
+            return null;
         }
     }
 }
