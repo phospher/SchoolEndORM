@@ -50,10 +50,9 @@ public class SQLGeneratorTest
     [TestMethod]
     public void GetInsertSQL_MatchesCurrentSnapshot()
     {
-        // TODO(6.3/7.9): 修复 13.7（最后一个属性被跳过时残留尾随分隔符）后更新此快照。
         var entity = new TestEntity { Id = 1, Name = null, Created = new DateTime(2024, 1, 2, 3, 4, 5), Score = 1.5, Children = null };
         string actual = CreateGenerator().GetInsertSQL(entity);
-        Assert.AreEqual("insert into TestEntity(Id,Name,Created,Score,) values(1,NULL,'2024-01-02 03:04:05',1.5,)", actual);
+        Assert.AreEqual("insert into TestEntity(Id,Name,Created,Score) values(1,NULL,'2024-01-02 03:04:05',1.5)", actual);
     }
 
     [TestMethod]
@@ -68,9 +67,8 @@ public class SQLGeneratorTest
     [TestMethod]
     public void GetDeleteSQL_MatchesCurrentSnapshot()
     {
-        // TODO(7.9): 修复 13.7（尾随分隔符）后更新此快照。
         var entity = new TestEntity { Id = 1, Name = null, Created = new DateTime(2024, 1, 2, 3, 4, 5), Score = 1.5, Children = null };
         string actual = CreateGenerator().GetDeleteSQL(entity);
-        Assert.AreEqual("delete from TestEntity where (Id=1 and Name is null and Created='2024-01-02 03:04:05' and Score=1.5 and )", actual);
+        Assert.AreEqual("delete from TestEntity where (Id=1 and Name is null and Created='2024-01-02 03:04:05' and Score=1.5)", actual);
     }
 }

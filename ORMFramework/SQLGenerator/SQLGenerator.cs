@@ -126,93 +126,38 @@ public sealed class SQLGenerator : ISQLGenerator
 
     public string GetDeleteSQL(object @object)
     {
-        var sql = new StringBuilder("delete from ");
+        var parts = new List<string>();
         EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
         string tableName = mapping.TableName;
-        PropertyInfo[] properties = @object.GetType().GetProperties();
-        sql.Append(tableName);
-        sql.Append(" where (");
-        for (int i = 0; i < properties.Length; i++)
+        foreach (PropertyInfo property in @object.GetType().GetProperties())
         {
-            if (IsBasicType(properties[i].PropertyType))
+            if (IsBasicType(property.PropertyType))
             {
-                sql.Append(GenerateStatmentByProperty(properties[i], @object));
+                parts.Add(GenerateStatmentByProperty(property, @object));
             }
-            else if (IsStringType(properties[i].PropertyType))
+            else if (IsStringType(property.PropertyType))
             {
-                sql.Append(GenerateStatementByStringProperty(properties[i], @object));
-                //} else if ( properties[i].PropertyType.GetInterface ( "System.Collections.ICollection" ) == null ) {
-                //    object value = properties[i].GetValue ( @object, null );
-                //    EntityRelation relation = mapping.Relations[properties[i].Name];
-                //    sql.Append ( relation.KeyColum );
-                //    if ( value != null ) {
-                //        sql.Append ( "=" );
-                //        sql.Append ( GetObjectPropertyValue ( value, relation.ReferenceColum ) );
-                //    } else {
-                //        sql.Append ( " is NULL" );
-                //    }
-            }
-            else
-            {
-                continue;
-            }
-            if (i < properties.Length - 1)
-            {
-                sql.Append(" and ");
+                parts.Add(GenerateStatementByStringProperty(property, @object));
             }
         }
-        sql.Append(")");
-        return sql.ToString();
+        return $"delete from {tableName} where ({string.Join(" and ", parts)})";
     }
 
     public string GetInsertSQL(object @object)
     {
-        var sql = new StringBuilder("insert into ");
-        var colums = new StringBuilder("(");
-        var values = new StringBuilder("(");
+        var columns = new List<string>();
+        var values = new List<string>();
         EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
         string tableName = mapping.TableName;
-        PropertyInfo[] properties = @object.GetType().GetProperties();
-        sql.Append(tableName);
-        for (int i = 0; i < properties.Length; i++)
+        foreach (PropertyInfo property in @object.GetType().GetProperties())
         {
-            if (IsBasicType(properties[i].PropertyType))
+            if (IsBasicType(property.PropertyType) || IsStringType(property.PropertyType))
             {
-                object value = properties[i].GetValue(@object, null);
-                colums.Append(properties[i].Name);
-                values.Append(SqlLiteral.Format(value));
-            }
-            else if (IsStringType(properties[i].PropertyType))
-            {
-                object value = properties[i].GetValue(@object, null);
-                colums.Append(properties[i].Name);
-                values.Append(SqlLiteral.Format(value));
-                //} else if ( properties[i].PropertyType.GetInterface ( "System.Collections.ICollection" ) == null ) {
-                //    object value = properties[i].GetValue ( @object, null );
-                //    EntityRelation relation = mapping.Relations[properties[i].Name];
-                //    colums.Append ( relation.KeyColum );
-                //    if ( value != null ) {
-                //        values.Append ( GetObjectPropertyValue ( value, relation.ReferenceColum ) );
-                //    } else {
-                //        values.Append ( "NULL" );
-                //    }
-            }
-            else
-            {
-                continue;
-            }
-            if (i < properties.Length - 1)
-            {
-                colums.Append(",");
-                values.Append(",");
+                columns.Add(property.Name);
+                values.Add(SqlLiteral.Format(property.GetValue(@object, null)));
             }
         }
-        colums.Append(")");
-        values.Append(")");
-        sql.Append(colums);
-        sql.Append(" values");
-        sql.Append(values);
-        return sql.ToString();
+        return $"insert into {tableName}({string.Join(",", columns)}) values({string.Join(",", values)})";
     }
 
     private static string GetSQLOperator(Operator @operator) => _sqlOperators[(int)@operator];
