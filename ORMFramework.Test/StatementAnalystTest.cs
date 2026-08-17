@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using ORMFramework.Exceptions;
 using ORMFramework.Statment;
 
 #pragma warning disable CA1707 // test method names are specified with underscores by the task spec
@@ -62,53 +63,52 @@ public class StatementAnalystTest
     }
 
     [TestMethod]
-    public void QueryString_Empty_ThrowsGenericException()
+    public void QueryString_Empty_ThrowsArgumentException()
     {
-        // TODO(12.1): 修复 13.12 后改为断言 ArgumentException（当前抛通用 Exception "QueryString is empty"）。
-        var ex = Assert.ThrowsException<Exception>(() => Parse(""));
-        Assert.AreEqual("QueryString is empty", ex.Message);
+        var ex = Assert.ThrowsException<ArgumentException>(() => Parse(""));
+        Assert.AreEqual("value", ex.ParamName);
     }
 
     [TestMethod]
-    public void QueryString_WhitespaceOnly_ThrowsGenericException()
+    public void QueryString_WhitespaceOnly_ThrowsArgumentException()
     {
-        // TODO(12.1): 修复 13.12 后改为断言 ArgumentException（当前抛通用 Exception "QueryString is empty"）。
-        var ex = Assert.ThrowsException<Exception>(() => Parse("   "));
-        Assert.AreEqual("QueryString is empty", ex.Message);
+        var ex = Assert.ThrowsException<ArgumentException>(() => Parse("   "));
+        Assert.AreEqual("value", ex.ParamName);
     }
 
     [TestMethod]
-    public void QueryString_Null_ThrowsNullReferenceException()
+    public void QueryString_Null_ThrowsArgumentNullException()
     {
-        // TODO(12.1): 修复 13.12 后改为断言 ArgumentException（当前 value.Trim() 对 null 抛 NullReferenceException）。
-        Assert.ThrowsException<NullReferenceException>(() => Parse(null));
+        // ThrowIfNullOrWhiteSpace(null) 抛 ArgumentNullException（ArgumentException 子类）。
+        var ex = Assert.ThrowsException<ArgumentNullException>(() => Parse(null));
+        Assert.AreEqual("value", ex.ParamName);
     }
 
     [TestMethod]
-    public void QueryString_UnbalancedParenthesis_ThrowsExpected()
+    public void QueryString_UnbalancedParenthesis_ThrowsQuerySyntaxException()
     {
-        var ex = Assert.ThrowsException<Exception>(() => Parse("! ( b== 3"));
+        var ex = Assert.ThrowsException<QuerySyntaxException>(() => Parse("! ( b== 3"));
         Assert.AreEqual(") is expected", ex.Message);
     }
 
     [TestMethod]
-    public void QueryString_UnclosedQuote_ThrowsExpected()
+    public void QueryString_UnclosedQuote_ThrowsQuerySyntaxException()
     {
-        var ex = Assert.ThrowsException<Exception>(() => Parse("a=='x"));
+        var ex = Assert.ThrowsException<QuerySyntaxException>(() => Parse("a=='x"));
         Assert.AreEqual("' is expected", ex.Message);
     }
 
     [TestMethod]
-    public void QueryString_UnrecognizedOperator_ThrowsExpected()
+    public void QueryString_UnrecognizedOperator_ThrowsQuerySyntaxException()
     {
-        var ex = Assert.ThrowsException<Exception>(() => Parse("a=<1"));
+        var ex = Assert.ThrowsException<QuerySyntaxException>(() => Parse("a=<1"));
         Assert.AreEqual("Invaild Operator:=<", ex.Message);
     }
 
     [TestMethod]
-    public void QueryString_InvalidNumericConstant_ThrowsExpected()
+    public void QueryString_InvalidNumericConstant_ThrowsQuerySyntaxException()
     {
-        var ex = Assert.ThrowsException<Exception>(() => Parse("a==1x"));
+        var ex = Assert.ThrowsException<QuerySyntaxException>(() => Parse("a==1x"));
         Assert.AreEqual("Invalid Vairable:1x", ex.Message);
     }
 

@@ -105,6 +105,7 @@ public sealed class Session : ISession, IDisposable
 
     public int ExecuteNonQuery(string commandText)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(commandText);
         var @event = new CommandEvent();
         @event.CommandText = commandText;
         @event.PersistenceContext = PersistenceContext;
@@ -115,6 +116,7 @@ public sealed class Session : ISession, IDisposable
 
     public DataSet ExecuteQuery(string commandText)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(commandText);
         var @event = new CommandEvent();
         @event.CommandText = commandText;
         @event.PersistenceContext = PersistenceContext;

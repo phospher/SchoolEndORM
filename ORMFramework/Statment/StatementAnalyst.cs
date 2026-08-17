@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Globalization;
 using System.Text;
+using ORMFramework.Exceptions;
 
 namespace ORMFramework.Statment;
 public class StatementAnalyst
@@ -44,10 +45,7 @@ public class StatementAnalyst
         get { return new string(_queryString); }
         set
         {
-            if (string.IsNullOrEmpty(value.Trim()))
-            {
-                throw new Exception("QueryString is empty");
-            }
+            ArgumentException.ThrowIfNullOrWhiteSpace(value);
             _queryString = value.ToCharArray();
             Init();
         }
@@ -71,7 +69,7 @@ public class StatementAnalyst
     {
         if (_queryString == null || _queryString.Length == 0)
         {
-            throw new Exception("QueryString is empty");
+            throw new QuerySyntaxException("QueryString is empty");
         }
         if (_expression.Count > 0)
         {
@@ -145,7 +143,7 @@ public class StatementAnalyst
                 string text = _currentElement.ToString();
                 if (text is not ['\'', .., '\''] && !double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
                 {
-                    throw new Exception($"Invalid Vairable:{text}");
+                    throw new QuerySyntaxException($"Invalid Vairable:{text}");
                 }
                 element.Type = StatElementType.Constant;
                 element.Value = text;
@@ -173,7 +171,7 @@ public class StatementAnalyst
         "like" => Operator.Like,
         "(" => Operator.LeftParenthesis,
         ")" => Operator.RightParenthesis,
-        _ => throw new Exception($"Invaild Operator:{operatorStr}")
+        _ => throw new QuerySyntaxException($"Invaild Operator:{operatorStr}")
     };
 
     private void ReadElement()
@@ -273,7 +271,7 @@ public class StatementAnalyst
                 }
                 else
                 {
-                    throw new Exception("' is expected");
+                    throw new QuerySyntaxException("' is expected");
                 }
             }
             _currentElement.Append(currentChar);
@@ -314,21 +312,21 @@ public class StatementAnalyst
         {
             if (!ReadVariableOrConstant())
             {
-                throw new Exception("Invalid Statement");
+                throw new QuerySyntaxException("Invalid Statement");
             }
         }
         else if (element is { Type: StatElementType.Operator, Value: Operator.Not })
         {
             if (!ReadNotOperation(operatorStack))
             {
-                throw new Exception("Invalid Statement");
+                throw new QuerySyntaxException("Invalid Statement");
             }
         }
         else if (element is { Type: StatElementType.Operator, Value: Operator.LeftParenthesis })
         {
             if (!ReadLeftParenthesis(operatorStack))
             {
-                throw new Exception("Invalid Statement");
+                throw new QuerySyntaxException("Invalid Statement");
             }
         }
         while (_expressionIndex < _expression.Count)
@@ -338,35 +336,35 @@ public class StatementAnalyst
             {
                 if (!ReadVariableOrConstant())
                 {
-                    throw new Exception("Invalid Statement");
+                    throw new QuerySyntaxException("Invalid Statement");
                 }
             }
             else if (element is { Type: StatElementType.Operator, Value: Operator.Not })
             {
                 if (!ReadNotOperation(operatorStack))
                 {
-                    throw new Exception("Invalid Statement");
+                    throw new QuerySyntaxException("Invalid Statement");
                 }
             }
             else if (element is { Type: StatElementType.Operator, Value: Operator.LeftParenthesis })
             {
                 if (!ReadLeftParenthesis(operatorStack))
                 {
-                    throw new Exception("Invalid Statement");
+                    throw new QuerySyntaxException("Invalid Statement");
                 }
             }
             else if (element is { Type: StatElementType.Operator, Value: Operator.RightParenthesis })
             {
                 if (!ReadRightParenthesis(operatorStack))
                 {
-                    throw new Exception("Invalid Statement");
+                    throw new QuerySyntaxException("Invalid Statement");
                 }
             }
             else
             {
                 if (!ReadOperator(operatorStack))
                 {
-                    throw new Exception("Invalid Statement");
+                    throw new QuerySyntaxException("Invalid Statement");
                 }
             }
         }
@@ -444,7 +442,7 @@ public class StatementAnalyst
     {
         if (element.Type != StatElementType.Operator)
         {
-            throw new Exception("element.Type must be StatElement.Operator");
+            throw new ArgumentException("element.Type must be StatElement.Operator", nameof(element));
         }
 
         StatElement top;
@@ -452,7 +450,7 @@ public class StatementAnalyst
         {
             if ((Operator)element.Value == Operator.RightParenthesis)
             {
-                throw new Exception("( is expected");
+                throw new QuerySyntaxException("( is expected");
             }
             else
             {
@@ -470,7 +468,7 @@ public class StatementAnalyst
             {
                 if (operatorStack.Count == 0)
                 {
-                    throw new Exception("( is expected");
+                    throw new QuerySyntaxException("( is expected");
                 }
                 _suffixExpression.Add(top);
                 top = operatorStack.Pop();
@@ -507,7 +505,7 @@ public class StatementAnalyst
             }
             else
             {
-                throw new Exception(") is expected");
+                throw new QuerySyntaxException(") is expected");
             }
         }
     }

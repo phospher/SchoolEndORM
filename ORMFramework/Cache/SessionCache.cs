@@ -143,7 +143,7 @@ public sealed class SessionCache : ISessionCache
                 _objTable.Remove(@object.GetType());
             }
         }
-        catch (Exception ex)
+        catch
         {
             RollBack();
             throw;
@@ -162,10 +162,10 @@ public sealed class SessionCache : ISessionCache
                 _updateList.Add(cacheEntity);
             }
         }
-        catch (Exception ex)
+        catch
         {
             RollBack();
-            throw ex;
+            throw;
         }
     }
 
@@ -175,7 +175,7 @@ public sealed class SessionCache : ISessionCache
         {
             if (_objList.ContainsKey(@object))
             {
-                throw new Exception("The object exists");
+                throw new InvalidOperationException("The object exists");
             }
             else
             {
@@ -193,10 +193,10 @@ public sealed class SessionCache : ISessionCache
                 _insertList.Add(cacheEntity);
             }
         }
-        catch (Exception ex)
+        catch
         {
             RollBack();
-            throw ex;
+            throw;
         }
     }
 

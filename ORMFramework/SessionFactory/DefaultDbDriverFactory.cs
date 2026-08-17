@@ -41,7 +41,7 @@ public sealed class DefaultDbDriverFactory : IDbDriverFactory
     {
         if (string.IsNullOrEmpty(ConnectionString))
         {
-            throw new Exception("ConnectionString can not be null or empty");
+            throw new InvalidOperationException("ConnectionString can not be null or empty");
         }
         return GetDbConnection(ConnectionString);
     }

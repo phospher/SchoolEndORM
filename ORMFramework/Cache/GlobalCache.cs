@@ -3,6 +3,7 @@ using System.Data;
 using System.Reflection;
 using System.Text;
 using ORMFramework.Configuration;
+using ORMFramework.Exceptions;
 using ORMFramework.SQL;
 using ORMFramework.Statment;
 
@@ -62,7 +63,7 @@ public static class GlobalCache
                     {
                         ReadObject(entity, queryExpression, result, ignorePrimaryKey, mapping);
                     }
-                    catch (ThreadInterruptedException ex)
+                    catch (ThreadInterruptedException)
                     {
                         ReadObject(entity, queryExpression, result, ignorePrimaryKey, mapping);
                     }
@@ -90,7 +91,7 @@ public static class GlobalCache
                         Thread.Sleep(Timeout.Infinite);
                         return null;
                     }
-                    catch (ThreadInterruptedException ex)
+                    catch (ThreadInterruptedException)
                     {
                         return Search(objectId);
                     }
@@ -145,7 +146,7 @@ public static class GlobalCache
         GlobalCacheEntity cacheEntity = _objList[objectId];
         if (cacheEntity.Lock != Lock.WriteLock || cacheEntity.WriteLockThreadId != Thread.CurrentThread.ManagedThreadId)
         {
-            throw new Exception("You must get a WriteLock before updating object");
+            throw new ConcurrencyException("You must get a WriteLock before updating object");
         }
         cacheEntity.Value = @object;
         cacheEntity.Version = DateTime.UtcNow.Ticks;
@@ -184,7 +185,7 @@ public static class GlobalCache
                     Monitor.Exit(cacheEntity);
                     Thread.Sleep(Timeout.Infinite);
                 }
-                catch (ThreadInterruptedException ex)
+                catch (ThreadInterruptedException)
                 {
                     GetWriteLockForObject(objectId);
                 }
@@ -192,7 +193,7 @@ public static class GlobalCache
         }
         else
         {
-            throw new Exception("object has been deleted");
+            throw new ConcurrencyException("object has been deleted");
         }
     }
 
@@ -203,7 +204,7 @@ public static class GlobalCache
         GlobalCacheEntity entity = _objList[objectId];
         if (entity.Lock != Lock.WriteLock || entity.WriteLockThreadId != Thread.CurrentThread.ManagedThreadId)
         {
-            throw new Exception("You must get a WriteLock before deleting object");
+            throw new ConcurrencyException("You must get a WriteLock before deleting object");
         }
         entity.IsDeleted = true;
         if (entity.BlockThreads.Count > 0)
@@ -454,7 +455,7 @@ public static class GlobalCache
         GlobalCacheEntity cacheEntity = _objList[objectId];
         if (cacheEntity.ReferenceCount == 0)
         {
-            throw new Exception("The object do not be referenced");
+            throw new InvalidOperationException("The object do not be referenced");
         }
         _objList[objectId].ReferenceCount--;
     }

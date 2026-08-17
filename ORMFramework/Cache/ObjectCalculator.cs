@@ -1,6 +1,7 @@
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using ORMFramework.Exceptions;
 using ORMFramework.Statment;
 
 namespace ORMFramework.Cache;
@@ -28,7 +29,7 @@ public static class ObjectCalculator
                     ProcessVariable(@object, element, resultStack);
                     break;
                 default:
-                    throw new Exception("Invalid Statement");
+                    throw new QuerySyntaxException("Invalid Statement");
             }
         }
         if (resultStack.Count == 1)
@@ -40,12 +41,12 @@ public static class ObjectCalculator
             }
             else
             {
-                throw new Exception("Invalid Statement");
+                throw new QuerySyntaxException("Invalid Statement");
             }
         }
         else
         {
-            throw new Exception("Invalid Statement");
+            throw new QuerySyntaxException("Invalid Statement");
         }
     }
 
@@ -57,7 +58,7 @@ public static class ObjectCalculator
         }
         else
         {
-            throw new Exception($"{@object.GetType()} do not contain the property:{element.Value}");
+            throw new QuerySyntaxException($"{@object.GetType()} do not contain the property:{element.Value}");
         }
     }
 
@@ -83,7 +84,7 @@ public static class ObjectCalculator
     {
         if (resultStack.Count == 0)
         {
-            throw new Exception("Invalid Statement");
+            throw new QuerySyntaxException("Invalid Statement");
         }
 
         StatElement element = resultStack.Pop();
@@ -102,7 +103,7 @@ public static class ObjectCalculator
             }
             else
             {
-                throw new Exception($"{@object.GetType()}.{property.Name} is not a boolean property");
+                throw new QuerySyntaxException($"{@object.GetType()}.{property.Name} is not a boolean property");
             }
         }
         else
@@ -115,7 +116,7 @@ public static class ObjectCalculator
             }
             else
             {
-                throw new Exception($"{element.Value} is not boolean");
+                throw new QuerySyntaxException($"{element.Value} is not boolean");
             }
         }
         resultStack.Push(element);
@@ -125,7 +126,7 @@ public static class ObjectCalculator
     {
         if (resultStack.Count < 2)
         {
-            throw new Exception("Invalid Statement");
+            throw new QuerySyntaxException("Invalid Statement");
         }
 
         StatElement y = resultStack.Pop();
@@ -147,7 +148,7 @@ public static class ObjectCalculator
         }
         else
         {
-            throw new Exception("Invalid Statement");
+            throw new QuerySyntaxException("Invalid Statement");
         }
     }
 
@@ -155,7 +156,7 @@ public static class ObjectCalculator
     {
         if (resultStack.Count < 2)
         {
-            throw new Exception("Invalid Statement");
+            throw new QuerySyntaxException("Invalid Statement");
         }
 
         StatElement y = resultStack.Pop();
@@ -178,7 +179,7 @@ public static class ObjectCalculator
         }
         else
         {
-            throw new Exception("Invalid Statment");
+            throw new QuerySyntaxException("Invalid Statment");
         }
         resultStack.Push(element);
     }
@@ -232,7 +233,7 @@ public static class ObjectCalculator
             Operator.Equals => xStr == yStr,
             Operator.UnEquals => xStr != yStr,
             Operator.Like => CalculateLikeOperator(xStr, yStr, x.Type, y.Type),
-            _ => throw new Exception("Invalid Statement"),
+            _ => throw new QuerySyntaxException("Invalid Statement"),
         };
     }
 
@@ -265,7 +266,7 @@ public static class ObjectCalculator
         }
         else
         {
-            throw new Exception("Invalid Statement");
+            throw new QuerySyntaxException("Invalid Statement");
         }
     }
 
@@ -273,7 +274,7 @@ public static class ObjectCalculator
     {
         Operator.And => x && y,
         Operator.Or => x || y,
-        _ => throw new Exception("Invalid operator"),
+        _ => throw new QuerySyntaxException("Invalid operator"),
     };
 
     private static bool CalculateNotBooleanOperator(double x, double y, Operator @operator) => @operator switch
@@ -284,7 +285,7 @@ public static class ObjectCalculator
         Operator.Less => x < y,
         Operator.LessEquals => x <= y,
         Operator.UnEquals => x != y,
-        _ => throw new Exception("Invalid Statement"),
+        _ => throw new QuerySyntaxException("Invalid Statement"),
     };
 
     private static PropertyInfo GetObjectProperty(object @object, string propertyName)
@@ -296,7 +297,7 @@ public static class ObjectCalculator
         }
         else
         {
-            throw new Exception($"{@object.GetType()} do not have the property:{propertyName}");
+            throw new QuerySyntaxException($"{@object.GetType()} do not have the property:{propertyName}");
         }
     }
 
@@ -314,7 +315,7 @@ public static class ObjectCalculator
         }
         else
         {
-            throw new Exception("'element' must a variable or constant");
+            throw new QuerySyntaxException("'element' must a variable or constant");
         }
     }
 

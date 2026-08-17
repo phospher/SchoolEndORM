@@ -1,4 +1,5 @@
 using System.Xml;
+using ORMFramework.Exceptions;
 
 namespace ORMFramework.Configuration;
 public sealed class ConfigManager(string? configFilePath = null)
@@ -10,9 +11,9 @@ public sealed class ConfigManager(string? configFilePath = null)
         using var fs = new FileStream(ConfigFilePath, FileMode.Open, FileAccess.Read);
         using var reader = new XmlTextReader(fs) { WhitespaceHandling = WhitespaceHandling.None };
         if (!reader.Read() || reader.NodeType != XmlNodeType.XmlDeclaration)
-            throw new Exception("Invail Config File");
+            throw new OrmConfigurationException("Invalid config file: missing XML declaration");
         if (!reader.Read() || reader.NodeType != XmlNodeType.Element || reader.Name != "Configuration")
-            throw new Exception("Invail Config File");
+            throw new OrmConfigurationException("Invalid config file: root element is not 'Configuration'");
         var configuration = new Configuration();
         var result = true;
         while (result && reader.Read() && reader.NodeType == XmlNodeType.Element)
@@ -24,7 +25,7 @@ public sealed class ConfigManager(string? configFilePath = null)
                 _ => result,
             };
         }
-        if (!result) throw new Exception("Invail Config File");
+        if (!result) throw new OrmConfigurationException("Invalid config file");
         return configuration;
     }
 

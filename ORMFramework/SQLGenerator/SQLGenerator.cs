@@ -2,6 +2,7 @@ using System.Collections.Frozen;
 using System.Reflection;
 using System.Text;
 using ORMFramework.Configuration;
+using ORMFramework.Exceptions;
 using ORMFramework.Statment;
 
 namespace ORMFramework.SQL;
@@ -58,7 +59,7 @@ public sealed class SQLGenerator : ISQLGenerator
                         sql.Append(element.Value);
                         break;
                     default:
-                        throw new Exception("Invalid Statement");
+                        throw new QuerySyntaxException("Invalid Statement");
                 }
             }
             sql.Append(")");
@@ -68,9 +69,11 @@ public sealed class SQLGenerator : ISQLGenerator
 
     public string GetUpdateSQL(object oldObject, object newObject)
     {
+        ArgumentNullException.ThrowIfNull(oldObject);
+        ArgumentNullException.ThrowIfNull(newObject);
         if (oldObject.GetType() != newObject.GetType())
         {
-            throw new Exception("Type of oldOject must be the same as that of newObject");
+            throw new ArgumentException("Type of oldOject must be the same as that of newObject", nameof(newObject));
         }
 
         var sql = new StringBuilder("update ");
@@ -166,7 +169,7 @@ public sealed class SQLGenerator : ISQLGenerator
     {
         if (!IsBasicType(property.PropertyType))
         {
-            throw new Exception("Invalid property type");
+            throw new ArgumentException("Invalid property type", nameof(property));
         }
 
         return SqlLiteral.Comparison(property.Name, property.GetValue(@object, null));
@@ -176,7 +179,7 @@ public sealed class SQLGenerator : ISQLGenerator
     {
         if (!IsStringType(property.PropertyType))
         {
-            throw new Exception("Invalid property type");
+            throw new ArgumentException("Invalid property type", nameof(property));
         }
         return SqlLiteral.Comparison(property.Name, property.GetValue(@object, null));
     }
