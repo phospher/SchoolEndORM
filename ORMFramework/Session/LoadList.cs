@@ -18,145 +18,49 @@ public sealed class LoadList<T> : IList<T>
 
     public ISelectListener SelectListener { get; }
 
+    private List<T> Items => _items ??= LoadItems();
+
     public LoadList()
     {
-        _items = null;
         ForeignKeyValues = new List<object>();
         SelectListener = new DefaultSelectListener();
     }
 
-    public int IndexOf(T item)
-    {
-        if (_items == null)
-        {
-            GetItems();
-        }
-        return _items.IndexOf(item);
-    }
+    public int IndexOf(T item) => Items.IndexOf(item);
 
-    public void Insert(int index, T item)
-    {
-        if (_items == null)
-        {
-            GetItems();
-        }
-        _items.Insert(index, item);
-    }
+    public void Insert(int index, T item) => Items.Insert(index, item);
 
-    public void RemoveAt(int index)
-    {
-        if (_items == null)
-        {
-            GetItems();
-        }
-        _items.RemoveAt(index);
-    }
+    public void RemoveAt(int index) => Items.RemoveAt(index);
 
     public T this[int index]
     {
-        get
-        {
-            if (_items == null)
-            {
-                GetItems();
-            }
-            return _items[index];
-        }
-        set
-        {
-            if (_items == null)
-            {
-                GetItems();
-            }
-            _items[index] = value;
-        }
+        get => Items[index];
+        set => Items[index] = value;
     }
 
-    public void Add(T item)
-    {
-        if (_items == null)
-        {
-            GetItems();
-        }
-        _items.Add(item);
-    }
+    public void Add(T item) => Items.Add(item);
 
-    public void Clear()
-    {
-        if (_items == null)
-        {
-            GetItems();
-        }
-        _items.Clear();
-    }
+    public void Clear() => Items.Clear();
 
-    public bool Contains(T item)
-    {
-        if (_items == null)
-        {
-            GetItems();
-        }
-        return _items.Contains(item);
-    }
+    public bool Contains(T item) => Items.Contains(item);
 
-    public void CopyTo(T[] array, int arrayIndex)
-    {
-        if (_items == null)
-        {
-            GetItems();
-        }
-        _items.CopyTo(array, arrayIndex);
-    }
+    public void CopyTo(T[] array, int arrayIndex) => Items.CopyTo(array, arrayIndex);
 
-    public int Count
-    {
-        get
-        {
-            if (_items == null)
-            {
-                GetItems();
-            }
-            return _items.Count;
-        }
-    }
+    public int Count => Items.Count;
 
-    public bool IsReadOnly
-    {
-        get { return false; }
-    }
+    public bool IsReadOnly => false;
 
-    public bool Remove(T item)
-    {
-        if (_items == null)
-        {
-            GetItems();
-        }
-        return _items.Remove(item);
-    }
+    public bool Remove(T item) => Items.Remove(item);
 
-    IEnumerator<T> IEnumerable<T>.GetEnumerator()
-    {
-        if (_items == null)
-        {
-            GetItems();
-        }
-        return _items.GetEnumerator();
-    }
+    IEnumerator<T> IEnumerable<T>.GetEnumerator() => Items.GetEnumerator();
 
-    IEnumerator IEnumerable.GetEnumerator()
-    {
-        if (_items == null)
-        {
-            GetItems();
-        }
-        return _items.GetEnumerator();
-    }
+    IEnumerator IEnumerable.GetEnumerator() => ((IEnumerable)Items).GetEnumerator();
 
-    private void GetItems()
+    private List<T> LoadItems()
     {
         var statement = new StringBuilder();
         var @event = new SelectEvent();
-        _items = new List<T>();
+        var items = new List<T>();
         for (int i = 0; i < ForeignKeyValues.Count; i++)
         {
             statement.Append(ForeignKeyName);
@@ -185,8 +89,9 @@ public sealed class LoadList<T> : IList<T>
         SelectListener.OnSelect(@event, this);
         foreach (object item in (IEnumerable<object>)@event.Result)
         {
-            _items.Add((T)item);
+            items.Add((T)item);
         }
+        return items;
     }
 
 }
