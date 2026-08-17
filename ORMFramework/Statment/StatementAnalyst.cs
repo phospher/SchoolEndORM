@@ -125,7 +125,7 @@ public class StatementAnalyst
     {
         if (_currentElement.Length > 0)
         {
-            StatElement element = new StatElement();
+            var element = new StatElement();
             if (type == StatElementType.Variable)
             {
                 switch (_currentElement.ToString().ToLower())
@@ -217,10 +217,9 @@ public class StatementAnalyst
 
     private void ReadElement()
     {
-        char currentChar;
         while (_stringIndex < _queryString.Length)
         {
-            currentChar = _queryString[_stringIndex];
+            char currentChar = _queryString[_stringIndex];
             while (currentChar == ' ')
             {
                 currentChar = _queryString[++_stringIndex];
@@ -349,7 +348,7 @@ public class StatementAnalyst
     private void GenerateSuffixExpression()
     {
         StatElement element = _expression[_expressionIndex];
-        Stack<StatElement> operatorStack = new Stack<StatElement>();
+        var operatorStack = new Stack<StatElement>();
         if (element.Type == StatElementType.Constant || element.Type == StatElementType.Variable)
         {
             if (!ReadVariableOrConstant())

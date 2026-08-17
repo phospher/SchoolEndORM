@@ -1,7 +1,7 @@
 namespace ORMFramework.Configuration;
 public class Configuration
 {
-    private IList<EntityMapping> _mappings = new List<EntityMapping>();
+    private readonly IList<EntityMapping> _mappings = new List<EntityMapping>();
 
     public string ConnectionString { get; set; }
 

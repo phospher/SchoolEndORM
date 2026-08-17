@@ -12,7 +12,7 @@ public static class ObjectCalculator
     public static bool IsTargetObject(object @object, QueryExpression expression)
     {
         List<StatElement> suffixExpression = expression.SuffixExpression;
-        Stack<StatElement> resultStack = new Stack<StatElement>();
+        var resultStack = new Stack<StatElement>();
         StatElement result;
         foreach (StatElement element in suffixExpression)
         {
@@ -145,7 +145,7 @@ public static class ObjectCalculator
         }
         if (x.Value is bool && y.Value is bool)
         {
-            StatElement element = new StatElement();
+            var element = new StatElement();
             element.Type = StatElementType.Result;
             element.Value = CalculateBooleanOperator((bool)x.Value, (bool)y.Value, @operator);
             resultStack.Push(element);
@@ -165,26 +165,14 @@ public static class ObjectCalculator
 
         StatElement y = resultStack.Pop();
         StatElement x = resultStack.Pop();
-        StatElement element = new StatElement();
-        object xValue;
-        object yValue;
+        var element = new StatElement();
         element.Type = StatElementType.Result;
-        if (x.Type == StatElementType.Variable)
-        {
-            xValue = GetObjectProperty(@object, (string)x.Value).GetValue(@object, null);
-        }
-        else
-        {
-            xValue = x.Value;
-        }
-        if (y.Type == StatElementType.Variable)
-        {
-            yValue = GetObjectProperty(@object, (string)y.Value).GetValue(@object, null);
-        }
-        else
-        {
-            yValue = y.Value;
-        }
+        object xValue = x.Type == StatElementType.Variable
+            ? GetObjectProperty(@object, (string)x.Value).GetValue(@object, null)
+            : x.Value;
+        object yValue = y.Type == StatElementType.Variable
+            ? GetObjectProperty(@object, (string)y.Value).GetValue(@object, null)
+            : y.Value;
         if (IsString(x, @object) && IsString(y, @object))
         {
             element.Value = CalculateStringOperator(x, y, @operator, @object);

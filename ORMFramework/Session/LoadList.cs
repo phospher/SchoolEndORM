@@ -172,9 +172,8 @@ public class LoadList<T> : IList<T>
 
     private void GetItems()
     {
-        StringBuilder statement = new StringBuilder();
-        QueryExpression expression;
-        SelectEvent @event = new SelectEvent();
+        var statement = new StringBuilder();
+        var @event = new SelectEvent();
         _items = new List<T>();
         for (int i = 0; i < _foreignKeyValues.Count; i++)
         {
@@ -197,7 +196,7 @@ public class LoadList<T> : IList<T>
                 statement.Append(" || ");
             }
         }
-        expression = new StatementAnalyst(statement.ToString()).GetQueryExpression();
+        QueryExpression expression = new StatementAnalyst(statement.ToString()).GetQueryExpression();
         @event.Cache = _sessionCache;
         @event.QueryExpression = expression;
         @event.SearchType = typeof(T);

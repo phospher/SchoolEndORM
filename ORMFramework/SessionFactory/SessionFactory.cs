@@ -48,7 +48,7 @@ public class SessionFactory : ISessionFactory
 
     public ISession CreateSession()
     {
-        IPersistenceContext persistenceContext = new PersistenceContext(_driverFactory, _mappings);
+        var persistenceContext = new PersistenceContext(_driverFactory, _mappings);
         persistenceContext.SQLGenerator = new SQLGenerator();
         persistenceContext.SQLGenerator.PersistenceContext = persistenceContext;
         return new Session(this, persistenceContext);

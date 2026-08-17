@@ -7,11 +7,11 @@ using ORMFramework.Statment;
 namespace ORMFramework.Cache;
 public class SessionCache : ISessionCache
 {
-    private Dictionary<object, CacheEntity> _objList = new Dictionary<object, CacheEntity>();
-    private Dictionary<Type, List<CacheEntity>> _objTable = new Dictionary<Type, List<CacheEntity>>();
-    private List<CacheEntity> _insertList = new List<CacheEntity>();
-    private List<CacheEntity> _updateList = new List<CacheEntity>();
-    private List<CacheEntity> _deleteList = new List<CacheEntity>();
+    private readonly Dictionary<object, CacheEntity> _objList = new();
+    private readonly Dictionary<Type, List<CacheEntity>> _objTable = new();
+    private readonly List<CacheEntity> _insertList = new();
+    private readonly List<CacheEntity> _updateList = new();
+    private readonly List<CacheEntity> _deleteList = new();
 
     public IPersistenceContext PersistenceContext { get; set; }
 
@@ -22,8 +22,8 @@ public class SessionCache : ISessionCache
 
     public IEnumerable<object> Search(Type objType, QueryExpression expression)
     {
-        List<Guid> ignoreIds = new List<Guid>();
-        List<object> result = new List<object>();
+        var ignoreIds = new List<Guid>();
+        var result = new List<object>();
         IList<object> globalCacheObjects;
         if (_objTable.ContainsKey(objType))
         {
@@ -62,7 +62,7 @@ public class SessionCache : ISessionCache
                     Type referenceType = objType.GetProperty(relation.Property).PropertyType;
                     if (relation.Type == RelationType.ManyToOne || relation.Type == RelationType.OneToOne)
                     {
-                        StringBuilder expressionStr = new StringBuilder();
+                        var expressionStr = new StringBuilder();
                         QueryExpression expression;
                         object foreignKeysValue = _objList[soruceObject].ForeignKeys[relation.KeyColum];
                         expressionStr.Append(relation.ReferenceColum);
@@ -104,7 +104,7 @@ public class SessionCache : ISessionCache
                         referenceType = (referenceType.GetGenericArguments())[0];
                         Type loadListType = Assembly.Load("ORMFramework").GetType("ORMFramework.LoadList`1").MakeGenericType(referenceType);
                         object loadList = Activator.CreateInstance(loadListType);
-                        List<object> foreignKeyValues = (List<object>)loadListType.GetProperty("ForeignKeyValues").GetValue(loadList, null);
+                        var foreignKeyValues = (List<object>)loadListType.GetProperty("ForeignKeyValues").GetValue(loadList, null);
                         loadListType.GetProperty("SessionCache").SetValue(loadList, this, null);
                         if (relation.Type == RelationType.OneToMany)
                         {
@@ -113,8 +113,8 @@ public class SessionCache : ISessionCache
                         }
                         else
                         {
-                            ManyToManyRelation relation2 = (ManyToManyRelation)relation;
-                            StringBuilder sql = new StringBuilder("select ");
+                            var relation2 = (ManyToManyRelation)relation;
+                            var sql = new StringBuilder("select ");
                             object foreingKeyValue = _objList[soruceObject].ForeignKeys[relation2.KeyColum];
                             sql.Append(relation2.ReferenceClassColum);
                             sql.Append(" from ");
@@ -205,7 +205,7 @@ public class SessionCache : ISessionCache
             }
             else
             {
-                CacheEntity cacheEntity = new CacheEntity();
+                var cacheEntity = new CacheEntity();
                 cacheEntity.ObjectId = Guid.NewGuid();
                 cacheEntity.Value = @object;
                 cacheEntity.Version = DateTime.UtcNow.Ticks;
@@ -270,14 +270,13 @@ public class SessionCache : ISessionCache
 
     private List<object> ProcessQueryCommand(string sql)
     {
-        List<object> result = new List<object>();
+        var result = new List<object>();
         IDbDriverFactory driverFactory = this.PersistenceContext.DbDriverFactory;
         IDbConnection conn = driverFactory.GetDbConnection();
         IDbDataAdapter da = driverFactory.GetDbDataAdapter(sql, conn);
-        DataSet ds = new DataSet();
-        DataTable dt;
+        var ds = new DataSet();
         da.Fill(ds);
-        dt = ds.Tables[0];
+        DataTable dt = ds.Tables[0];
         foreach (DataRow row in dt.Rows)
         {
             result.Add(row[0]);
@@ -289,11 +288,9 @@ public class SessionCache : ISessionCache
     {
         IDbDriverFactory driverFactory = this.PersistenceContext.DbDriverFactory;
         IDbConnection conn = driverFactory.GetDbConnection();
-        IDbCommand cmd;
-        IDbTransaction tran;
         conn.Open();
-        tran = conn.BeginTransaction();
-        cmd = conn.CreateCommand();
+        IDbTransaction tran = conn.BeginTransaction();
+        IDbCommand cmd = conn.CreateCommand();
         cmd.Transaction = tran;
         try
         {
@@ -394,7 +391,7 @@ public class SessionCache : ISessionCache
 
     private IList<object> GetObjectsFromGlobalCache(Type objType, QueryExpression expression, IList<Guid> ignoreIds)
     {
-        List<object> result = new List<object>();
+        var result = new List<object>();
         IEnumerable<GlobalCacheResult> globalCacheResults;
         ignoreIds ??= [];
         foreach (CacheEntity cacheEntity in _deleteList)
@@ -404,7 +401,7 @@ public class SessionCache : ISessionCache
         globalCacheResults = GlobalCache.Search(objType, expression, this.PersistenceContext, ignoreIds);
         foreach (GlobalCacheResult globalCacheResult in globalCacheResults)
         {
-            CacheEntity cacheEntity = new CacheEntity();
+            var cacheEntity = new CacheEntity();
             cacheEntity.ObjectId = globalCacheResult.ObjectId;
             cacheEntity.Value = globalCacheResult.Value;
             cacheEntity.Version = globalCacheResult.Version;

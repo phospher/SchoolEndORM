@@ -10,8 +10,8 @@ public static class GlobalCache
 {
     private static int CACHEMAXCOUNT = 1000;
     private static int INCREASE = 100;
-    private static Dictionary<Type, List<GlobalCacheEntity>> _objTable = new Dictionary<Type, List<GlobalCacheEntity>>();
-    private static Dictionary<Guid, GlobalCacheEntity> _objList = new Dictionary<Guid, GlobalCacheEntity>();
+    private static readonly Dictionary<Type, List<GlobalCacheEntity>> _objTable = new();
+    private static readonly Dictionary<Guid, GlobalCacheEntity> _objList = new();
     private static readonly Type[] _basicType = new Type[] {
         typeof (bool), typeof (byte), typeof (sbyte),
         typeof (decimal), typeof (double), typeof (float), typeof (int), typeof (uint), typeof (long),
@@ -25,9 +25,9 @@ public static class GlobalCache
 
     public static IEnumerable<GlobalCacheResult> Search(Type objType, QueryExpression queryExpression, IPersistenceContext persistenceContext, IList<Guid> ignoreIds)
     {
-        List<GlobalCacheResult> result = new List<GlobalCacheResult>();
+        var result = new List<GlobalCacheResult>();
         EntityMapping mapping = persistenceContext.GetEntityMappingByClassName(objType.FullName);
-        Dictionary<string, List<object>> ignorePrimaryKey = new Dictionary<string, List<object>>();
+        var ignorePrimaryKey = new Dictionary<string, List<object>>();
         StringBuilder sql;
         ISQLGenerator sqlGenerator = persistenceContext.SQLGenerator;
         if (queryExpression == null)
@@ -97,7 +97,7 @@ public static class GlobalCache
                 {
                     Monitor.PulseAll(cacheEntity);
                     Monitor.Exit(cacheEntity);
-                    GlobalCacheResult result = new GlobalCacheResult(cacheEntity.ObjectId, CloneObject(cacheEntity.Value), cacheEntity.Version);
+                    var result = new GlobalCacheResult(cacheEntity.ObjectId, CloneObject(cacheEntity.Value), cacheEntity.Version);
                     result.ForeignKeys = cacheEntity.ForeignKeys;
                     return result;
                 }
@@ -107,7 +107,7 @@ public static class GlobalCache
                     cacheEntity.ReadCount++;
                     Monitor.Pulse(cacheEntity);
                     Monitor.Exit(cacheEntity);
-                    GlobalCacheResult result = new GlobalCacheResult(cacheEntity.ObjectId, CloneObject(cacheEntity.Value), cacheEntity.Version);
+                    var result = new GlobalCacheResult(cacheEntity.ObjectId, CloneObject(cacheEntity.Value), cacheEntity.Version);
                     result.ForeignKeys = cacheEntity.ForeignKeys;
                     lock (cacheEntity)
                     {
@@ -226,7 +226,7 @@ public static class GlobalCache
 
     public static void Insert(CacheEntity entity)
     {
-        GlobalCacheEntity cacheEntity = new GlobalCacheEntity();
+        var cacheEntity = new GlobalCacheEntity();
         cacheEntity.ObjectId = entity.ObjectId;
         cacheEntity.Value = entity.Value;
         cacheEntity.Version = entity.Version;
@@ -321,7 +321,7 @@ public static class GlobalCache
                     entity.ReadCount++;
                     Monitor.PulseAll(entity);
                     Monitor.Exit(entity);
-                    GlobalCacheResult cacheResult = new GlobalCacheResult(entity.ObjectId, CloneObject(entity.Value), entity.Version);
+                    var cacheResult = new GlobalCacheResult(entity.ObjectId, CloneObject(entity.Value), entity.Version);
                     cacheResult.ForeignKeys = entity.ForeignKeys;
                     resultList.Add(cacheResult);
                     foreach (string key in mapping.Keys)
@@ -431,10 +431,9 @@ public static class GlobalCache
     {
         IDbConnection conn = persistenceContext.Connection;
         IDbDataAdapter dataAdapter = persistenceContext.DbDriverFactory.GetDbDataAdapter(sql, conn);
-        DataSet ds = new DataSet();
-        DataTable dt;
+        var ds = new DataSet();
         dataAdapter.Fill(ds);
-        dt = ds.Tables[0];
+        DataTable dt = ds.Tables[0];
         if (dt.Rows.Count > 0)
         {
             if (!_objTable.ContainsKey(objType))
@@ -447,8 +446,6 @@ public static class GlobalCache
                 {
                     object newObj = Activator.CreateInstance(objType);
                     EntityMapping mapping = persistenceContext.GetEntityMappingByClassName(objType.FullName);
-                    GlobalCacheEntity cacheEntity;
-                    GlobalCacheResult cacheResult;
                     foreach (PropertyInfo property in objType.GetProperties())
                     {
                         if (IsBasicType(property.PropertyType))
@@ -456,7 +453,7 @@ public static class GlobalCache
                             property.SetValue(newObj, row[property.Name], null);
                         }
                     }
-                    cacheEntity = new GlobalCacheEntity(newObj);
+                    var cacheEntity = new GlobalCacheEntity(newObj);
                     foreach (EntityRelation relation in mapping.Relations.Values)
                     {
                         cacheEntity.ForeignKeys.Add(relation.KeyColum, row[relation.KeyColum]);
@@ -468,7 +465,7 @@ public static class GlobalCache
                         _objTable.Add(objType, new List<GlobalCacheEntity>());
                     }
                     _objTable[objType].Add(cacheEntity);
-                    cacheResult = new GlobalCacheResult(cacheEntity.ObjectId, CloneObject(newObj), cacheEntity.Version);
+                    var cacheResult = new GlobalCacheResult(cacheEntity.ObjectId, CloneObject(newObj), cacheEntity.Version);
                     cacheResult.ForeignKeys = cacheEntity.ForeignKeys;
                     cacheEntity.ReferenceCount++;
                     resultList.Add(cacheResult);

@@ -8,10 +8,10 @@ namespace ORMFramework;
 public class Session : ISession, IDisposable
 {
     private ISelectListener _selectListener;
-    private List<IInsertListener> _insertListeners = new List<IInsertListener>();
-    private List<IDeleteListener> _deleteListeners = new List<IDeleteListener>();
-    private List<IUpdateListener> _updateListeners = new List<IUpdateListener>();
-    private List<ISubmitListener> _submitListeners = new List<ISubmitListener>();
+    private readonly List<IInsertListener> _insertListeners = new();
+    private readonly List<IDeleteListener> _deleteListeners = new();
+    private readonly List<IUpdateListener> _updateListeners = new();
+    private readonly List<ISubmitListener> _submitListeners = new();
     private ICommandListener _commandListener;
     private IPersistenceContext _persistenceContext;
     private ISessionCache _sessionCache;
@@ -92,7 +92,7 @@ public class Session : ISession, IDisposable
 
     public object[] Search(Type objType, string selectCommand)
     {
-        List<object> result = new List<object>();
+        var result = new List<object>();
         foreach (object item in OnSearch(objType, selectCommand))
         {
             result.Add(item);
@@ -102,7 +102,7 @@ public class Session : ISession, IDisposable
 
     public T[] Search<T>(string selectCommand)
     {
-        List<T> result = new List<T>();
+        var result = new List<T>();
         foreach (object item in OnSearch(typeof(T), selectCommand))
         {
             result.Add((T)item);
@@ -112,7 +112,7 @@ public class Session : ISession, IDisposable
 
     public void Update(object @object)
     {
-        UpdateEvent @event = new UpdateEvent();
+        var @event = new UpdateEvent();
         @event.Cache = _sessionCache;
         @event.Entity = @object;
         foreach (IUpdateListener listener in _updateListeners)
@@ -123,7 +123,7 @@ public class Session : ISession, IDisposable
 
     public void Delete(object @object)
     {
-        UpdateEvent @event = new UpdateEvent();
+        var @event = new UpdateEvent();
         @event.Cache = _sessionCache;
         @event.Entity = @object;
         foreach (IDeleteListener listener in _deleteListeners)
@@ -134,7 +134,7 @@ public class Session : ISession, IDisposable
 
     public void Insert(object @object)
     {
-        UpdateEvent @event = new UpdateEvent();
+        var @event = new UpdateEvent();
         @event.Cache = _sessionCache;
         @event.Entity = @object;
         foreach (IInsertListener listener in _insertListeners)
@@ -145,7 +145,7 @@ public class Session : ISession, IDisposable
 
     public void Submit()
     {
-        ActionEvent @event = new ActionEvent();
+        var @event = new ActionEvent();
         @event.Cache = _sessionCache;
         foreach (ISubmitListener listener in _submitListeners)
         {
@@ -155,7 +155,7 @@ public class Session : ISession, IDisposable
 
     public int ExecuteNonQuery(string commandText)
     {
-        CommandEvent @event = new CommandEvent();
+        var @event = new CommandEvent();
         @event.CommandText = commandText;
         @event.PersistenceContext = _persistenceContext;
         @event.IsQuery = false;
@@ -165,7 +165,7 @@ public class Session : ISession, IDisposable
 
     public DataSet ExecuteQuery(string commandText)
     {
-        CommandEvent @event = new CommandEvent();
+        var @event = new CommandEvent();
         @event.CommandText = commandText;
         @event.PersistenceContext = _persistenceContext;
         @event.IsQuery = true;
@@ -176,7 +176,7 @@ public class Session : ISession, IDisposable
     private IEnumerable<object> OnSearch(Type objType, string selectCommand)
     {
         QueryExpression expression = new StatementAnalyst(selectCommand).GetQueryExpression();
-        SelectEvent @event = new SelectEvent();
+        var @event = new SelectEvent();
         @event.Cache = _sessionCache;
         @event.QueryExpression = expression;
         @event.SearchType = objType;

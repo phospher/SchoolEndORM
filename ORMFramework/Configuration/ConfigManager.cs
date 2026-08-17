@@ -23,9 +23,9 @@ public class ConfigManager
 
     public Configuration GetSystemConfiguration()
     {
-        FileStream fs = new FileStream(_configFilePath, FileMode.Open);
-        XmlTextReader reader = new XmlTextReader(fs);
-        Configuration configuration = new Configuration();
+        var fs = new FileStream(_configFilePath, FileMode.Open);
+        var reader = new XmlTextReader(fs);
+        var configuration = new Configuration();
         bool result = true;
         reader.WhitespaceHandling = WhitespaceHandling.None;
         if (reader.Read() && reader.NodeType == XmlNodeType.XmlDeclaration)
@@ -156,8 +156,8 @@ public class ConfigManager
 
     private bool ReadMap(XmlTextReader reader, Configuration configuration)
     {
-        XmlDocument xmlDoc = new XmlDocument();
-        EntityMapping map = new EntityMapping();
+        var xmlDoc = new XmlDocument();
+        var map = new EntityMapping();
         XmlNode mapNode;
         xmlDoc.Load(reader.ReadSubtree());
         mapNode = xmlDoc.ChildNodes.Item(0);
@@ -211,7 +211,7 @@ public class ConfigManager
             return null;
         }
 
-        ManyToManyRelation relation = new ManyToManyRelation();
+        var relation = new ManyToManyRelation();
         relation.Type = RelationType.MantToMany;
         relation.KeyColum = node.Attributes["KeyColum"].Value;
         relation.Property = node.Attributes["Property"].Value;

@@ -25,11 +25,11 @@ public class SQLGenerator : ISQLGenerator
 
     public string GetSelectSQL(Type type, QueryExpression queryExpression)
     {
-        List<StatElement> expression;
-        StringBuilder sql = new StringBuilder("select * from ");
+        var sql = new StringBuilder("select * from ");
         EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(type.FullName);
         string tableName = mapping.TableName;
         sql.Append(tableName);
+        List<StatElement> expression;
         if (queryExpression != null)
         {
             expression = queryExpression.NifixExpression;
@@ -70,8 +70,8 @@ public class SQLGenerator : ISQLGenerator
             throw new Exception("Type of oldOject must be the same as that of newObject");
         }
 
-        StringBuilder sql = new StringBuilder("update ");
-        StringBuilder where = new StringBuilder(" where (");
+        var sql = new StringBuilder("update ");
+        var where = new StringBuilder(" where (");
         EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(newObject.GetType().FullName);
         string tableName = mapping.TableName;
         PropertyInfo[] properties = oldObject.GetType().GetProperties();
@@ -123,7 +123,7 @@ public class SQLGenerator : ISQLGenerator
 
     public string GetDeleteSQL(object @object)
     {
-        StringBuilder sql = new StringBuilder("delete from ");
+        var sql = new StringBuilder("delete from ");
         EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
         string tableName = mapping.TableName;
         PropertyInfo[] properties = @object.GetType().GetProperties();
@@ -164,9 +164,9 @@ public class SQLGenerator : ISQLGenerator
 
     public string GetInsertSQL(object @object)
     {
-        StringBuilder sql = new StringBuilder("insert into ");
-        StringBuilder colums = new StringBuilder("(");
-        StringBuilder values = new StringBuilder("(");
+        var sql = new StringBuilder("insert into ");
+        var colums = new StringBuilder("(");
+        var values = new StringBuilder("(");
         EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
         string tableName = mapping.TableName;
         PropertyInfo[] properties = @object.GetType().GetProperties();

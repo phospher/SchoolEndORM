@@ -17,7 +17,7 @@ class DefaultCommandListener : ICommandListener
         if (@event.IsQuery)
         {
             IDbDataAdapter da = @event.PersistenceContext.DbDriverFactory.GetDbDataAdapter(@event.CommandText, conn);
-            DataSet ds = new DataSet();
+            var ds = new DataSet();
             da.Fill(ds);
             @event.Result = ds;
         }

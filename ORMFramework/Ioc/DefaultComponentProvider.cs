@@ -29,7 +29,7 @@ public class DefaultComponentProvider : IComponentProvider
     {
         this.componentImplDict = componentImplDict;
 
-        ServiceCollection services = new ServiceCollection();
+        var services = new ServiceCollection();
 
         foreach(KeyValuePair<Type,Type> componentImpl in this.componentImplDict)
         {
