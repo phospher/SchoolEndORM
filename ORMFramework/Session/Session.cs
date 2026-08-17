@@ -11,7 +11,7 @@ public sealed class Session : ISession, IDisposable
 
     private bool _disposed;
 
-    public ISessionFactory SessionFactory { get; set; }
+    public ISessionFactory? SessionFactory { get; set; }
 
     public ISelectListener SelectListener { get; }
 
@@ -35,13 +35,13 @@ public sealed class Session : ISession, IDisposable
 
     }
 
-    public Session(ISessionFactory sessionFactory, IPersistenceContext persistenceContext) : this(sessionFactory, persistenceContext, new SessionCache(), new DefaultSelectListener(),
+    public Session(ISessionFactory? sessionFactory, IPersistenceContext persistenceContext) : this(sessionFactory, persistenceContext, new SessionCache(), new DefaultSelectListener(),
         new DefaultInsertListener(), new DefaultUpdateListener(), new DefaultDeleteListener(), new DefaultSubmitListener(), new DefaultCommandListener())
     {
 
     }
 
-    public Session(ISessionFactory sessionFactory, IPersistenceContext persistenceContext, ISessionCache sessionCache, ISelectListener selectListener, IInsertListener insertListener,
+    public Session(ISessionFactory? sessionFactory, IPersistenceContext persistenceContext, ISessionCache sessionCache, ISelectListener selectListener, IInsertListener insertListener,
         IUpdateListener updateListener, IDeleteListener deleteListener, ISubmitListener submitListener, ICommandListener commandListener)
     {
         SessionFactory = sessionFactory;
@@ -111,7 +111,7 @@ public sealed class Session : ISession, IDisposable
         @event.PersistenceContext = PersistenceContext;
         @event.IsQuery = false;
         CommandListener.OnExecute(@event, this);
-        return (int)@event.Result;
+        return (int)@event.Result!;
     }
 
     public DataSet ExecuteQuery(string commandText)
@@ -122,7 +122,7 @@ public sealed class Session : ISession, IDisposable
         @event.PersistenceContext = PersistenceContext;
         @event.IsQuery = true;
         CommandListener.OnExecute(@event, this);
-        return (DataSet)@event.Result;
+        return (DataSet)@event.Result!;
     }
 
     private IEnumerable<object> OnSearch(Type objType, string selectCommand)
@@ -133,7 +133,7 @@ public sealed class Session : ISession, IDisposable
         @event.QueryExpression = expression;
         @event.SearchType = objType;
         SelectListener.OnSelect(@event, this);
-        return (IEnumerable<object>)@event.Result;
+        return (IEnumerable<object>)@event.Result!;
     }
 
     public void Dispose()

@@ -5,7 +5,7 @@ using log4net.Repository;
 namespace ORMFramework.LogHelper;
 public static class LogHelper
 {
-    private static ILog _log;
+    private static ILog _log = null!;
 
     public static void InitLog(string configFilePath)
     {

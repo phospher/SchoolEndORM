@@ -33,7 +33,8 @@ public sealed class SQLGenerator : ISQLGenerator
     public string GetSelectSQL(Type type, QueryExpression? queryExpression)
     {
         var sql = new StringBuilder("select * from ");
-        EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(type.FullName ?? throw new OrmConfigurationException($"Type '{type}' has no full name."));
+        EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(type.FullName ?? throw new OrmConfigurationException($"Type '{type}' has no full name."))
+            ?? throw new OrmConfigurationException($"No mapping is registered for type '{type}'.");
         string tableName = mapping.TableName;
         sql.Append(tableName);
         List<StatElement>? expression = queryExpression?.NifixExpression;
@@ -73,7 +74,8 @@ public sealed class SQLGenerator : ISQLGenerator
 
         var sql = new StringBuilder("update ");
         var where = new StringBuilder(" where (");
-        EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(newObject.GetType().FullName ?? throw new OrmConfigurationException($"Type '{newObject.GetType()}' has no full name."));
+        EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(newObject.GetType().FullName ?? throw new OrmConfigurationException($"Type '{newObject.GetType()}' has no full name."))
+            ?? throw new OrmConfigurationException($"No mapping is registered for type '{newObject.GetType()}'.");
         string tableName = mapping.TableName;
         PropertyInfo[] properties = oldObject.GetType().GetProperties();
         sql.Append(tableName);
@@ -125,7 +127,8 @@ public sealed class SQLGenerator : ISQLGenerator
     public string GetDeleteSQL(object @object)
     {
         var parts = new List<string>();
-        EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(@object.GetType().FullName ?? throw new OrmConfigurationException($"Type '{@object.GetType()}' has no full name."));
+        EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(@object.GetType().FullName ?? throw new OrmConfigurationException($"Type '{@object.GetType()}' has no full name."))
+            ?? throw new OrmConfigurationException($"No mapping is registered for type '{@object.GetType()}'.");
         string tableName = mapping.TableName;
         foreach (PropertyInfo property in @object.GetType().GetProperties())
         {
@@ -145,7 +148,8 @@ public sealed class SQLGenerator : ISQLGenerator
     {
         var columns = new List<string>();
         var values = new List<string>();
-        EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(@object.GetType().FullName ?? throw new OrmConfigurationException($"Type '{@object.GetType()}' has no full name."));
+        EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(@object.GetType().FullName ?? throw new OrmConfigurationException($"Type '{@object.GetType()}' has no full name."))
+            ?? throw new OrmConfigurationException($"No mapping is registered for type '{@object.GetType()}'.");
         string tableName = mapping.TableName;
         foreach (PropertyInfo property in @object.GetType().GetProperties())
         {

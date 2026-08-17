@@ -5,9 +5,9 @@ using ORMFramework.SQL;
 namespace ORMFramework;
 public sealed class PersistenceContext : IPersistenceContext
 {
-    private IDbConnection _connection;
+    private IDbConnection? _connection;
 
-    public IDictionary<string, EntityMapping> Mappings { get; set; }
+    public IDictionary<string, EntityMapping> Mappings { get; set; } = new Dictionary<string, EntityMapping>();
 
     public IDbConnection Connection
     {
@@ -21,7 +21,7 @@ public sealed class PersistenceContext : IPersistenceContext
         }
     }
 
-    public ISQLGenerator SQLGenerator { get; set; }
+    public ISQLGenerator SQLGenerator { get; set; } = null!;
 
     public IDbDriverFactory DbDriverFactory { get; }
 
@@ -37,7 +37,7 @@ public sealed class PersistenceContext : IPersistenceContext
         Mappings = mappings;
     }
 
-    public EntityMapping GetEntityMappingByClassName(string className)
+    public EntityMapping? GetEntityMappingByClassName(string className)
     {
         return Mappings != null && Mappings.TryGetValue(className, out var mapping) ? mapping : null;
     }

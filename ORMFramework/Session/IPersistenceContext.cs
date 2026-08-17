@@ -9,5 +9,5 @@ public interface IPersistenceContext
     IDbConnection Connection { get; }
     IDictionary<string, EntityMapping> Mappings { get; set; }
     ISQLGenerator SQLGenerator { get; set; }
-    EntityMapping GetEntityMappingByClassName(string className);
+    EntityMapping? GetEntityMappingByClassName(string className);
 }

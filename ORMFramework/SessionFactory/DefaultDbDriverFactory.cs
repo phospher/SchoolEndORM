@@ -6,9 +6,9 @@ namespace ORMFramework;
 public sealed class DefaultDbDriverFactory : IDbDriverFactory
 {
 
-    public string ConnectionString { get; set; }
+    public string ConnectionString { get; set; } = "";
 
-    private DbProviderFactory _dbProviderFactory;
+    private DbProviderFactory _dbProviderFactory = null!;
 
     private readonly static ConcurrentDictionary<string, byte> _registeredProviderName = new();
 
@@ -48,14 +48,14 @@ public sealed class DefaultDbDriverFactory : IDbDriverFactory
 
     public IDbConnection GetDbConnection(string connectionString)
     {
-        IDbConnection conn = _dbProviderFactory.CreateConnection();
+        IDbConnection conn = _dbProviderFactory.CreateConnection() ?? throw new InvalidOperationException("DbProviderFactory returned a null connection");
         conn.ConnectionString = connectionString;
         return conn;
     }
 
     public IDbCommand GetDBCommand()
     {
-        return _dbProviderFactory.CreateCommand();
+        return _dbProviderFactory.CreateCommand() ?? throw new InvalidOperationException("DbProviderFactory returned a null command");
     }
 
     public IDbCommand GetDBCommand(string commandText)
@@ -74,7 +74,7 @@ public sealed class DefaultDbDriverFactory : IDbDriverFactory
 
     public IDbDataAdapter GetDbDataAdapter()
     {
-        return _dbProviderFactory.CreateDataAdapter();
+        return _dbProviderFactory.CreateDataAdapter() ?? throw new InvalidOperationException("DbProviderFactory returned a null data adapter");
     }
 
     public IDbDataAdapter GetDbDataAdapter(string selectCommandText, IDbConnection connection)
@@ -95,7 +95,7 @@ public sealed class DefaultDbDriverFactory : IDbDriverFactory
 
     public DbCommandBuilder GetDBCommandBuilder()
     {
-        return _dbProviderFactory.CreateCommandBuilder();
+        return _dbProviderFactory.CreateCommandBuilder() ?? throw new InvalidOperationException("DbProviderFactory returned a null command builder");
     }
 
     public DbCommandBuilder GetDBCommandBuilder(IDbDataAdapter dbDataAdapter)

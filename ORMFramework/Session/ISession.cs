@@ -7,7 +7,7 @@ public interface ISession : IDisposable
     IDbConnection Connection { get; }
     IPersistenceContext PersistenceContext { get; }
     ISelectListener SelectListener { get; }
-    ISessionFactory SessionFactory { get; set; }
+    ISessionFactory? SessionFactory { get; set; }
     List<IUpdateListener> UpdateListeners { get; }
     List<IInsertListener> InsertListeners { get; }
     List<IDeleteListener> DeleteListeners { get; }

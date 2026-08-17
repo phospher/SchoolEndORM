@@ -4,14 +4,14 @@ using ORMFramework.Ioc;
 namespace ORMFramework;
 public sealed class SessionFactoryIoc : ISessionFactory
 {
-    private IDbDriverFactory _driverFactory;
-    private Dictionary<string, EntityMapping> _mappings;
-    private IComponentProvider _componentProvider;
+    private IDbDriverFactory _driverFactory = null!;
+    private Dictionary<string, EntityMapping> _mappings = null!;
+    private IComponentProvider _componentProvider = null!;
 
     public Configuration.Configuration Configuration
     {
         get; private set;
-    }
+    } = null!;
 
     public void Initialize() => Initialize(string.Empty);
 

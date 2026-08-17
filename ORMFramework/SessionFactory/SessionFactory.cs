@@ -4,13 +4,13 @@ using ORMFramework.SQL;
 namespace ORMFramework;
 public sealed class SessionFactory : ISessionFactory
 {
-    private IDbDriverFactory _driverFactory;
-    private Dictionary<string, EntityMapping> _mappings;
+    private IDbDriverFactory _driverFactory = null!;
+    private Dictionary<string, EntityMapping> _mappings = null!;
 
     public Configuration.Configuration Configuration
     {
         get; private set;
-    }
+    } = null!;
 
     public void Initialize()
     {

@@ -9,11 +9,11 @@ using ORMFramework.Statment;
 namespace ORMFramework;
 public sealed class LoadList<T> : IList<T>
 {
-    private List<T> _items;
+    private List<T>? _items;
 
-    public ISessionCache SessionCache { get; set; }
+    public ISessionCache SessionCache { get; set; } = null!;
 
-    public string ForeignKeyName { get; set; }
+    public string ForeignKeyName { get; set; } = "";
 
     public List<object> ForeignKeyValues { get; }
 
@@ -77,7 +77,7 @@ public sealed class LoadList<T> : IList<T>
         @event.QueryExpression = expression;
         @event.SearchType = typeof(T);
         SelectListener.OnSelect(@event, this);
-        foreach (object item in (IEnumerable<object>)@event.Result)
+        foreach (object item in (IEnumerable<object>)@event.Result!)
         {
             items.Add((T)item);
         }
