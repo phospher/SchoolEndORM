@@ -48,6 +48,9 @@ public sealed class SessionCache : ISessionCache
         return result;
     }
 
+    /// <summary>
+    /// 依据外键值构造谓词字符串并解析引用关系；谓词经字符串拼接进入 SQL，不提供 SQL 注入防护，调用方需自行约束输入。
+    /// </summary>
     public void GetReferenceClasses(object soruceObject)
     {
         if (_objList.TryGetValue(soruceObject, out var sourceEntity))

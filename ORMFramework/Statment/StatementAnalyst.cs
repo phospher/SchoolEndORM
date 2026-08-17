@@ -149,7 +149,7 @@ public class StatementAnalyst
                     }
                     catch
                     {
-                        throw new Exception(string.Format("Invalid Vairable:{0}", _currentElement.ToString()));
+                        throw new Exception($"Invalid Vairable:{_currentElement}");
                     }
                 }
                 element.Type = StatElementType.Constant;

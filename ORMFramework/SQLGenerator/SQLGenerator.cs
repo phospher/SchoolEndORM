@@ -5,6 +5,10 @@ using ORMFramework.Configuration;
 using ORMFramework.Statment;
 
 namespace ORMFramework.SQL;
+
+/// <summary>
+/// 通过字符串拼接生成 SQL；不使用参数化查询，不提供 SQL 注入防护，调用方需自行约束输入。
+/// </summary>
 public sealed class SQLGenerator : ISQLGenerator
 {
     private static readonly string[] _sqlOperators = ["=", "!=", ">", ">=", "<", "<=", " and ", " or ", " like ", "(", ")"];

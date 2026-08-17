@@ -33,7 +33,7 @@ class Program
         IEnumerable<Student> result = session.Search<Student>("1==1");
         foreach (Student item in result)
         {
-            Console.WriteLine("{0}--{1}--{2}", item.StudentId, item.Name, item.Gender);
+            Console.WriteLine($"{item.StudentId}--{item.Name}--{item.Gender}");
         }
         Console.WriteLine("-------------------------------------");
         Console.WriteLine("Got objects successfully...");
@@ -57,7 +57,7 @@ class Program
     {
         Student[] result;
         Console.WriteLine("Update an object...");
-        result = session.Search<Student>(string.Format("StudentId=='{0}'", studentId));
+        result = session.Search<Student>($"StudentId=='{studentId}'");
         result[0].Name = "Lisa";
         result[0].Gender = "Female";
         session.Update(result[0]);
@@ -71,7 +71,7 @@ class Program
     {
         Student[] result;
         Console.WriteLine("Delete an object...");
-        result = session.Search<Student>(string.Format("StudentId=='{0}'", studentId));
+        result = session.Search<Student>($"StudentId=='{studentId}'");
         session.Delete(result[0]);
         session.Submit();
         Console.WriteLine("Deleted Successfully...");
@@ -85,11 +85,11 @@ class Program
         Console.WriteLine("Test one-to-many relation...");
         Console.WriteLine("Get an object:");
         result = session.Search<Department>("Id==1");
-        Console.WriteLine("{0}--{1}", result[0].Id, result[0].Name);
+        Console.WriteLine($"{result[0].Id}--{result[0].Name}");
         Console.WriteLine("Objects refer to the object:");
         foreach (Teacher t in result[0].Teachers)
         {
-            Console.WriteLine("{0}--{1}--{2}", t.Id, t.Name, t.Gender);
+            Console.WriteLine($"{t.Id}--{t.Name}--{t.Gender}");
         }
     }
 
@@ -99,9 +99,9 @@ class Program
         Console.WriteLine("Test many-to-one relation...");
         Console.WriteLine("Get an object:");
         result = session.Search<Teacher>("Id==1");
-        Console.WriteLine("{0}--{1}--{2}", result[0].Id, result[0].Name, result[0].Gender);
+        Console.WriteLine($"{result[0].Id}--{result[0].Name}--{result[0].Gender}");
         Console.WriteLine("Object refers to the object:");
-        Console.WriteLine("{0}--{1}", result[0].Department.Id, result[0].Department.Name);
+        Console.WriteLine($"{result[0].Department.Id}--{result[0].Department.Name}");
     }
 
     private static void TestOneToOne(ISession session)
@@ -110,9 +110,9 @@ class Program
         Console.WriteLine("Test one-to-one relation...");
         Console.WriteLine("Get an object:");
         result = session.Search<ContactMenu>("Email=='t@abc.com'");
-        Console.WriteLine("{0}--{1}--{2}", result[0].Phone, result[0].Email, result[0].Address);
+        Console.WriteLine($"{result[0].Phone}--{result[0].Email}--{result[0].Address}");
         Console.WriteLine("Object refers to the object:");
-        Console.WriteLine("{0}--{1}--{2}", result[0].Student.StudentId, result[0].Student.Name, result[0].Student.Gender);
+        Console.WriteLine($"{result[0].Student.StudentId}--{result[0].Student.Name}--{result[0].Student.Gender}");
     }
 
     private static void TestManyToMany(ISession session)
@@ -121,11 +121,11 @@ class Program
         Console.WriteLine("Test many-to-many relation...");
         Console.WriteLine("Get an object;");
         result = session.Search<Course>("Id==1");
-        Console.WriteLine("{0}--{1}--{2}", result[0].Id, result[0].Name, result[0].Classroom);
+        Console.WriteLine($"{result[0].Id}--{result[0].Name}--{result[0].Classroom}");
         Console.WriteLine("Objects refer to the object:");
         foreach (Student s in result[0].Students)
         {
-            Console.WriteLine("{0}--{1}--{2}", s.StudentId, s.Name, s.Gender);
+            Console.WriteLine($"{s.StudentId}--{s.Name}--{s.Gender}");
         }
     }
 
@@ -156,6 +156,6 @@ class Program
         Console.WriteLine("Transaction2 begin to read the object...");
         result = session.Search<Course>("Id==2");
         Console.WriteLine("Transcation2 finished reading...");
-        Console.WriteLine("{0}--{1}--{2}", result[0].Id, result[0].Name, result[0].Classroom);
+        Console.WriteLine($"{result[0].Id}--{result[0].Name}--{result[0].Classroom}");
     }
 }

@@ -57,7 +57,7 @@ public static class ObjectCalculator
         }
         else
         {
-            throw new Exception(string.Format("{0} do not contain the property:{1}", @object.GetType(), element.Value));
+            throw new Exception($"{@object.GetType()} do not contain the property:{element.Value}");
         }
     }
 
@@ -102,7 +102,7 @@ public static class ObjectCalculator
             }
             else
             {
-                throw new Exception(string.Format("{0}.{1} is not a boolean property", @object.GetType(), property.Name));
+                throw new Exception($"{@object.GetType()}.{property.Name} is not a boolean property");
             }
         }
         else
@@ -115,7 +115,7 @@ public static class ObjectCalculator
             }
             else
             {
-                throw new Exception(string.Format("{0} is not boolean", element.Value));
+                throw new Exception($"{element.Value} is not boolean");
             }
         }
         resultStack.Push(element);
@@ -192,7 +192,7 @@ public static class ObjectCalculator
             PropertyInfo property = GetObjectProperty(@object, (string)x.Value);
             if (property.GetValue(@object, null) is DateTime xDateTime)
             {
-                xStr = xDateTime.ToString("yyyy-MM-dd HH:mm:ss");
+                xStr = FormattableString.Invariant($"'{xDateTime:yyyy-MM-dd HH:mm:ss}'");
             }
             else
             {
@@ -208,7 +208,7 @@ public static class ObjectCalculator
             PropertyInfo property = GetObjectProperty(@object, (string)y.Value);
             if (property.GetValue(@object, null) is DateTime yDateTime)
             {
-                yStr = yDateTime.ToString("yyyy-MM-dd HH:mm:ss");
+                yStr = FormattableString.Invariant($"'{yDateTime:yyyy-MM-dd HH:mm:ss}'");
             }
             else
             {
@@ -296,7 +296,7 @@ public static class ObjectCalculator
         }
         else
         {
-            throw new Exception(string.Format("{0} do not have the property:{1}", @object.GetType(), propertyName));
+            throw new Exception($"{@object.GetType()} do not have the property:{propertyName}");
         }
     }
 
