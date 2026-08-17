@@ -27,18 +27,18 @@ public sealed class DefaultComponentProvider(IDictionary<Type, Type> componentIm
     {
         var services = new ServiceCollection();
 
-        foreach (KeyValuePair<Type, Type> componentImpl in componentImplDict)
+        foreach (var (serviceType, implementationType) in componentImplDict)
         {
-            switch (_componentLifetimes[componentImpl.Key])
+            switch (_componentLifetimes[serviceType])
             {
                 case ServiceLifetime.Singleton:
-                    services.AddSingleton(componentImpl.Key, componentImpl.Value);
+                    services.AddSingleton(serviceType, implementationType);
                     break;
                 case ServiceLifetime.Scoped:
-                    services.AddScoped(componentImpl.Key, componentImpl.Value);
+                    services.AddScoped(serviceType, implementationType);
                     break;
                 default:
-                    services.AddTransient(componentImpl.Key, componentImpl.Value);
+                    services.AddTransient(serviceType, implementationType);
                     break;
             }
         }

@@ -59,25 +59,9 @@ public sealed class Session : ISession, IDisposable
         _sessionCache.Dispose();
     }
 
-    public object[] Search(Type objType, string selectCommand)
-    {
-        var result = new List<object>();
-        foreach (object item in OnSearch(objType, selectCommand))
-        {
-            result.Add(item);
-        }
-        return result.ToArray();
-    }
+    public object[] Search(Type objType, string selectCommand) => OnSearch(objType, selectCommand).ToArray();
 
-    public T[] Search<T>(string selectCommand)
-    {
-        var result = new List<T>();
-        foreach (object item in OnSearch(typeof(T), selectCommand))
-        {
-            result.Add((T)item);
-        }
-        return result.ToArray();
-    }
+    public T[] Search<T>(string selectCommand) => OnSearch(typeof(T), selectCommand).Cast<T>().ToArray();
 
     public void Update(object @object)
     {

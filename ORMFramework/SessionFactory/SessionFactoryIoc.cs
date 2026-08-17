@@ -24,7 +24,6 @@ public sealed class SessionFactoryIoc : ISessionFactory
         {
             return;
         }
-        _mappings = new Dictionary<string, EntityMapping>();
         if (string.IsNullOrEmpty(configFilePath))
         {
             Configuration = new ConfigManager().GetSystemConfiguration();
@@ -35,10 +34,7 @@ public sealed class SessionFactoryIoc : ISessionFactory
         }
         _driverFactory = new DefaultDbDriverFactory(Configuration.ConnectionString,
             Configuration.ProviderName);
-        foreach (EntityMapping map in Configuration.Mappings)
-        {
-            _mappings.Add(map.ClassName, map);
-        }
+        _mappings = Configuration.Mappings.ToDictionary(m => m.ClassName);
         LogHelper.LogHelper.InitLog(configFilePath);
     }
 

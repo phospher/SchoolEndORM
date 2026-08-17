@@ -370,7 +370,7 @@ public static class GlobalCache
     private static void ReadIgnoreKeys(Dictionary<string, List<object>> ignoreKeys, StringBuilder sql, bool hasExpression)
     {
         int i = 0;
-        foreach (KeyValuePair<string, List<object>> key in ignoreKeys)
+        foreach (var (key, values) in ignoreKeys)
         {
             int j = 0;
             if (i == 0 && !hasExpression)
@@ -381,13 +381,13 @@ public static class GlobalCache
             {
                 sql.Append(" and ");
             }
-            sql.Append(key.Key);
+            sql.Append(key);
             sql.Append(" not in (");
-            foreach (object o in key.Value)
+            foreach (object o in values)
             {
                 sql.Append(SqlLiteral.Format(o));
                 j++;
-                if (j < key.Value.Count)
+                if (j < values.Count)
                 {
                     sql.Append(",");
                 }
@@ -472,10 +472,8 @@ public static class GlobalCache
     private static void Collect()
     {
         GC.Collect();
-        foreach (KeyValuePair<Guid, GlobalCacheEntity> item in _objList)
+        foreach (var (objectId, cacheEntity) in _objList)
         {
-            Guid objectId = item.Key;
-            GlobalCacheEntity cacheEntity = item.Value;
             if (cacheEntity.ReferenceCount <= 0)
             {
                 List<GlobalCacheEntity> objectList = _objTable[cacheEntity.Value.GetType()];

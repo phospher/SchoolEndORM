@@ -1,4 +1,5 @@
 using System.Buffers;
+using System.Globalization;
 using System.Text;
 
 namespace ORMFramework.Statment;
@@ -78,7 +79,7 @@ public class StatementAnalyst
         }
         if (_currentElement.Length > 0)
         {
-            _currentElement.Remove(0, _currentElement.Length);
+            _currentElement.Clear();
         }
         if (_suffixExpression.Count > 0)
         {
@@ -141,21 +142,15 @@ public class StatementAnalyst
             }
             else
             {
-                if (_currentElement[0] != '\'' || _currentElement[^1] != '\'')
+                string text = _currentElement.ToString();
+                if (text is not ['\'', .., '\''] && !double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
                 {
-                    try
-                    {
-                        double.Parse(_currentElement.ToString());
-                    }
-                    catch
-                    {
-                        throw new Exception($"Invalid Vairable:{_currentElement}");
-                    }
+                    throw new Exception($"Invalid Vairable:{text}");
                 }
                 element.Type = StatElementType.Constant;
-                element.Value = _currentElement.ToString();
+                element.Value = text;
             }
-            _currentElement.Remove(0, _currentElement.Length);
+            _currentElement.Clear();
             return element;
         }
         else

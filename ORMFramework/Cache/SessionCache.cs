@@ -58,9 +58,8 @@ public sealed class SessionCache : ISessionCache
             bool hasTarget = false;
             Type objType = soruceObject.GetType();
             EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(objType.FullName);
-            foreach (KeyValuePair<string, EntityRelation> item in mapping.Relations)
+            foreach (var (_, relation) in mapping.Relations)
             {
-                EntityRelation relation = item.Value;
                 if (sourceEntity.ForeignKeys.TryGetValue(relation.KeyColum, out var foreignKeyValue))
                 {
                     Type referenceType = objType.GetProperty(relation.Property).PropertyType;
