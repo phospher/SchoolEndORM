@@ -9,7 +9,7 @@ public class StatementAnalyst
     private List<StatElement> _expression;
     private List<StatElement> _suffixExpression;
     private StringBuilder _currentElement;
-    private char[] _queryString;
+    private char[] _queryString = [];
     private int _stringIndex;
     private int _expressionIndex;
     private static readonly SearchValues<char> _operatorChars = SearchValues.Create("=><!&|like()");
@@ -102,7 +102,7 @@ public class StatementAnalyst
 
     private bool IsOperatorChar(char c) => _operatorChars.Contains(c);
 
-    private StatElement CreateElement(StatElementType type)
+    private StatElement? CreateElement(StatElementType type)
     {
         if (_currentElement.Length > 0)
         {
@@ -221,7 +221,7 @@ public class StatementAnalyst
                 break;
             }
         }
-        StatElement element = CreateElement(StatElementType.Variable);
+        StatElement? element = CreateElement(StatElementType.Variable);
         if (element != null)
         {
             _expression.Add(element);
@@ -250,7 +250,7 @@ public class StatementAnalyst
             _currentElement.Append(_queryString[++_stringIndex]);
             _stringIndex++;
         }
-        StatElement element = CreateElement(StatElementType.Operator);
+        StatElement? element = CreateElement(StatElementType.Operator);
         if (element != null)
         {
             _expression.Add(element);
@@ -293,7 +293,7 @@ public class StatementAnalyst
                 }
             }
         }
-        StatElement element = CreateElement(StatElementType.Constant);
+        StatElement? element = CreateElement(StatElementType.Constant);
         if (element != null)
         {
             _expression.Add(element);

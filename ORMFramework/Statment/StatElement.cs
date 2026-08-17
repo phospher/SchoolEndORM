@@ -1,7 +1,7 @@
 namespace ORMFramework.Statment;
 public class StatElement
 {
-    public object Value { get; set; }
+    public object Value { get; set; } = "";
 
     public StatElementType Type { get; set; }
 }
