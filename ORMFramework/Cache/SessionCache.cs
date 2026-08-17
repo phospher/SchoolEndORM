@@ -425,9 +425,9 @@ namespace ORMFramework.Cache
 
         private void Collect()
         {
-            foreach (Guid objectId in _objList.Keys)
+            foreach (CacheEntity entity in _objList.Values)
             {
-                GlobalCache.ReleaseReferenct(objectId);
+                GlobalCache.ReleaseReferenct(entity.ObjectId);
             }
         }
 
