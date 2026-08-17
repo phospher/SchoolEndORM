@@ -5,7 +5,7 @@ class Program
     {
         ISessionFactory sessionFactory = new SessionFactoryIoc();
         ISession session;
-        sessionFactory.Initialize(@"/Users/liuqiming/Projects/personal/SchoolEndORM/ORMFramework.Examples/Config.xml");
+        sessionFactory.Initialize(Path.Combine(AppContext.BaseDirectory, "Config.xml"));
         session = sessionFactory.CreateSession();
         string studentId = Guid.NewGuid().ToString();
         TestInsert(session, studentId);
