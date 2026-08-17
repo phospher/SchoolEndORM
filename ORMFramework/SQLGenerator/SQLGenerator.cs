@@ -15,9 +15,19 @@ public sealed class SQLGenerator : ISQLGenerator
     private static readonly string[] _sqlOperators = ["=", "!=", ">", ">=", "<", "<=", " and ", " or ", " like ", "(", ")"];
     private static readonly FrozenSet<Type> _basicType = FrozenSet.ToFrozenSet(
     [
-        typeof(bool), typeof(byte), typeof(sbyte),
-        typeof(decimal), typeof(double), typeof(float), typeof(int), typeof(uint), typeof(long),
-        typeof(ulong), typeof(short), typeof(ushort), typeof(byte[])
+        typeof(bool),
+        typeof(byte),
+        typeof(sbyte),
+        typeof(decimal),
+        typeof(double),
+        typeof(float),
+        typeof(int),
+        typeof(uint),
+        typeof(long),
+        typeof(ulong),
+        typeof(short),
+        typeof(ushort),
+        typeof(byte[])
     ]);
     private static readonly FrozenSet<Type> _stringType = FrozenSet.ToFrozenSet([typeof(char), typeof(string), typeof(DateTime)]);
 
@@ -58,7 +68,7 @@ public sealed class SQLGenerator : ISQLGenerator
                         throw new QuerySyntaxException("Invalid Statement");
                 }
             }
-            sql.Append(")");
+            sql.Append(')');
         }
         return sql.ToString();
     }
@@ -96,12 +106,12 @@ public sealed class SQLGenerator : ISQLGenerator
             {
                 continue;
             }
-            sql.Append(",");
+            sql.Append(',');
             where.Append(" and ");
         }
         sql.Remove(sql.Length - 1, 1);
         where.Remove(where.Length - 5, 5);
-        where.Append(")");
+        where.Append(')');
         sql.Append(where);
         return sql.ToString();
     }
@@ -146,7 +156,7 @@ public sealed class SQLGenerator : ISQLGenerator
 
     private static string GetSQLOperator(Operator @operator) => _sqlOperators[(int)@operator];
 
-    private string GenerateStatmentByProperty(PropertyInfo property, object @object)
+    private static string GenerateStatmentByProperty(PropertyInfo property, object @object)
     {
         if (!IsBasicType(property.PropertyType))
         {
@@ -156,7 +166,7 @@ public sealed class SQLGenerator : ISQLGenerator
         return SqlLiteral.Comparison(property.Name, property.GetValue(@object));
     }
 
-    private string GenerateStatementByStringProperty(PropertyInfo property, object @object)
+    private static string GenerateStatementByStringProperty(PropertyInfo property, object @object)
     {
         if (!IsStringType(property.PropertyType))
         {
@@ -165,7 +175,7 @@ public sealed class SQLGenerator : ISQLGenerator
         return SqlLiteral.Comparison(property.Name, property.GetValue(@object));
     }
 
-    private bool IsBasicType(Type type) => _basicType.Contains(type);
+    private static bool IsBasicType(Type type) => _basicType.Contains(type);
 
-    private bool IsStringType(Type type) => _stringType.Contains(type);
+    private static bool IsStringType(Type type) => _stringType.Contains(type);
 }

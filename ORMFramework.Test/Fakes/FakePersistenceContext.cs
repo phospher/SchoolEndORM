@@ -5,7 +5,6 @@ using ORMFramework.SQL;
 namespace ORMFramework.Test.Fakes;
 public class FakePersistenceContext : IPersistenceContext
 {
-    private IDictionary<string, EntityMapping> _mappings = new Dictionary<string, EntityMapping>();
     private IDbConnection _connection = null!;
     private IDbDriverFactory _dbDriverFactory = null!;
 
@@ -21,16 +20,12 @@ public class FakePersistenceContext : IPersistenceContext
         set { _connection = value; }
     }
 
-    public IDictionary<string, EntityMapping> Mappings
-    {
-        get { return _mappings; }
-        set { _mappings = value; }
-    }
+    public IDictionary<string, EntityMapping> Mappings { get; set; } = new Dictionary<string, EntityMapping>();
 
     public ISQLGenerator SQLGenerator { get; set; } = null!;
 
     public EntityMapping? GetEntityMappingByClassName(string className)
     {
-        return _mappings.TryGetValue(className, out var mapping) ? mapping : null;
+        return Mappings.TryGetValue(className, out var mapping) ? mapping : null;
     }
 }

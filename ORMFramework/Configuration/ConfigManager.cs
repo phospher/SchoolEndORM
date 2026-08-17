@@ -29,7 +29,7 @@ public sealed class ConfigManager(string? configFilePath = null)
         return configuration;
     }
 
-    private bool ReadSessionFactory(XmlTextReader reader, Configuration configuration)
+    private static bool ReadSessionFactory(XmlTextReader reader, Configuration configuration)
     {
         bool result = true;
         while (result && reader.Read() && reader.NodeType == XmlNodeType.Element)
@@ -49,7 +49,7 @@ public sealed class ConfigManager(string? configFilePath = null)
         return result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "SessionFactory";
     }
 
-    private bool ReadConnectionString(XmlTextReader reader, Configuration configuration)
+    private static bool ReadConnectionString(XmlTextReader reader, Configuration configuration)
     {
         bool result = false;
         if (reader.Read() && reader.NodeType == XmlNodeType.Text)
@@ -60,7 +60,7 @@ public sealed class ConfigManager(string? configFilePath = null)
         return result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "ConnectionString";
     }
 
-    private bool ReadProviderName(XmlTextReader reader, Configuration configuration)
+    private static bool ReadProviderName(XmlTextReader reader, Configuration configuration)
     {
         bool result = false;
         if (reader.Read() && reader.NodeType == XmlNodeType.Text)
@@ -71,7 +71,7 @@ public sealed class ConfigManager(string? configFilePath = null)
         return result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "ProviderName";
     }
 
-    private bool ReadMappings(XmlTextReader reader, Configuration configuration)
+    private static bool ReadMappings(XmlTextReader reader, Configuration configuration)
     {
         bool result = true;
         while (result && reader.Read() && reader.NodeType == XmlNodeType.Element)
@@ -88,7 +88,7 @@ public sealed class ConfigManager(string? configFilePath = null)
         return true;
     }
 
-    private bool ReadMap(XmlTextReader reader, Configuration configuration)
+    private static bool ReadMap(XmlTextReader reader, Configuration configuration)
     {
         var xmlDoc = new XmlDocument();
         xmlDoc.Load(reader.ReadSubtree());
@@ -96,7 +96,7 @@ public sealed class ConfigManager(string? configFilePath = null)
         var map = new EntityMapping
         {
             ClassName = GetRequiredAttribute(mapNode, "ClassName"),
-            Keys = GetRequiredAttribute(mapNode, "Key").Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries),
+            Keys = GetRequiredAttribute(mapNode, "Key").Split(',', StringSplitOptions.RemoveEmptyEntries),
             TableName = GetRequiredAttribute(mapNode, "TableName"),
         };
         for (int i = 0; i < mapNode.ChildNodes.Count; i++)
@@ -140,7 +140,7 @@ public sealed class ConfigManager(string? configFilePath = null)
         return true;
     }
 
-    private EntityRelation? GetManyToManyRelation(XmlNode node)
+    private static EntityRelation? GetManyToManyRelation(XmlNode node)
     {
         if (node.ChildNodes.Count != 2)
         {

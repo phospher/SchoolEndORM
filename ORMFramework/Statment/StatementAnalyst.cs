@@ -99,7 +99,7 @@ public class StatementAnalyst
 
     private static bool IsVariableChar(char c) => char.IsAsciiLetterOrDigit(c) || c == '_';
 
-    private bool IsOperatorChar(char c) => _operatorChars.Contains(c);
+    private static bool IsOperatorChar(char c) => _operatorChars.Contains(c);
 
     private StatElement? CreateElement(StatElementType type)
     {
@@ -441,7 +441,7 @@ public class StatementAnalyst
     {
         if (element.Type != StatElementType.Operator)
         {
-            throw new ArgumentException("element.Type must be StatElement.Operator", nameof(element));
+            throw new ArgumentException("The element's Type must be StatElement.Operator", nameof(element));
         }
 
         StatElement top;

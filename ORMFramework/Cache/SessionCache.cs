@@ -126,15 +126,8 @@ public sealed class SessionCache : ISessionCache
         {
             CacheEntity cacheEntity = _objList[@object];
             GlobalCache.GetWriteLockForObject(cacheEntity.ObjectId);
-            if (_updateList.Contains(cacheEntity))
-            {
-                _updateList.Remove(cacheEntity);
-            }
-            if (_insertList.Contains(cacheEntity))
-            {
-                _insertList.Remove(cacheEntity);
-            }
-            else
+            _updateList.Remove(cacheEntity);
+            if (!_insertList.Remove(cacheEntity))
             {
                 _deleteList.Add(cacheEntity);
             }
@@ -354,7 +347,7 @@ public sealed class SessionCache : ISessionCache
         }
     }
 
-    private void RefreshCacheEntity(CacheEntity cacheEntity)
+    private static void RefreshCacheEntity(CacheEntity cacheEntity)
     {
         if (GlobalCache.GetObjectVersion(cacheEntity.ObjectId) > cacheEntity.Version)
         {

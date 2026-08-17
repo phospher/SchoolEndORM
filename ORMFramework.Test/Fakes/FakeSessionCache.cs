@@ -6,7 +6,6 @@ public sealed class FakeSessionCache : ISessionCache
 {
     private readonly List<Type> _searchTypes = new List<Type>();
     private readonly List<QueryExpression> _searchExpressions = new List<QueryExpression>();
-    private IEnumerable<object> _searchResult = Array.Empty<object>();
 
     public int SearchCallCount
     {
@@ -23,17 +22,13 @@ public sealed class FakeSessionCache : ISessionCache
         get { return _searchExpressions; }
     }
 
-    public IEnumerable<object> SearchResult
-    {
-        get { return _searchResult; }
-        set { _searchResult = value; }
-    }
+    public IEnumerable<object> SearchResult { get; set; } = Array.Empty<object>();
 
     public IEnumerable<object> Search(Type objType, QueryExpression? expression)
     {
         _searchTypes.Add(objType);
         _searchExpressions.Add(expression!);
-        return _searchResult;
+        return SearchResult;
     }
 
     public IPersistenceContext PersistenceContext { get; set; } = null!;

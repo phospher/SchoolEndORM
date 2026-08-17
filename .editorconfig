@@ -25,7 +25,9 @@ dotnet_style_object_initializer = true:suggestion
 dotnet_style_collection_initializer = true:suggestion
 dotnet_style_prefer_auto_properties = true:warning
 dotnet_style_readonly_field = true:suggestion
-dotnet_diagnostic.IDE0005.severity = warning
+# IDE0005 在 build 上运行要求 GenerateDocumentationFile=true（否则触发 EnableGenerateDocumentationFile 编译警告，
+# 而开启文档生成会引入大量 CS1591）。降为 suggestion：IDE 仍会提示，且可用 `dotnet format style --diagnostics IDE0005` 清理。
+dotnet_diagnostic.IDE0005.severity = suggestion
 
 dotnet_style_qualification_for_field = false:warning
 dotnet_style_qualification_for_property = false:warning
@@ -50,3 +52,12 @@ dotnet_naming_symbols.const_fields.applicable_kinds = field
 dotnet_naming_symbols.const_fields.required_modifiers = const
 
 dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+
+# ---- 范围外规则抑制（§13 最终验证）----
+# CA1716/CA1720：'object' 参数名与 'Event'/'Operator' 等命名属于公开 API 拼写，本次不改名（红线）。
+dotnet_diagnostic.CA1716.severity = none
+dotnet_diagnostic.CA1720.severity = none
+# CA1840：Thread.CurrentThread.ManagedThreadId 位于手写锁的 GlobalCache.cs 中，禁止改动 Thread 语句。
+dotnet_diagnostic.CA1840.severity = none
+# CA1859："用具体类型代替接口" 属于改变签名的微优化，超出本次范围。
+dotnet_diagnostic.CA1859.severity = none

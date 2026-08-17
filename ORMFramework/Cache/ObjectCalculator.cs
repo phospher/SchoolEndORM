@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -175,7 +176,7 @@ public static class ObjectCalculator
         }
         else if (!(IsString(x, @object) || IsString(y, @object)))
         {
-            element.Value = CalculateNotBooleanOperator(Convert.ToDouble(xValue), Convert.ToDouble(yValue), @operator);
+            element.Value = CalculateNotBooleanOperator(Convert.ToDouble(xValue, CultureInfo.InvariantCulture), Convert.ToDouble(yValue, CultureInfo.InvariantCulture), @operator);
         }
         else
         {

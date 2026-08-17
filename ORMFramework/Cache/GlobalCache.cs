@@ -16,9 +16,21 @@ public static class GlobalCache
     private static readonly Dictionary<Guid, GlobalCacheEntity> _objList = new();
     private static readonly FrozenSet<Type> _basicType = FrozenSet.ToFrozenSet(
     [
-        typeof(bool), typeof(byte), typeof(sbyte),
-        typeof(decimal), typeof(double), typeof(float), typeof(int), typeof(uint), typeof(long),
-        typeof(ulong), typeof(short), typeof(ushort), typeof(char), typeof(string), typeof(byte[])
+        typeof(bool),
+        typeof(byte),
+        typeof(sbyte),
+        typeof(decimal),
+        typeof(double),
+        typeof(float),
+        typeof(int),
+        typeof(uint),
+        typeof(long),
+        typeof(ulong),
+        typeof(short),
+        typeof(ushort),
+        typeof(char),
+        typeof(string),
+        typeof(byte[])
     ]);
 
     public static IEnumerable<GlobalCacheResult> Search<T>(QueryExpression? queryExpression, IPersistenceContext persistenceContext, IList<Guid> ignoreIds)
@@ -394,10 +406,10 @@ public static class GlobalCache
                 j++;
                 if (j < values.Count)
                 {
-                    sql.Append(",");
+                    sql.Append(',');
                 }
             }
-            sql.Append(")");
+            sql.Append(')');
         }
     }
 

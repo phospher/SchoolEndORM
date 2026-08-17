@@ -1,5 +1,5 @@
 ﻿namespace ORMFramework.Examples;
-class Program
+sealed class Program
 {
     static void Main(string[] args)
     {

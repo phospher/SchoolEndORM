@@ -97,11 +97,9 @@ public sealed class FakeDbCommand : IDbCommand
 
 public sealed class FakeDbTransaction : IDbTransaction
 {
-    private readonly IDbConnection _connection;
-
     public FakeDbTransaction(IDbConnection connection, IsolationLevel isolationLevel)
     {
-        _connection = connection;
+        Connection = connection;
         IsolationLevel = isolationLevel;
     }
 
@@ -111,7 +109,7 @@ public sealed class FakeDbTransaction : IDbTransaction
 
     public bool RolledBack { get; private set; }
 
-    public IDbConnection Connection => _connection;
+    public IDbConnection Connection { get; }
 
     public IsolationLevel IsolationLevel { get; }
 
