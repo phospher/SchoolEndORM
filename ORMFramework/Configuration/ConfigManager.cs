@@ -75,14 +75,7 @@ public sealed class ConfigManager(string? configFilePath = null)
                     return false;
             }
         }
-        if (result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "SessionFactory")
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "SessionFactory";
     }
 
     private bool ReadConnectionString(XmlTextReader reader, Configuration configuration)
@@ -93,14 +86,7 @@ public sealed class ConfigManager(string? configFilePath = null)
             configuration.ConnectionString = reader.ReadString().Trim();
             result = true;
         }
-        if (result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "ConnectionString")
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "ConnectionString";
     }
 
     private bool ReadProviderName(XmlTextReader reader, Configuration configuration)
@@ -111,14 +97,7 @@ public sealed class ConfigManager(string? configFilePath = null)
             configuration.ProviderName = reader.ReadString().Trim();
             result = true;
         }
-        if (result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "ProviderName")
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
+        return result && reader.NodeType == XmlNodeType.EndElement && reader.Name == "ProviderName";
     }
 
     private bool ReadMappings(XmlTextReader reader, Configuration configuration)
@@ -163,20 +142,18 @@ public sealed class ConfigManager(string? configFilePath = null)
             else
             {
                 relation = new EntityRelation();
-                switch (node.Name)
+                RelationType? relationType = node.Name switch
                 {
-                    case "One-to-Many":
-                        relation.Type = RelationType.OneToMany;
-                        break;
-                    case "One-to-One":
-                        relation.Type = RelationType.OneToOne;
-                        break;
-                    case "Many-to-One":
-                        relation.Type = RelationType.ManyToOne;
-                        break;
-                    default:
-                        return false;
+                    "One-to-Many" => RelationType.OneToMany,
+                    "One-to-One" => RelationType.OneToOne,
+                    "Many-to-One" => RelationType.ManyToOne,
+                    _ => null,
+                };
+                if (relationType is null)
+                {
+                    return false;
                 }
+                relation.Type = relationType.Value;
                 relation.KeyColum = node.Attributes["KeyColum"].Value;
                 relation.Property = node.Attributes["Property"].Value;
                 relation.ReferenceClassName = node.Attributes["ReferenceClass"].Value;

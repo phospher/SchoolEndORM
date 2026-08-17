@@ -194,17 +194,7 @@ public static class GlobalCache
         }
     }
 
-    public static long GetObjectVersion(Guid objectId)
-    {
-        if (_objList.ContainsKey(objectId))
-        {
-            return _objList[objectId].Version;
-        }
-        else
-        {
-            return -1;
-        }
-    }
+    public static long GetObjectVersion(Guid objectId) => _objList.TryGetValue(objectId, out var e) ? e.Version : -1;
 
     public static void Delete(Guid objectId)
     {

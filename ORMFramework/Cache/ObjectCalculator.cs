@@ -227,17 +227,13 @@ public static class ObjectCalculator
         {
             yStr = yStr.Substring(1, yStr.Length - 2);
         }
-        switch (@operator)
+        return @operator switch
         {
-            case Operator.Equals:
-                return xStr == yStr;
-            case Operator.UnEquals:
-                return xStr != yStr;
-            case Operator.Like:
-                return CalculateLikeOperator(xStr, yStr, x.Type, y.Type);
-            default:
-                throw new Exception("Invalid Statement");
-        }
+            Operator.Equals => xStr == yStr,
+            Operator.UnEquals => xStr != yStr,
+            Operator.Like => CalculateLikeOperator(xStr, yStr, x.Type, y.Type),
+            _ => throw new Exception("Invalid Statement"),
+        };
     }
 
     private static bool CalculateLikeOperator(string x, string y, StatElementType xType, StatElementType yType)
@@ -273,39 +269,23 @@ public static class ObjectCalculator
         }
     }
 
-    private static bool CalculateBooleanOperator(bool x, bool y, Operator @operator)
+    private static bool CalculateBooleanOperator(bool x, bool y, Operator @operator) => @operator switch
     {
-        switch (@operator)
-        {
-            case Operator.And:
-                return x && y;
-            case Operator.Or:
-                return x || y;
-            default:
-                throw new Exception("Invalid operator");
-        }
-    }
+        Operator.And => x && y,
+        Operator.Or => x || y,
+        _ => throw new Exception("Invalid operator"),
+    };
 
-    private static bool CalculateNotBooleanOperator(double x, double y, Operator @operator)
+    private static bool CalculateNotBooleanOperator(double x, double y, Operator @operator) => @operator switch
     {
-        switch (@operator)
-        {
-            case Operator.Equals:
-                return x == y;
-            case Operator.Greater:
-                return x > y;
-            case Operator.GreaterEquals:
-                return x >= y;
-            case Operator.Less:
-                return x < y;
-            case Operator.LessEquals:
-                return x <= y;
-            case Operator.UnEquals:
-                return x != y;
-            default:
-                throw new Exception("Invalid Statement");
-        }
-    }
+        Operator.Equals => x == y,
+        Operator.Greater => x > y,
+        Operator.GreaterEquals => x >= y,
+        Operator.Less => x < y,
+        Operator.LessEquals => x <= y,
+        Operator.UnEquals => x != y,
+        _ => throw new Exception("Invalid Statement"),
+    };
 
     private static PropertyInfo GetObjectProperty(object @object, string propertyName)
     {
@@ -325,26 +305,12 @@ public static class ObjectCalculator
         if (element.Type == StatElementType.Variable)
         {
             Type type = @object.GetType().GetProperty((string)element.Value).PropertyType;
-            if (type == typeof(string) || type == typeof(DateTime) || type == typeof(char))
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return type == typeof(string) || type == typeof(DateTime) || type == typeof(char);
         }
         else if (element.Type == StatElementType.Constant)
         {
             string value = (string)element.Value;
-            if (value.Length > 1 && value[0] == '\'' && value[value.Length - 1] == '\'')
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            return value.Length > 1 && value[0] == '\'' && value[value.Length - 1] == '\'';
         }
         else
         {
