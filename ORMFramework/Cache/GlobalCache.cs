@@ -399,7 +399,7 @@ public static class GlobalCache
 
     private static void ReadDataFromDatabase(Type objType, string sql, List<GlobalCacheResult> resultList, IPersistenceContext persistenceContext)
     {
-        using var conn = persistenceContext.Connection;
+        var conn = persistenceContext.Connection;
         using var ds = new DataSet();
         IDbDataAdapter dataAdapter = persistenceContext.DbDriverFactory.GetDbDataAdapter(sql, conn);
         using (dataAdapter as IDisposable)

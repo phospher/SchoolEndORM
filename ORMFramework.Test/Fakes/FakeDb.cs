@@ -128,6 +128,35 @@ public sealed class FakeDbTransaction : IDbTransaction
     }
 }
 
+public sealed class FakeDbDataAdapter : IDbDataAdapter
+{
+    public IDbCommand SelectCommand { get; set; }
+
+    public IDbCommand InsertCommand { get; set; }
+
+    public IDbCommand UpdateCommand { get; set; }
+
+    public IDbCommand DeleteCommand { get; set; }
+
+    public MissingMappingAction MissingMappingAction { get; set; }
+
+    public MissingSchemaAction MissingSchemaAction { get; set; }
+
+    public ITableMappingCollection TableMappings => null;
+
+    public int Fill(DataSet dataSet)
+    {
+        dataSet.Tables.Add(new DataTable());
+        return 0;
+    }
+
+    public DataTable[] FillSchema(DataSet dataSet, SchemaType schemaType) => null;
+
+    public IDataParameter[] GetFillParameters() => null;
+
+    public int Update(DataSet dataSet) => 0;
+}
+
 public sealed class FakeDbDriverFactory : IDbDriverFactory
 {
     public string ConnectionString { get; set; }
@@ -144,11 +173,11 @@ public sealed class FakeDbDriverFactory : IDbDriverFactory
 
     public IDbCommand GetDBCommand(string commandText, IDbConnection connection) => new FakeDbCommand { CommandText = commandText, Connection = connection };
 
-    public IDbDataAdapter GetDbDataAdapter() => throw new NotImplementedException();
+    public IDbDataAdapter GetDbDataAdapter() => new FakeDbDataAdapter();
 
-    public IDbDataAdapter GetDbDataAdapter(string selectCommandText, IDbConnection connection) => throw new NotImplementedException();
+    public IDbDataAdapter GetDbDataAdapter(string selectCommandText, IDbConnection connection) => new FakeDbDataAdapter { SelectCommand = new FakeDbCommand { CommandText = selectCommandText, Connection = connection } };
 
-    public IDbDataAdapter GetDbDataAdapter(IDbCommand dbCommand) => throw new NotImplementedException();
+    public IDbDataAdapter GetDbDataAdapter(IDbCommand dbCommand) => new FakeDbDataAdapter { SelectCommand = dbCommand };
 
     public DbCommandBuilder GetDBCommandBuilder() => throw new NotImplementedException();
 
