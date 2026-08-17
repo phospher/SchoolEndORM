@@ -35,9 +35,8 @@ public class SQLGeneratorTest
     [TestMethod]
     public void GetSelectSQL_WithoutQueryExpression_MatchesCurrentSnapshot()
     {
-        // TODO(7.9): 修复 13.6 后（无查询条件时不追加多余 ")"）更新此快照。
         string actual = CreateGenerator().GetSelectSQL(typeof(TestEntity));
-        Assert.AreEqual("select * from TestEntity)", actual);
+        Assert.AreEqual("select * from TestEntity", actual);
     }
 
     [TestMethod]

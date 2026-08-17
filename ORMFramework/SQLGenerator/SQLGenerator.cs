@@ -61,8 +61,8 @@ public sealed class SQLGenerator : ISQLGenerator
                         throw new Exception("Invalid Statement");
                 }
             }
+            sql.Append(")");
         }
-        sql.Append(")");
         return sql.ToString();
     }
 
