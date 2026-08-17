@@ -6,9 +6,9 @@ using ORMFramework.Listener;
 namespace ORMFramework.Ioc;
 public class DefaultComponentProvider : IComponentProvider
 {
-    private readonly IDictionary<Type, Type> componentImplDict;
+    private readonly IDictionary<Type, Type> _componentImplDict;
 
-    private readonly IDictionary<Type, ServiceLifetime> componentLiftimeDict = new Dictionary<Type, ServiceLifetime>()
+    private readonly Dictionary<Type, ServiceLifetime> _componentLifetimes = new Dictionary<Type, ServiceLifetime>()
     {
         { typeof(ISession), ServiceLifetime.Transient },
         { typeof(IDbDriverFactory), ServiceLifetime.Transient },
@@ -23,17 +23,17 @@ public class DefaultComponentProvider : IComponentProvider
         { typeof(ISubmitListener), ServiceLifetime.Singleton }
     };
 
-    private readonly ServiceProvider serviceProvider;
+    private readonly ServiceProvider _serviceProvider;
 
     public DefaultComponentProvider(IDictionary<Type, Type> componentImplDict)
     {
-        this.componentImplDict = componentImplDict;
+        _componentImplDict = componentImplDict;
 
         var services = new ServiceCollection();
 
-        foreach(KeyValuePair<Type,Type> componentImpl in this.componentImplDict)
+        foreach(KeyValuePair<Type,Type> componentImpl in _componentImplDict)
         {
-            switch (this.componentLiftimeDict[componentImpl.Key])
+            switch (_componentLifetimes[componentImpl.Key])
             {
                 case ServiceLifetime.Singleton:
                     services.AddSingleton(componentImpl.Key, componentImpl.Value);
@@ -47,12 +47,12 @@ public class DefaultComponentProvider : IComponentProvider
             }
         }
 
-        this.serviceProvider = services.BuildServiceProvider();
+        _serviceProvider = services.BuildServiceProvider();
     }
 
     public T GetComponent<T>()
     {
-        return this.serviceProvider.GetService<T>();
+        return _serviceProvider.GetService<T>();
     }
 }
 

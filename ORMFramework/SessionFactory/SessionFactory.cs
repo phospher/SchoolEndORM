@@ -26,15 +26,15 @@ public class SessionFactory : ISessionFactory
         _mappings = new Dictionary<string, EntityMapping>();
         if (string.IsNullOrEmpty(configFilePath))
         {
-            this.Configuration = new ConfigManager().GetSystemConfiguration();
+            Configuration = new ConfigManager().GetSystemConfiguration();
         }
         else
         {
-            this.Configuration = new ConfigManager(configFilePath).GetSystemConfiguration();
+            Configuration = new ConfigManager(configFilePath).GetSystemConfiguration();
         }
-        this._driverFactory = new DefaultDbDriverFactory(this.Configuration.ConnectionString,
-            this.Configuration.ProviderName);
-        foreach (EntityMapping map in this.Configuration.Mappings)
+        _driverFactory = new DefaultDbDriverFactory(Configuration.ConnectionString,
+            Configuration.ProviderName);
+        foreach (EntityMapping map in Configuration.Mappings)
         {
             _mappings.Add(map.ClassName, map);
         }

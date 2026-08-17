@@ -11,7 +11,7 @@ public class Configuration
     {
         get
         {
-            return this._mappings;
+            return _mappings;
         }
     }
 }

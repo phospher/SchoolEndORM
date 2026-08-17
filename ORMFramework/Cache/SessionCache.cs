@@ -32,7 +32,7 @@ public class SessionCache : ISessionCache
                 RefreshCacheEntity(cacheEntity);
                 if (ObjectCalculator.IsTargetObject(cacheEntity.Value, expression))
                 {
-                    EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(objType.FullName);
+                    EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(objType.FullName);
                     result.Add((object)cacheEntity.Value);
                     ignoreIds.Add(cacheEntity.ObjectId);
                 }
@@ -53,7 +53,7 @@ public class SessionCache : ISessionCache
         {
             bool hasTarget = false;
             Type objType = soruceObject.GetType();
-            EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(objType.FullName);
+            EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(objType.FullName);
             foreach (KeyValuePair<string, EntityRelation> item in mapping.Relations)
             {
                 EntityRelation relation = item.Value;
@@ -115,24 +115,24 @@ public class SessionCache : ISessionCache
                         {
                             var relation2 = (ManyToManyRelation)relation;
                             var sql = new StringBuilder("select ");
-                            object foreingKeyValue = _objList[soruceObject].ForeignKeys[relation2.KeyColum];
+                            object foreignKeyValue = _objList[soruceObject].ForeignKeys[relation2.KeyColum];
                             sql.Append(relation2.ReferenceClassColum);
                             sql.Append(" from ");
                             sql.Append(relation2.ReferenceTableName);
                             sql.Append(" where ");
                             sql.Append(relation2.ReferenceColum);
                             sql.Append("=");
-                            if (foreingKeyValue is string || foreingKeyValue is char)
+                            if (foreignKeyValue is string || foreignKeyValue is char)
                             {
-                                sql.Append(string.Format("'{0}'", foreingKeyValue));
+                                sql.Append(string.Format("'{0}'", foreignKeyValue));
                             }
-                            else if (foreingKeyValue is DateTime)
+                            else if (foreignKeyValue is DateTime)
                             {
-                                sql.Append(string.Format("'{0}'", ((DateTime)foreingKeyValue).ToString("yyyy-MM-dd HH:mm:ss")));
+                                sql.Append(string.Format("'{0}'", ((DateTime)foreignKeyValue).ToString("yyyy-MM-dd HH:mm:ss")));
                             }
                             else
                             {
-                                sql.Append(foreingKeyValue);
+                                sql.Append(foreignKeyValue);
                             }
                             foreignKeyValues.AddRange(ProcessQueryCommand(sql.ToString()));
                             loadListType.GetProperty("ForeignKeyName").SetValue(loadList, relation2.ReferenceClassKeyColum, null);
@@ -271,7 +271,7 @@ public class SessionCache : ISessionCache
     private List<object> ProcessQueryCommand(string sql)
     {
         var result = new List<object>();
-        IDbDriverFactory driverFactory = this.PersistenceContext.DbDriverFactory;
+        IDbDriverFactory driverFactory = PersistenceContext.DbDriverFactory;
         IDbConnection conn = driverFactory.GetDbConnection();
         IDbDataAdapter da = driverFactory.GetDbDataAdapter(sql, conn);
         var ds = new DataSet();
@@ -286,7 +286,7 @@ public class SessionCache : ISessionCache
 
     public void Commit()
     {
-        IDbDriverFactory driverFactory = this.PersistenceContext.DbDriverFactory;
+        IDbDriverFactory driverFactory = PersistenceContext.DbDriverFactory;
         IDbConnection conn = driverFactory.GetDbConnection();
         conn.Open();
         IDbTransaction tran = conn.BeginTransaction();
@@ -333,7 +333,7 @@ public class SessionCache : ISessionCache
         foreach (CacheEntity cacheEntity in _updateList)
         {
             GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId);
-            string sql = this.PersistenceContext.SQLGenerator.GetUpdateSQL(globalCacheResult.Value, cacheEntity.Value);
+            string sql = PersistenceContext.SQLGenerator.GetUpdateSQL(globalCacheResult.Value, cacheEntity.Value);
             cmd.CommandText = sql;
             cmd.ExecuteNonQuery();
         }
@@ -343,7 +343,7 @@ public class SessionCache : ISessionCache
     {
         foreach (CacheEntity cacheEntity in _updateList)
         {
-            GlobalCache.Update(cacheEntity.ObjectId, cacheEntity.Value, cacheEntity.ForeignKeys, this.PersistenceContext);
+            GlobalCache.Update(cacheEntity.ObjectId, cacheEntity.Value, cacheEntity.ForeignKeys, PersistenceContext);
         }
     }
 
@@ -352,7 +352,7 @@ public class SessionCache : ISessionCache
         foreach (CacheEntity cacheEntity in _deleteList)
         {
             GlobalCacheResult globalCacheResult = GlobalCache.Search(cacheEntity.ObjectId);
-            string sql = this.PersistenceContext.SQLGenerator.GetDeleteSQL(globalCacheResult.Value);
+            string sql = PersistenceContext.SQLGenerator.GetDeleteSQL(globalCacheResult.Value);
             cmd.CommandText = sql;
             cmd.ExecuteNonQuery();
             GlobalCache.Delete(cacheEntity.ObjectId);
@@ -364,7 +364,7 @@ public class SessionCache : ISessionCache
     {
         foreach (CacheEntity cacheEntity in _insertList)
         {
-            string sql = this.PersistenceContext.SQLGenerator.GetInsertSQL(cacheEntity.Value);
+            string sql = PersistenceContext.SQLGenerator.GetInsertSQL(cacheEntity.Value);
             cmd.CommandText = sql;
             cmd.ExecuteNonQuery();
         }
@@ -398,7 +398,7 @@ public class SessionCache : ISessionCache
         {
             ignoreIds.Add(cacheEntity.ObjectId);
         }
-        globalCacheResults = GlobalCache.Search(objType, expression, this.PersistenceContext, ignoreIds);
+        globalCacheResults = GlobalCache.Search(objType, expression, PersistenceContext, ignoreIds);
         foreach (GlobalCacheResult globalCacheResult in globalCacheResults)
         {
             var cacheEntity = new CacheEntity();

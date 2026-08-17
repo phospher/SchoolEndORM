@@ -252,8 +252,8 @@ public static class ObjectCalculator
             int startIndex = 0;
             int endIndex;
             StringBuilder patten = new StringBuilder();
-            Regex pattenRegex = new Regex(@"\[(\S|\s)*]");
-            Match pattenMatch = pattenRegex.Match(y);
+            Regex patternRegex = new Regex(@"\[(\S|\s)*]");
+            Match pattenMatch = patternRegex.Match(y);
             while (pattenMatch.Success)
             {
                 endIndex = pattenMatch.Index;

@@ -358,7 +358,7 @@ public class StatementAnalyst
         }
         else if ((Operator)element.Value == Operator.Not)
         {
-            if (!ReadNotOpeartion(operatorStack))
+            if (!ReadNotOperation(operatorStack))
             {
                 throw new Exception("Invalid Statement");
             }
@@ -382,7 +382,7 @@ public class StatementAnalyst
             }
             else if ((Operator)element.Value == Operator.Not)
             {
-                if (!ReadNotOpeartion(operatorStack))
+                if (!ReadNotOperation(operatorStack))
                 {
                     throw new Exception("Invalid Statement");
                 }
@@ -412,7 +412,7 @@ public class StatementAnalyst
         ClearOperatorStack(operatorStack);
     }
 
-    private bool ReadNotOpeartion(Stack<StatElement> operatorStack)
+    private bool ReadNotOperation(Stack<StatElement> operatorStack)
     {
         StatElement element = _expression[_expressionIndex++];
         ProcessOperatorStack(element, operatorStack);

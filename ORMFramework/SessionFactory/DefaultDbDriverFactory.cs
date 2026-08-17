@@ -24,8 +24,8 @@ public class DefaultDbDriverFactory : IDbDriverFactory
 
     public DefaultDbDriverFactory(string connectionString, string providerName)
     {
-        this.ConnectionString = connectionString;
-        this.SetProviderName(providerName);
+        ConnectionString = connectionString;
+        SetProviderName(providerName);
     }
 
     public void SetProviderName(string providerName)
@@ -35,75 +35,75 @@ public class DefaultDbDriverFactory : IDbDriverFactory
             DbProviderFactories.RegisterFactory(providerName, providerName);
             _registedProviderName.Add(providerName, new object());
         }
-        this._dbProviderFactory = DbProviderFactories.GetFactory(providerName);
+        _dbProviderFactory = DbProviderFactories.GetFactory(providerName);
     }
 
     public IDbConnection GetDbConnection()
     {
-        if (string.IsNullOrEmpty(this.ConnectionString))
+        if (string.IsNullOrEmpty(ConnectionString))
         {
             throw new Exception("ConnectionString can not be null or empty");
         }
-        return this.GetDbConnection(this.ConnectionString);
+        return GetDbConnection(ConnectionString);
     }
 
     public IDbConnection GetDbConnection(string connectionString)
     {
-        IDbConnection conn = this._dbProviderFactory.CreateConnection();
+        IDbConnection conn = _dbProviderFactory.CreateConnection();
         conn.ConnectionString = connectionString;
         return conn;
     }
 
     public IDbCommand GetDBCommand()
     {
-        return this._dbProviderFactory.CreateCommand();
+        return _dbProviderFactory.CreateCommand();
     }
 
     public IDbCommand GetDBCommand(string commandText)
     {
-        IDbCommand cmd = this.GetDBCommand();
+        IDbCommand cmd = GetDBCommand();
         cmd.CommandText = commandText;
         return cmd;
     }
 
     public IDbCommand GetDBCommand(string commandText, IDbConnection connection)
     {
-        IDbCommand cmd = this.GetDBCommand(commandText);
+        IDbCommand cmd = GetDBCommand(commandText);
         cmd.Connection = connection;
         return cmd;
     }
 
     public IDbDataAdapter GetDbDataAdapter()
     {
-        return this._dbProviderFactory.CreateDataAdapter();
+        return _dbProviderFactory.CreateDataAdapter();
     }
 
     public IDbDataAdapter GetDbDataAdapter(string selectCommandText, IDbConnection connection)
     {
         IDbCommand cmd = connection.CreateCommand();
         cmd.CommandText = selectCommandText;
-        IDbDataAdapter dataAdapter = this.GetDbDataAdapter();
+        IDbDataAdapter dataAdapter = GetDbDataAdapter();
         dataAdapter.SelectCommand = cmd;
         return dataAdapter;
     }
 
     public IDbDataAdapter GetDbDataAdapter(IDbCommand dbCommand)
     {
-        IDbDataAdapter dataAdapter = this.GetDbDataAdapter();
+        IDbDataAdapter dataAdapter = GetDbDataAdapter();
         dataAdapter.SelectCommand = dbCommand;
         return dataAdapter;
     }
 
     public DbCommandBuilder GetDBCommandBuilder()
     {
-        return this._dbProviderFactory.CreateCommandBuilder();
+        return _dbProviderFactory.CreateCommandBuilder();
     }
 
     public DbCommandBuilder GetDBCommandBuilder(IDbDataAdapter dbDataAdapter)
     {
         if (dbDataAdapter is DbDataAdapter)
         {
-            DbCommandBuilder dbCommandBuilder = this.GetDBCommandBuilder();
+            DbCommandBuilder dbCommandBuilder = GetDBCommandBuilder();
             dbCommandBuilder.DataAdapter = (DbDataAdapter)dbDataAdapter;
             return dbCommandBuilder;
         }

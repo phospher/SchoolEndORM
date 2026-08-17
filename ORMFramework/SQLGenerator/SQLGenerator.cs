@@ -26,7 +26,7 @@ public class SQLGenerator : ISQLGenerator
     public string GetSelectSQL(Type type, QueryExpression queryExpression)
     {
         var sql = new StringBuilder("select * from ");
-        EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(type.FullName);
+        EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(type.FullName);
         string tableName = mapping.TableName;
         sql.Append(tableName);
         List<StatElement> expression;
@@ -72,7 +72,7 @@ public class SQLGenerator : ISQLGenerator
 
         var sql = new StringBuilder("update ");
         var where = new StringBuilder(" where (");
-        EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(newObject.GetType().FullName);
+        EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(newObject.GetType().FullName);
         string tableName = mapping.TableName;
         PropertyInfo[] properties = oldObject.GetType().GetProperties();
         sql.Append(tableName);
@@ -124,7 +124,7 @@ public class SQLGenerator : ISQLGenerator
     public string GetDeleteSQL(object @object)
     {
         var sql = new StringBuilder("delete from ");
-        EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
+        EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
         string tableName = mapping.TableName;
         PropertyInfo[] properties = @object.GetType().GetProperties();
         sql.Append(tableName);
@@ -167,7 +167,7 @@ public class SQLGenerator : ISQLGenerator
         var sql = new StringBuilder("insert into ");
         var colums = new StringBuilder("(");
         var values = new StringBuilder("(");
-        EntityMapping mapping = this.PersistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
+        EntityMapping mapping = PersistenceContext.GetEntityMappingByClassName(@object.GetType().FullName);
         string tableName = mapping.TableName;
         PropertyInfo[] properties = @object.GetType().GetProperties();
         sql.Append(tableName);

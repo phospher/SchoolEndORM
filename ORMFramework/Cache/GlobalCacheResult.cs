@@ -11,9 +11,9 @@ public class GlobalCacheResult
 
     public GlobalCacheResult(Guid objectId, object Value, long version)
     {
-        this.ObjectId = objectId;
+        ObjectId = objectId;
         this.Value = Value;
-        this.Version = version;
-        this.ForeignKeys = new Dictionary<string, object>();
+        Version = version;
+        ForeignKeys = new Dictionary<string, object>();
     }
 }

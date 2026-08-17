@@ -25,17 +25,17 @@ public class Department
 
     public override bool Equals(object obj)
     {
-        if (obj == null || this.GetType() != obj.GetType())
+        if (obj == null || GetType() != obj.GetType())
         {
             return false;
         }
 
         Department student = (Department)obj;
-        return this.Id == student.Id;
+        return Id == student.Id;
     }
 
     public override int GetHashCode()
     {
-        return this.Id.GetHashCode();
+        return Id.GetHashCode();
     }
 }

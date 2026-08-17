@@ -9,17 +9,17 @@ public class Student
 
     public override bool Equals(object obj)
     {
-        if (obj == null || this.GetType() != obj.GetType())
+        if (obj == null || GetType() != obj.GetType())
         {
             return false;
         }
 
         Student student = (Student)obj;
-        return this.StudentId == student.StudentId;
+        return StudentId == student.StudentId;
     }
 
     public override int GetHashCode()
     {
-        return this.StudentId.GetHashCode();
+        return StudentId.GetHashCode();
     }
 }

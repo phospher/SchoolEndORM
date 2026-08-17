@@ -8,8 +8,8 @@ using ORMFramework.Statment;
 namespace ORMFramework.Cache;
 public static class GlobalCache
 {
-    private static int CACHEMAXCOUNT = 1000;
-    private static int INCREASE = 100;
+    private static int _cacheMaxCount = 1000;
+    private const int CacheIncrease = 100;
     private static readonly Dictionary<Type, List<GlobalCacheEntity>> _objTable = new();
     private static readonly Dictionary<Guid, GlobalCacheEntity> _objList = new();
     private static readonly Type[] _basicType = new Type[] {
@@ -517,15 +517,15 @@ public static class GlobalCache
             }
         }
         GC.Collect();
-        if (_objList.Count >= CACHEMAXCOUNT)
+        if (_objList.Count >= _cacheMaxCount)
         {
-            CACHEMAXCOUNT += INCREASE;
+            _cacheMaxCount += CacheIncrease;
         }
     }
 
     private static void CheckCache()
     {
-        if (_objList.Count >= CACHEMAXCOUNT)
+        if (_objList.Count >= _cacheMaxCount)
         {
             Collect();
         }

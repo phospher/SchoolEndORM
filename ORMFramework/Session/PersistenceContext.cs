@@ -31,21 +31,21 @@ public class PersistenceContext : IPersistenceContext
 
     public PersistenceContext(IDbDriverFactory driverFactory, ISQLGenerator sqlGenerator)
     {
-        this._driverFactory = driverFactory;
-        this.SQLGenerator = sqlGenerator;
+        _driverFactory = driverFactory;
+        SQLGenerator = sqlGenerator;
     }
 
     public PersistenceContext(IDbDriverFactory driverFactory, IDictionary<string, EntityMapping> mappings)
     {
-        this._driverFactory = driverFactory;
-        this.Mappings = mappings;
+        _driverFactory = driverFactory;
+        Mappings = mappings;
     }
 
     public EntityMapping GetEntityMappingByClassName(string className)
     {
-        if (this.Mappings != null && this.Mappings.ContainsKey(className))
+        if (Mappings != null && Mappings.ContainsKey(className))
         {
-            return this.Mappings[className];
+            return Mappings[className];
         }
         else
         {

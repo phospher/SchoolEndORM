@@ -73,7 +73,7 @@ public class Session : ISession, IDisposable
     public Session(ISessionFactory sessionFactory, IPersistenceContext persistenceContext, ISessionCache sessionCache, ISelectListener selectListener, IInsertListener insertListener,
         IUpdateListener updateListener, IDeleteListener deleteListener, ISubmitListener submitListener, ICommandListener commandListener)
     {
-        this.SessionFactory = sessionFactory;
+        SessionFactory = sessionFactory;
         _persistenceContext = persistenceContext;
         _sessionCache = sessionCache;
         _sessionCache.PersistenceContext = persistenceContext;

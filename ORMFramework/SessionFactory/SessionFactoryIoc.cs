@@ -15,17 +15,17 @@ public class SessionFactoryIoc : ISessionFactory
 
     public void Initialize()
     {
-        this.Initialize(string.Empty);
+        Initialize(string.Empty);
     }
 
     public void Initialize(string configFilePath)
     {
-        this.Initialize(configFilePath, new ComponentProviderBuilder().Build());   
+        Initialize(configFilePath, new ComponentProviderBuilder().Build());   
     }
 
     public void Initialize(string configFilePath, IComponentProvider componentProvider)
     {
-        this._componentProvider = componentProvider;
+        _componentProvider = componentProvider;
         if (_driverFactory != null)
         {
             return;
@@ -33,15 +33,15 @@ public class SessionFactoryIoc : ISessionFactory
         _mappings = new Dictionary<string, EntityMapping>();
         if (string.IsNullOrEmpty(configFilePath))
         {
-            this.Configuration = new ConfigManager().GetSystemConfiguration();
+            Configuration = new ConfigManager().GetSystemConfiguration();
         }
         else
         {
-            this.Configuration = new ConfigManager(configFilePath).GetSystemConfiguration();
+            Configuration = new ConfigManager(configFilePath).GetSystemConfiguration();
         }
-        this._driverFactory = new DefaultDbDriverFactory(this.Configuration.ConnectionString,
-            this.Configuration.ProviderName);
-        foreach (EntityMapping map in this.Configuration.Mappings)
+        _driverFactory = new DefaultDbDriverFactory(Configuration.ConnectionString,
+            Configuration.ProviderName);
+        foreach (EntityMapping map in Configuration.Mappings)
         {
             _mappings.Add(map.ClassName, map);
         }
@@ -55,11 +55,11 @@ public class SessionFactoryIoc : ISessionFactory
 
     public ISession CreateSession()
     {
-        ISession session = this._componentProvider.GetComponent<ISession>();
+        ISession session = _componentProvider.GetComponent<ISession>();
         session.SessionFactory = this;
-        session.PersistenceContext.DbDriverFactory.ConnectionString = this.Configuration.ConnectionString;
-        session.PersistenceContext.DbDriverFactory.SetProviderName(this.Configuration.ProviderName);
-        session.PersistenceContext.Mappings = this._mappings;
+        session.PersistenceContext.DbDriverFactory.ConnectionString = Configuration.ConnectionString;
+        session.PersistenceContext.DbDriverFactory.SetProviderName(Configuration.ProviderName);
+        session.PersistenceContext.Mappings = _mappings;
         session.PersistenceContext.SQLGenerator.PersistenceContext = session.PersistenceContext;
 
         return session;

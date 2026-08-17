@@ -3,7 +3,7 @@ public class QueryExpression
 {
     private List<StatElement> _nifixExpression;
     private List<StatElement> _suffixExpression;
-    private string _epxression;
+    private string _expression;
 
     public List<StatElement> NifixExpression
     {
@@ -17,13 +17,13 @@ public class QueryExpression
 
     public string Expression
     {
-        get { return _epxression; }
+        get { return _expression; }
     }
 
     internal QueryExpression(List<StatElement> nifixExpression, List<StatElement> suffixExpression, string expression)
     {
         _nifixExpression = nifixExpression;
         _suffixExpression = suffixExpression;
-        _epxression = expression;
+        _expression = expression;
     }
 }

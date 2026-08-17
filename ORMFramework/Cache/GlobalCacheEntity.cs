@@ -20,9 +20,9 @@ public class GlobalCacheEntity : CacheEntity
 
     public GlobalCacheEntity()
     {
-        this.ReadCount = 0;
-        this.Lock = Lock.None;
-        this.IsDeleted = false;
+        ReadCount = 0;
+        Lock = Lock.None;
+        IsDeleted = false;
         _blockThreads = new Queue<Thread>();
     }
 
@@ -30,14 +30,14 @@ public class GlobalCacheEntity : CacheEntity
     {
         Value = value;
         Version = DateTime.UtcNow.Ticks;
-        this.ReadCount = 0;
-        this.Lock = Lock.None;
+        ReadCount = 0;
+        Lock = Lock.None;
         _blockThreads = new Queue<Thread>();
         ForeignKeys = new Dictionary<string, object>();
         ObjectId = Guid.NewGuid();
-        this.IsDeleted = false;
-        this.WriteLockThreadId = -1;
-        this.ReferenceCount = 0;
+        IsDeleted = false;
+        WriteLockThreadId = -1;
+        ReferenceCount = 0;
     }
 }
 

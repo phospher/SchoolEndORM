@@ -5,37 +5,37 @@ using ORMFramework.SQL;
 namespace ORMFramework.Ioc;
 public class ComponentProviderBuilder
 {
-    private readonly IDictionary<Type, Type> componentImplTypes = new Dictionary<Type, Type>();
+    private readonly Dictionary<Type, Type> _componentImplTypes = new Dictionary<Type, Type>();
 
     public ComponentProviderBuilder()
     {
-        componentImplTypes[typeof(ISession)] = typeof(Session);
-        componentImplTypes[typeof(IDbDriverFactory)] = typeof(DefaultDbDriverFactory);
-        componentImplTypes[typeof(IPersistenceContext)] = typeof(PersistenceContext);
-        componentImplTypes[typeof(ISQLGenerator)] = typeof(SQLGenerator);
-        componentImplTypes[typeof(ISessionCache)] = typeof(SessionCache);
-        componentImplTypes[typeof(ISelectListener)] = typeof(DefaultSelectListener);
-        componentImplTypes[typeof(IInsertListener)] = typeof(DefaultInsertListener);
-        componentImplTypes[typeof(IUpdateListener)] = typeof(DefaultUpdateListener);
-        componentImplTypes[typeof(IDeleteListener)] = typeof(DefaultDeleteListener);
-        componentImplTypes[typeof(ICommandListener)] = typeof(DefaultCommandListener);
+        _componentImplTypes[typeof(ISession)] = typeof(Session);
+        _componentImplTypes[typeof(IDbDriverFactory)] = typeof(DefaultDbDriverFactory);
+        _componentImplTypes[typeof(IPersistenceContext)] = typeof(PersistenceContext);
+        _componentImplTypes[typeof(ISQLGenerator)] = typeof(SQLGenerator);
+        _componentImplTypes[typeof(ISessionCache)] = typeof(SessionCache);
+        _componentImplTypes[typeof(ISelectListener)] = typeof(DefaultSelectListener);
+        _componentImplTypes[typeof(IInsertListener)] = typeof(DefaultInsertListener);
+        _componentImplTypes[typeof(IUpdateListener)] = typeof(DefaultUpdateListener);
+        _componentImplTypes[typeof(IDeleteListener)] = typeof(DefaultDeleteListener);
+        _componentImplTypes[typeof(ICommandListener)] = typeof(DefaultCommandListener);
     }
 
     public ComponentProviderBuilder SetSession<T>() where T : ISession
     {
-        this.componentImplTypes[typeof(Session)] = typeof(T);
+        _componentImplTypes[typeof(Session)] = typeof(T);
         return this;
     }
 
     public ComponentProviderBuilder SetDbDriverFactory<T>() where T : IDbDriverFactory
     {
-        this.componentImplTypes[typeof(IDbDriverFactory)] = typeof(T);
+        _componentImplTypes[typeof(IDbDriverFactory)] = typeof(T);
         return this;
     }
 
     public IComponentProvider Build()
     {
-        return new DefaultComponentProvider(this.componentImplTypes);
+        return new DefaultComponentProvider(_componentImplTypes);
     }
 }
 
