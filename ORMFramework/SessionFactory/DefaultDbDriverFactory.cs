@@ -101,15 +101,12 @@ public sealed class DefaultDbDriverFactory : IDbDriverFactory
 
     public DbCommandBuilder GetDBCommandBuilder(IDbDataAdapter dbDataAdapter)
     {
-        if (dbDataAdapter is DbDataAdapter)
+        if (dbDataAdapter is not DbDataAdapter adapter)
         {
-            DbCommandBuilder dbCommandBuilder = GetDBCommandBuilder();
-            dbCommandBuilder.DataAdapter = (DbDataAdapter)dbDataAdapter;
-            return dbCommandBuilder;
+            throw new ArgumentException("dbDataAdapter must be DbDataAdapter", nameof(dbDataAdapter));
         }
-        else
-        {
-            throw new Exception("dbDataAdapter must be DbDataAdapter");
-        }
+        DbCommandBuilder dbCommandBuilder = GetDBCommandBuilder();
+        dbCommandBuilder.DataAdapter = adapter;
+        return dbCommandBuilder;
     }
 }

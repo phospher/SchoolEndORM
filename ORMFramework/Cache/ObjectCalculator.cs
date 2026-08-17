@@ -34,9 +34,9 @@ public static class ObjectCalculator
         if (resultStack.Count == 1)
         {
             result = resultStack.Pop();
-            if (result.Type == StatElementType.Result || (result.Type == StatElementType.Constant && result.Value is bool))
+            if ((result.Type == StatElementType.Result || result.Type == StatElementType.Constant) && result.Value is bool b)
             {
-                return (bool)result.Value;
+                return b;
             }
             else
             {
@@ -51,7 +51,7 @@ public static class ObjectCalculator
 
     private static void ProcessVariable(object @object, StatElement element, Stack<StatElement> resultStack)
     {
-        if (@object.GetType().GetProperty((string)element.Value) != null)
+        if (element.Value is string propertyName && @object.GetType().GetProperty(propertyName) != null)
         {
             resultStack.Push(element);
         }
@@ -94,11 +94,11 @@ public static class ObjectCalculator
         else if (element.Type == StatElementType.Variable)
         {
             PropertyInfo property = GetObjectProperty(@object, (string)element.Value);
-            if (property.PropertyType == typeof(bool))
+            if (property.GetValue(@object, null) is bool b)
             {
                 element = new StatElement();
                 element.Type = StatElementType.Result;
-                element.Value = !((bool)property.GetValue(@object, null));
+                element.Value = !b;
             }
             else
             {
@@ -107,11 +107,11 @@ public static class ObjectCalculator
         }
         else
         {
-            if (element.Value is bool)
+            if (element.Value is bool value)
             {
                 element = new StatElement();
                 element.Type = StatElementType.Result;
-                element.Value = !((bool)element.Value);
+                element.Value = !value;
             }
             else
             {
@@ -138,11 +138,11 @@ public static class ObjectCalculator
         {
             GetObjectProperty(@object, (string)y.Value);
         }
-        if (x.Value is bool && y.Value is bool)
+        if (x.Value is bool xb && y.Value is bool yb)
         {
             var element = new StatElement();
             element.Type = StatElementType.Result;
-            element.Value = CalculateBooleanOperator((bool)x.Value, (bool)y.Value, @operator);
+            element.Value = CalculateBooleanOperator(xb, yb, @operator);
             resultStack.Push(element);
         }
         else
@@ -190,9 +190,9 @@ public static class ObjectCalculator
         if (x.Type == StatElementType.Variable)
         {
             PropertyInfo property = GetObjectProperty(@object, (string)x.Value);
-            if (property.PropertyType == typeof(DateTime))
+            if (property.GetValue(@object, null) is DateTime xDateTime)
             {
-                xStr = ((DateTime)property.GetValue(@object, null)).ToString("yyyy-MM-dd HH:mm:ss");
+                xStr = xDateTime.ToString("yyyy-MM-dd HH:mm:ss");
             }
             else
             {
@@ -206,9 +206,9 @@ public static class ObjectCalculator
         if (y.Type == StatElementType.Variable)
         {
             PropertyInfo property = GetObjectProperty(@object, (string)y.Value);
-            if (property.PropertyType == typeof(DateTime))
+            if (property.GetValue(@object, null) is DateTime yDateTime)
             {
-                yStr = ((DateTime)property.GetValue(@object, null)).ToString("yyyy-MM-dd HH:mm:ss");
+                yStr = yDateTime.ToString("yyyy-MM-dd HH:mm:ss");
             }
             else
             {
@@ -219,13 +219,13 @@ public static class ObjectCalculator
         {
             yStr = y.Value.ToString();
         }
-        if (xStr[0] == '\'' && xStr[xStr.Length - 1] == '\'')
+        if (xStr is ['\'', .., '\''])
         {
-            xStr = xStr.Substring(1, xStr.Length - 2);
+            xStr = xStr[1..^1];
         }
-        if (yStr[0] == '\'' && yStr[yStr.Length - 1] == '\'')
+        if (yStr is ['\'', .., '\''])
         {
-            yStr = yStr.Substring(1, yStr.Length - 2);
+            yStr = yStr[1..^1];
         }
         return @operator switch
         {
@@ -302,15 +302,15 @@ public static class ObjectCalculator
 
     private static bool IsString(StatElement element, object @object)
     {
-        if (element.Type == StatElementType.Variable)
+        if (element.Type == StatElementType.Variable && element.Value is string name)
         {
-            Type type = @object.GetType().GetProperty((string)element.Value).PropertyType;
+            Type type = @object.GetType().GetProperty(name).PropertyType;
             return type == typeof(string) || type == typeof(DateTime) || type == typeof(char);
         }
         else if (element.Type == StatElementType.Constant)
         {
             string value = (string)element.Value;
-            return value.Length > 1 && value[0] == '\'' && value[value.Length - 1] == '\'';
+            return value.Length > 1 && value[0] == '\'' && value[^1] == '\'';
         }
         else
         {

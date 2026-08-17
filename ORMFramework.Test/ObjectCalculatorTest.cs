@@ -134,11 +134,11 @@ public class ObjectCalculatorTest
     }
 
     [TestMethod]
-    public void IsTargetObject_EmptyStringProperty_RecordsCurrentBug()
+    public void IsTargetObject_EmptyStringProperty_ComparesNormally()
     {
-        // TODO(12.2): 修复后空串属性参与比较不应越界（当前 CalculateStringOperator 的 xStr[0] 空串越界抛 IndexOutOfRangeException）。
+        // 6.20 的列表模式剥离修正了空串越界：空串属性现在正常参与比较，不再抛 IndexOutOfRangeException。
         var entity = new CalcEntity { Name = "" };
-        Assert.ThrowsException<IndexOutOfRangeException>(() => IsTarget(entity, "Name=='abc'"));
-        Assert.ThrowsException<IndexOutOfRangeException>(() => IsTarget(entity, "Name==''"));
+        Assert.IsFalse(IsTarget(entity, "Name=='abc'"));
+        Assert.IsTrue(IsTarget(entity, "Name==''"));
     }
 }

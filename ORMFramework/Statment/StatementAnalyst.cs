@@ -119,7 +119,7 @@ public class StatementAnalyst
             }
             else
             {
-                if (_currentElement[0] != '\'' || _currentElement[_currentElement.Length - 1] != '\'')
+                if (_currentElement[0] != '\'' || _currentElement[^1] != '\'')
                 {
                     try
                     {
@@ -300,14 +300,14 @@ public class StatementAnalyst
                 throw new Exception("Invalid Statement");
             }
         }
-        else if ((Operator)element.Value == Operator.Not)
+        else if (element is { Type: StatElementType.Operator, Value: Operator.Not })
         {
             if (!ReadNotOperation(operatorStack))
             {
                 throw new Exception("Invalid Statement");
             }
         }
-        else if ((Operator)element.Value == Operator.LeftParenthesis)
+        else if (element is { Type: StatElementType.Operator, Value: Operator.LeftParenthesis })
         {
             if (!ReadLeftParenthesis(operatorStack))
             {
@@ -324,21 +324,21 @@ public class StatementAnalyst
                     throw new Exception("Invalid Statement");
                 }
             }
-            else if ((Operator)element.Value == Operator.Not)
+            else if (element is { Type: StatElementType.Operator, Value: Operator.Not })
             {
                 if (!ReadNotOperation(operatorStack))
                 {
                     throw new Exception("Invalid Statement");
                 }
             }
-            else if ((Operator)element.Value == Operator.LeftParenthesis)
+            else if (element is { Type: StatElementType.Operator, Value: Operator.LeftParenthesis })
             {
                 if (!ReadLeftParenthesis(operatorStack))
                 {
                     throw new Exception("Invalid Statement");
                 }
             }
-            else if ((Operator)element.Value == Operator.RightParenthesis)
+            else if (element is { Type: StatElementType.Operator, Value: Operator.RightParenthesis })
             {
                 if (!ReadRightParenthesis(operatorStack))
                 {
@@ -365,7 +365,7 @@ public class StatementAnalyst
             return false;
         }
         element = _expression[_expressionIndex];
-        return element.Type == StatElementType.Operator && (Operator)element.Value == Operator.LeftParenthesis;
+        return element is { Type: StatElementType.Operator, Value: Operator.LeftParenthesis };
     }
 
     private bool ReadLeftParenthesis(Stack<StatElement> opeartorStack)
@@ -377,7 +377,7 @@ public class StatementAnalyst
             return false;
         }
         element = _expression[_expressionIndex];
-        return (element.Type == StatElementType.Operator && ((Operator)element.Value == Operator.Not || (Operator)element.Value == Operator.LeftParenthesis))
+        return element is { Type: StatElementType.Operator, Value: Operator.Not or Operator.LeftParenthesis }
             || element.Type == StatElementType.Variable
             || element.Type == StatElementType.Constant;
     }
@@ -391,7 +391,7 @@ public class StatementAnalyst
             return true;
         }
         element = _expression[_expressionIndex];
-        return element.Type == StatElementType.Operator && (Operator)element.Value != Operator.LeftParenthesis && (Operator)element.Value != Operator.Not;
+        return element is { Type: StatElementType.Operator, Value: not (Operator.LeftParenthesis or Operator.Not) };
     }
 
     private bool ReadVariableOrConstant()
@@ -404,8 +404,8 @@ public class StatementAnalyst
             return true;
         }
         element = _expression[_expressionIndex];
-        return (element.Type == StatElementType.Operator && (Operator)element.Value == Operator.RightParenthesis)
-            || (element.Type == StatElementType.Operator && (Operator)element.Value != Operator.Not && (Operator)element.Value != Operator.LeftParenthesis);
+        return element is { Type: StatElementType.Operator, Value: Operator.RightParenthesis }
+            || element is { Type: StatElementType.Operator, Value: not (Operator.Not or Operator.LeftParenthesis) };
     }
 
     private bool ReadOperator(Stack<StatElement> operatorStack)
@@ -419,8 +419,8 @@ public class StatementAnalyst
         element = _expression[_expressionIndex];
         return element.Type == StatElementType.Variable
             || element.Type == StatElementType.Constant
-            || (Operator)element.Value == Operator.LeftParenthesis
-            || (Operator)element.Value == Operator.Not;
+            || element is { Type: StatElementType.Operator, Value: Operator.LeftParenthesis }
+            || element is { Type: StatElementType.Operator, Value: Operator.Not };
     }
 
     private void ProcessOperatorStack(StatElement element, Stack<StatElement> operatorStack)
