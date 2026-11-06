@@ -403,7 +403,7 @@ public static class GlobalCache
             sql.Append(" not in (");
             foreach (object o in values)
             {
-                sql.Append(SqlLiteral.Format(o));
+                sql.Append(o.Format());
                 j++;
                 if (j < values.Count)
                 {

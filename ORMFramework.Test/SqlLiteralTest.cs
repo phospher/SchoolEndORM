@@ -17,13 +17,13 @@ public sealed class SqlLiteralTest
     [DataRow(true, "True")]
     public void Format_ReturnsExpected(object? input, string expected)
     {
-        Assert.AreEqual(expected, SqlLiteral.Format(input));
+        Assert.AreEqual(expected, input.Format());
     }
 
     [TestMethod]
     public void Format_DateTime_ReturnsQuotedInvariantFormat()
     {
-        Assert.AreEqual("'2024-01-02 03:04:05'", SqlLiteral.Format(new DateTime(2024, 1, 2, 3, 4, 5)));
+        Assert.AreEqual("'2024-01-02 03:04:05'", new DateTime(2024, 1, 2, 3, 4, 5).Format());
     }
 
     [TestMethod]
@@ -34,7 +34,7 @@ public sealed class SqlLiteralTest
         try
         {
             CultureInfo.CurrentCulture = new CultureInfo("de-DE");
-            Assert.AreEqual("1.5", SqlLiteral.Format(1.5));
+            Assert.AreEqual("1.5", 1.5.Format());
         }
         finally
         {
@@ -47,6 +47,6 @@ public sealed class SqlLiteralTest
     [DataRow("abc", "Name='abc'")]
     public void Comparison_ReturnsExpected(object? value, string expected)
     {
-        Assert.AreEqual(expected, SqlLiteral.Comparison("Name", value));
+        Assert.AreEqual(expected, "Name".Comparison(value));
     }
 }

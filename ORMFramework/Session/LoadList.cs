@@ -61,13 +61,10 @@ public sealed class LoadList<T> : IList<T>
         var statement = new StringBuilder();
         var @event = new SelectEvent();
         var items = new List<T>();
-        ReadOnlySpan<char> equality = "==";
         ReadOnlySpan<char> separator = " || ";
         for (int i = 0; i < ForeignKeyValues.Count; i++)
         {
-            statement.Append(ForeignKeyName);
-            statement.Append(equality);
-            statement.Append(SqlLiteral.Format(ForeignKeyValues[i]));
+            statement.AppendComparison(ForeignKeyName, ForeignKeyValues[i]);
             if (i < ForeignKeyValues.Count - 1)
             {
                 statement.Append(separator);

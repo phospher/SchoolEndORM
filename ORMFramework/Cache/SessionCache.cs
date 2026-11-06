@@ -67,9 +67,7 @@ public sealed class SessionCache : ISessionCache
                     {
                         var expressionStr = new StringBuilder();
                         QueryExpression expression;
-                        expressionStr.Append(relation.ReferenceColum);
-                        expressionStr.Append("==");
-                        expressionStr.Append(SqlLiteral.Format(foreignKeyValue));
+                        expressionStr.AppendComparison(relation.ReferenceColum, foreignKeyValue);
                         expression = new StatementAnalyst(expressionStr.ToString()).GetQueryExpression();
                         if (_objTable.TryGetValue(referenceType, out var referenceEntities))
                         {
@@ -110,7 +108,7 @@ public sealed class SessionCache : ISessionCache
                             sql.Append(" from ");
                             sql.Append(relation2.ReferenceTableName);
                             sql.Append(" where ");
-                            sql.Append(SqlLiteral.Comparison(relation2.ReferenceColum, foreignKeyValue));
+                            sql.Append(relation2.ReferenceColum.Comparison(foreignKeyValue));
                             foreignKeyValues.AddRange(ProcessQueryCommand(sql.ToString()));
                             (loadListType.GetProperty(nameof(LoadList<>.ForeignKeyName)) ?? throw new OrmConfigurationException($"Mapping references unknown property '{nameof(LoadList<>.ForeignKeyName)}' on {loadListType}.")).SetValue(loadList, relation2.ReferenceClassKeyColum);
                         }
