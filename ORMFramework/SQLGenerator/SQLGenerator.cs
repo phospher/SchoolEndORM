@@ -43,6 +43,7 @@ public sealed class SQLGenerator : ISQLGenerator
     public string GetSelectSQL(Type type, QueryExpression? queryExpression)
     {
         var sql = new StringBuilder("select * from ");
+        ReadOnlySpan<char> whereOpen = " where (";
         EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(type.FullName ?? throw new OrmConfigurationException($"Type '{type}' has no full name."))
             ?? throw new OrmConfigurationException($"No mapping is registered for type '{type}'.");
         string tableName = mapping.TableName;
@@ -50,7 +51,7 @@ public sealed class SQLGenerator : ISQLGenerator
         List<StatElement>? expression = queryExpression?.NifixExpression;
         if (expression != null && expression.Count > 0)
         {
-            sql.Append(" where (");
+            sql.Append(whereOpen);
             foreach (StatElement element in expression)
             {
                 switch (element.Type)
@@ -84,12 +85,14 @@ public sealed class SQLGenerator : ISQLGenerator
 
         var sql = new StringBuilder("update ");
         var where = new StringBuilder(" where (");
+        ReadOnlySpan<char> setClause = " set ";
+        ReadOnlySpan<char> andClause = " and ";
         EntityMapping mapping = PersistenceContextOrThrow.GetEntityMappingByClassName(newObject.GetType().FullName ?? throw new OrmConfigurationException($"Type '{newObject.GetType()}' has no full name."))
             ?? throw new OrmConfigurationException($"No mapping is registered for type '{newObject.GetType()}'.");
         string tableName = mapping.TableName;
         PropertyInfo[] properties = oldObject.GetType().GetProperties();
         sql.Append(tableName);
-        sql.Append(" set ");
+        sql.Append(setClause);
         for (int i = 0; i < properties.Length; i++)
         {
             if (IsBasicType(properties[i].PropertyType))
@@ -107,7 +110,7 @@ public sealed class SQLGenerator : ISQLGenerator
                 continue;
             }
             sql.Append(',');
-            where.Append(" and ");
+            where.Append(andClause);
         }
         sql.Remove(sql.Length - 1, 1);
         where.Remove(where.Length - 5, 5);

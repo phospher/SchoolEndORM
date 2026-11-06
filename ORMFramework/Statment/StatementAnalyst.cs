@@ -14,6 +14,7 @@ public class StatementAnalyst
     private int _stringIndex;
     private int _expressionIndex;
     private static readonly SearchValues<char> _operatorChars = SearchValues.Create("=><!&|like()");
+    private static readonly SearchValues<char> _quoteChars = SearchValues.Create("'");
 
     // `Operator` has 12 values but this table is 10×10; LeftParenthesis(10)/RightParenthesis(11)
     // are diverted by ProcessOperatorStack early — do not enlarge the table, do not reorder the enum.
@@ -47,7 +48,7 @@ public class StatementAnalyst
         set
         {
             ArgumentException.ThrowIfNullOrWhiteSpace(value);
-            _queryString = value.Trim().ToCharArray();
+            _queryString = value.AsSpan().Trim().ToArray();
             Init();
         }
     }
@@ -102,6 +103,9 @@ public class StatementAnalyst
 
     private static bool IsOperatorChar(char c) => _operatorChars.Contains(c);
 
+    private static bool IsQuotedConstant(ReadOnlySpan<char> text) =>
+        text.Length > 1 && _quoteChars.Contains(text[0]) && _quoteChars.Contains(text[^1]);
+
     private StatElement? CreateElement(StatElementType type)
     {
         if (_currentElement.Length > 0)
@@ -141,7 +145,8 @@ public class StatementAnalyst
             else
             {
                 string text = _currentElement.ToString();
-                if (text is not ['\'', .., '\''] && !double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
+                ReadOnlySpan<char> chars = text;
+                if (!IsQuotedConstant(chars) && !double.TryParse(chars, NumberStyles.Float, CultureInfo.InvariantCulture, out _))
                 {
                     throw new QuerySyntaxException($"Invalid Vairable:{text}");
                 }

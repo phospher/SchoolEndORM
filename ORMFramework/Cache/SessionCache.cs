@@ -95,12 +95,12 @@ public sealed class SessionCache : ISessionCache
                         referenceType = (referenceType.GetGenericArguments())[0];
                         Type loadListType = typeof(LoadList<>).MakeGenericType(referenceType);
                         object loadList = Activator.CreateInstance(loadListType) ?? throw new InvalidOperationException($"Activator.CreateInstance returned null for {loadListType}");
-                        var foreignKeyValues = (List<object>)(loadListType.GetProperty(nameof(LoadList<object>.ForeignKeyValues)) ?? throw new OrmConfigurationException($"Mapping references unknown property '{nameof(LoadList<object>.ForeignKeyValues)}' on {loadListType}.")).GetValue(loadList)!;
-                        (loadListType.GetProperty(nameof(LoadList<object>.SessionCache)) ?? throw new OrmConfigurationException($"Mapping references unknown property '{nameof(LoadList<object>.SessionCache)}' on {loadListType}.")).SetValue(loadList, this);
+                        var foreignKeyValues = (List<object>)(loadListType.GetProperty(nameof(LoadList<>.ForeignKeyValues)) ?? throw new OrmConfigurationException($"Mapping references unknown property '{nameof(LoadList<>.ForeignKeyValues)}' on {loadListType}.")).GetValue(loadList)!;
+                        (loadListType.GetProperty(nameof(LoadList<>.SessionCache)) ?? throw new OrmConfigurationException($"Mapping references unknown property '{nameof(LoadList<>.SessionCache)}' on {loadListType}.")).SetValue(loadList, this);
                         if (relation.Type == RelationType.OneToMany)
                         {
                             foreignKeyValues.Add(foreignKeyValue);
-                            (loadListType.GetProperty(nameof(LoadList<object>.ForeignKeyName)) ?? throw new OrmConfigurationException($"Mapping references unknown property '{nameof(LoadList<object>.ForeignKeyName)}' on {loadListType}.")).SetValue(loadList, relation.ReferenceColum);
+                            (loadListType.GetProperty(nameof(LoadList<>.ForeignKeyName)) ?? throw new OrmConfigurationException($"Mapping references unknown property '{nameof(LoadList<>.ForeignKeyName)}' on {loadListType}.")).SetValue(loadList, relation.ReferenceColum);
                         }
                         else
                         {
@@ -112,7 +112,7 @@ public sealed class SessionCache : ISessionCache
                             sql.Append(" where ");
                             sql.Append(SqlLiteral.Comparison(relation2.ReferenceColum, foreignKeyValue));
                             foreignKeyValues.AddRange(ProcessQueryCommand(sql.ToString()));
-                            (loadListType.GetProperty(nameof(LoadList<object>.ForeignKeyName)) ?? throw new OrmConfigurationException($"Mapping references unknown property '{nameof(LoadList<object>.ForeignKeyName)}' on {loadListType}.")).SetValue(loadList, relation2.ReferenceClassKeyColum);
+                            (loadListType.GetProperty(nameof(LoadList<>.ForeignKeyName)) ?? throw new OrmConfigurationException($"Mapping references unknown property '{nameof(LoadList<>.ForeignKeyName)}' on {loadListType}.")).SetValue(loadList, relation2.ReferenceClassKeyColum);
                         }
                         (objType.GetProperty(relation.Property) ?? throw new OrmConfigurationException($"Mapping references unknown property '{relation.Property}' on {objType}.")).SetValue(soruceObject, loadList);
                     }

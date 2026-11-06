@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
@@ -9,6 +10,8 @@ namespace ORMFramework.Cache;
 
 public static class ObjectCalculator
 {
+    private static readonly SearchValues<char> _quoteChars = SearchValues.Create("'");
+    private static readonly SearchValues<char> _likeWildcards = SearchValues.Create("%_");
 
     #region IsTargetObject
 
@@ -224,11 +227,11 @@ public static class ObjectCalculator
         }
         if (xStr is ['\'', .., '\''])
         {
-            xStr = xStr[1..^1];
+            xStr = xStr.AsSpan(1, xStr.Length - 2).ToString();
         }
         if (yStr is ['\'', .., '\''])
         {
-            yStr = yStr[1..^1];
+            yStr = yStr.AsSpan(1, yStr.Length - 2).ToString();
         }
         return @operator switch
         {
@@ -251,7 +254,7 @@ public static class ObjectCalculator
             while (pattenMatch.Success)
             {
                 endIndex = pattenMatch.Index;
-                patten.Append(y.Substring(startIndex, endIndex - startIndex).Replace("%", @"\w*").Replace("_", @"\w"));
+                AppendLikeSegment(patten, y.AsSpan(startIndex, endIndex - startIndex));
                 patten.Append(pattenMatch.Value);
                 startIndex = pattenMatch.Index + pattenMatch.Length;
                 pattenMatch = pattenMatch.NextMatch();
@@ -259,7 +262,7 @@ public static class ObjectCalculator
             endIndex = y.Length;
             if (startIndex < endIndex)
             {
-                patten.Append(y.Substring(startIndex, endIndex - startIndex).Replace("%", @"\w*").Replace("_", @"\w"));
+                AppendLikeSegment(patten, y.AsSpan(startIndex, endIndex - startIndex));
             }
             patten.Insert(0, '^');
             patten.Append('$');
@@ -269,6 +272,22 @@ public static class ObjectCalculator
         else
         {
             throw new QuerySyntaxException("Invalid Statement");
+        }
+    }
+
+    private static void AppendLikeSegment(StringBuilder pattern, ReadOnlySpan<char> segment)
+    {
+        foreach (char c in segment)
+        {
+            if (!_likeWildcards.Contains(c))
+            {
+                pattern.Append(c);
+            }
+            else
+            {
+                ReadOnlySpan<char> replacement = c == '%' ? @"\w*" : @"\w";
+                pattern.Append(replacement);
+            }
         }
     }
 
@@ -312,8 +331,8 @@ public static class ObjectCalculator
         }
         else if (element.Type == StatElementType.Constant)
         {
-            string value = (string)element.Value;
-            return value.Length > 1 && value[0] == '\'' && value[^1] == '\'';
+            ReadOnlySpan<char> value = (string)element.Value;
+            return value.Length > 1 && _quoteChars.Contains(value[0]) && _quoteChars.Contains(value[^1]);
         }
         else
         {
