@@ -3,6 +3,7 @@ using ORMFramework.Configuration;
 using ORMFramework.SQL;
 
 namespace ORMFramework.Test.Fakes;
+
 public class FakePersistenceContext : IPersistenceContext
 {
     private IDbConnection _connection = null!;

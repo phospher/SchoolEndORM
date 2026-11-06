@@ -1,6 +1,7 @@
 using ORMFramework.Statment;
 
 namespace ORMFramework.SQL;
+
 public interface ISQLGenerator
 {
     IPersistenceContext? PersistenceContext { get; set; }

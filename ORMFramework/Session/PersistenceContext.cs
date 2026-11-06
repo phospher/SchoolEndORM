@@ -3,6 +3,7 @@ using ORMFramework.Configuration;
 using ORMFramework.SQL;
 
 namespace ORMFramework;
+
 public sealed class PersistenceContext : IPersistenceContext
 {
     private IDbConnection? _connection;

@@ -2,13 +2,21 @@
 
 ## Project
 
-`SchoolEndORM` is a hand-written ORM framework for .NET 8 (a graduation project, see `README.md`). Solution `SchoolEndORM.sln` contains three projects:
+`SchoolEndORM` is a hand-written ORM framework for .NET 10 / C# 14 (a graduation project, see `README.md`). The repo root `global.json` pins the SDK, and `Directory.Build.props` declares the common target framework and language version once for all three projects. Solution `SchoolEndORM.sln` contains three projects:
 
 | Project | Type | Purpose |
 | --- | --- | --- |
-| `ORMFramework` | library, `net8.0` | the ORM itself (log4net + `Microsoft.Extensions.DependencyInjection`) |
-| `ORMFramework.Examples` | console exe, `net8.0` | runnable demo against MySQL (`MySql.Data`), entity classes + `Config.xml` |
-| `ORMFramework.Test` | MSTest, `net8.0` | unit tests for parser / SQL generation / config / object evaluation |
+| `ORMFramework` | library, `net10.0` | the ORM itself (log4net 3.x + `Microsoft.Extensions.DependencyInjection` 10.x) |
+| `ORMFramework.Examples` | console exe, `net10.0` | runnable demo against MySQL (`MySql.Data` 9.x), entity classes + `Config.xml` |
+| `ORMFramework.Test` | MSTest 4.x, `net10.0` | unit tests for parser / SQL generation / config / object evaluation |
+
+## Runtime and SDK baseline
+
+- Target framework `net10.0`, language version **C# 14** — declared once in `Directory.Build.props`; `Nullable=enable`, `ImplicitUsings=enable`, `EnableNETAnalyzers=true`, `AnalysisLevel=latest-recommended`, `EnforceCodeStyleInBuild=true` and `GenerateDocumentationFile=false` stay unchanged.
+- `global.json` pins SDK `10.0.100` (10.0.1xx feature band) with `rollForward: latestFeature` and `allowPrerelease: false`; it resolves to the installed .NET 10 SDK (here `10.0.403`). `dotnet --version` from the repo root must print `10.x`. Do not pin an exact patch, and do not use `disable` / `latest` / `preview`.
+- **Minimum runtime: .NET 10 (BREAKING).** Downstream consumers with only the .NET 8 runtime must upgrade; there is no `net8.0` compatibility target.
+- Aligned dependency major lines: `Microsoft.Extensions.DependencyInjection` 10.x, `Microsoft.NET.Test.Sdk` 18.x, `MSTest.TestAdapter` / `MSTest.TestFramework` 4.x, `coverlet.collector` 6.x, `MySql.Data` 9.x, `log4net` 3.x. `dotnet restore SchoolEndORM.sln` must be free of NU1701 (framework asset fallback) and NU190x (known vulnerability), and every package must provide `net10.0` compatible assets.
+- Test host: VSTest-compatible `dotnet test` through the explicit `Microsoft.NET.Test.Sdk` reference (no `MSTest.Sdk`, no MTP-native project file). `MSTestAnalysisMode` stays at its default — never `Recommended`.
 
 ## Commands
 
@@ -16,6 +24,8 @@
 dotnet restore SchoolEndORM.sln
 dotnet build SchoolEndORM.sln                      # all three projects
 dotnet build ORMFramework/ORMFramework.csproj      # library only
+dotnet build SchoolEndORM.sln -warnaserror           # static gate: zero warnings / zero errors
+dotnet format --verify-no-changes SchoolEndORM.sln   # formatting gate
 
 dotnet test ORMFramework.Test/ORMFramework.Test.csproj
 dotnet test ORMFramework.Test/ORMFramework.Test.csproj --filter FullyQualifiedName~StatementAnalystTest
@@ -26,7 +36,7 @@ dotnet run --project ORMFramework.Examples          # needs a reachable MySQL, w
 dotnet publish ORMFramework.Examples -c Release -o dist   # `dist/` in repo is such an output; git-ignored
 ```
 
-There is no dedicated linter; `dotnet build` warnings (from the .NET analyzers enabled in `Directory.Build.props`) are the static feedback. `dotnet format` uses the repo's `.editorconfig`, but avoid mass reformatting.
+There is no dedicated linter; `dotnet build` warnings (from the .NET analyzers enabled in `Directory.Build.props`) are the static feedback. `dotnet format` uses the repo's `.editorconfig`, but avoid mass reformatting. The four fixed verification gates for every commit are `dotnet restore SchoolEndORM.sln`, `dotnet format --verify-no-changes SchoolEndORM.sln`, `dotnet build SchoolEndORM.sln -warnaserror`, and `dotnet test ORMFramework.Test/ORMFramework.Test.csproj`; the three `dotnet test` commands above (plain, `--filter FullyQualifiedName~StatementAnalystTest`, and `--collect:"XPlat Code Coverage"`) must keep working verbatim.
 
 Caveats before running things:
 - `ORMFramework.Examples/Program.cs` loads `Config.xml` from `Path.Combine(AppContext.BaseDirectory, "Config.xml")`; the csproj copies `Config.xml` to the output directory (`CopyToOutputDirectory=PreserveNewest`).

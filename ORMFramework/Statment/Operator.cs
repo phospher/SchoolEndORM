@@ -1,4 +1,5 @@
 namespace ORMFramework.Statment;
+
 public enum Operator
 {
     Equals = 0,

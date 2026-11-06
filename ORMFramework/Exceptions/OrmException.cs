@@ -1,4 +1,5 @@
 namespace ORMFramework.Exceptions;
+
 public class OrmException : Exception
 {
     public OrmException()

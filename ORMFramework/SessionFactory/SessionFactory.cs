@@ -2,6 +2,7 @@ using ORMFramework.Configuration;
 using ORMFramework.SQL;
 
 namespace ORMFramework;
+
 public sealed class SessionFactory : ISessionFactory
 {
     private IDbDriverFactory _driverFactory = null!;

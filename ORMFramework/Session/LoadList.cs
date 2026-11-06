@@ -7,6 +7,7 @@ using ORMFramework.SQL;
 using ORMFramework.Statment;
 
 namespace ORMFramework;
+
 public sealed class LoadList<T> : IList<T>
 {
     private List<T>? _items;

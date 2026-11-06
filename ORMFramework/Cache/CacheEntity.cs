@@ -1,4 +1,5 @@
 namespace ORMFramework.Cache;
+
 public class CacheEntity
 {
     public Guid ObjectId { get; set; }

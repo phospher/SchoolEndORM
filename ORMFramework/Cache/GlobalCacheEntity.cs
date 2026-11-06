@@ -1,4 +1,5 @@
 namespace ORMFramework.Cache;
+
 public class GlobalCacheEntity : CacheEntity
 {
     public Lock Lock { get; set; }

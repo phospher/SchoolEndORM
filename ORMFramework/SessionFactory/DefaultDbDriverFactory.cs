@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Collections.Concurrent;
 
 namespace ORMFramework;
+
 public sealed class DefaultDbDriverFactory : IDbDriverFactory
 {
 

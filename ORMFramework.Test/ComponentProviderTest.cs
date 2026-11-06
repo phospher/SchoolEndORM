@@ -4,6 +4,7 @@ using ORMFramework.Ioc;
 using ORMFramework.Listener;
 
 namespace ORMFramework.Test;
+
 [TestClass]
 public class ComponentProviderTest
 {

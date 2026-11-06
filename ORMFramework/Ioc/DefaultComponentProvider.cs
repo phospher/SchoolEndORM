@@ -4,6 +4,7 @@ using ORMFramework.Cache;
 using ORMFramework.Listener;
 
 namespace ORMFramework.Ioc;
+
 public sealed class DefaultComponentProvider(IDictionary<Type, Type> componentImplDict) : IComponentProvider
 {
     private static readonly Dictionary<Type, ServiceLifetime> _componentLifetimes = new()

@@ -4,6 +4,7 @@ using System.Text;
 using ORMFramework.Exceptions;
 
 namespace ORMFramework.Statment;
+
 public class StatementAnalyst
 {
     private List<StatElement> _expression;

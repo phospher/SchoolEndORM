@@ -1,4 +1,5 @@
 namespace ORMFramework.Configuration;
+
 public class ManyToManyRelation : EntityRelation
 {
     public required string ReferenceTableName { get; set; }

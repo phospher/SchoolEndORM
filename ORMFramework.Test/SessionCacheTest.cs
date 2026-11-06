@@ -9,6 +9,7 @@ using ORMFramework.Test.Fakes;
 #pragma warning disable CA1707 // test method names are specified with underscores by the task spec
 
 namespace ORMFramework.Test;
+
 [TestClass]
 public class SessionCacheTest
 {
@@ -117,7 +118,7 @@ public class SessionCacheTest
         var objList = (Dictionary<object, CacheEntity>)objListField.GetValue(sessionCache)!;
         objList.Add(sourceEntity, cacheEntity);
 
-        var ex = Assert.ThrowsException<OrmConfigurationException>(() => sessionCache.GetReferenceClasses(sourceEntity));
+        var ex = Assert.ThrowsExactly<OrmConfigurationException>(() => sessionCache.GetReferenceClasses(sourceEntity));
         StringAssert.Contains(ex.Message, "MissingProp");
         StringAssert.Contains(ex.Message, entityType.FullName!);
     }

@@ -2,6 +2,7 @@ using System.Data;
 using ORMFramework.Event;
 
 namespace ORMFramework.Listener;
+
 sealed class DefaultCommandListener : ICommandListener
 {
 

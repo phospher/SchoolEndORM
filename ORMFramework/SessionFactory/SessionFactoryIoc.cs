@@ -2,6 +2,7 @@
 using ORMFramework.Ioc;
 
 namespace ORMFramework;
+
 public sealed class SessionFactoryIoc : ISessionFactory
 {
     private IDbDriverFactory _driverFactory = null!;

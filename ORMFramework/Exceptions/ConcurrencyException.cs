@@ -1,4 +1,5 @@
 namespace ORMFramework.Exceptions;
+
 public sealed class ConcurrencyException : OrmException
 {
     public ConcurrencyException()

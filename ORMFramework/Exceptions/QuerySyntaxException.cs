@@ -1,4 +1,5 @@
 namespace ORMFramework.Exceptions;
+
 public sealed class QuerySyntaxException : OrmException
 {
     public QuerySyntaxException()

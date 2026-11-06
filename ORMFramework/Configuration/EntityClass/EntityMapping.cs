@@ -1,4 +1,5 @@
 namespace ORMFramework.Configuration;
+
 public class EntityMapping
 {
     private IEnumerable<string> _keys = [];

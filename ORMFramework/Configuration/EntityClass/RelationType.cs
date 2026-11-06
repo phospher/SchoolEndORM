@@ -1,4 +1,5 @@
 namespace ORMFramework.Configuration;
+
 public enum RelationType
 {
     OneToOne,

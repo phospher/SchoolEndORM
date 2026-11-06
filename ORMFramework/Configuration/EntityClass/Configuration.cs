@@ -1,4 +1,5 @@
 namespace ORMFramework.Configuration;
+
 public class Configuration
 {
     public required string ConnectionString { get; set; }

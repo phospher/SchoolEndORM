@@ -1,4 +1,5 @@
 ﻿namespace ORMFramework.Examples;
+
 public class Teacher
 {
     public int Id { get; set; }

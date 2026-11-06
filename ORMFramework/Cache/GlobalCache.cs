@@ -8,6 +8,7 @@ using ORMFramework.SQL;
 using ORMFramework.Statment;
 
 namespace ORMFramework.Cache;
+
 public static class GlobalCache
 {
     private static int _cacheMaxCount = 1000;

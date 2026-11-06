@@ -5,6 +5,7 @@ using ORMFramework.SQL;
 #pragma warning disable CA1707 // test method names are specified with underscores by the task spec
 
 namespace ORMFramework.Test;
+
 [TestClass]
 public class SqlLiteralTest
 {

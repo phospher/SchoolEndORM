@@ -5,6 +5,7 @@ using ORMFramework.Statment;
 #pragma warning disable CA1707 // test method names are specified with underscores by the task spec
 
 namespace ORMFramework.Test;
+
 [TestClass]
 public class ObjectCalculatorTest
 {
@@ -70,8 +71,8 @@ public class ObjectCalculatorTest
 
         // TODO(12.2): bool 常量参与 == 当前抛 InvalidCastException（IsString 对 bool 常量做强转），
         // 后续阶段修复后应断言 true/false 而非异常。
-        Assert.ThrowsException<InvalidCastException>(() => IsTarget(entity, "Active==true"));
-        Assert.ThrowsException<InvalidCastException>(() => IsTarget(entity, "Active==false"));
+        Assert.ThrowsExactly<InvalidCastException>(() => IsTarget(entity, "Active==true"));
+        Assert.ThrowsExactly<InvalidCastException>(() => IsTarget(entity, "Active==false"));
 
         // 两个 bool 属性比较时走数值路径（Convert.ToDouble），当前返回 true。
         Assert.IsTrue(IsTarget(entity, "Active==Other"));
@@ -84,8 +85,8 @@ public class ObjectCalculatorTest
 
         // TODO(12.2): char 属性参与 == 当前抛 InvalidCastException（CalculateStringOperator 对 char 值强转为 string），
         // 后续阶段修复后应断言 true/false 而非异常。
-        Assert.ThrowsException<InvalidCastException>(() => IsTarget(entity, "Grade=='A'"));
-        Assert.ThrowsException<InvalidCastException>(() => IsTarget(entity, "Grade=='B'"));
+        Assert.ThrowsExactly<InvalidCastException>(() => IsTarget(entity, "Grade=='A'"));
+        Assert.ThrowsExactly<InvalidCastException>(() => IsTarget(entity, "Grade=='B'"));
     }
 
     [TestMethod]
@@ -104,7 +105,7 @@ public class ObjectCalculatorTest
         Assert.IsFalse(IsTarget(entity, "!(Id==1)"));
 
         // bool 常量参与 == 抛 InvalidCastException，导致整个 && 表达式抛异常。
-        Assert.ThrowsException<InvalidCastException>(() => IsTarget(entity, "Name=='abc' && Active==true"));
+        Assert.ThrowsExactly<InvalidCastException>(() => IsTarget(entity, "Name=='abc' && Active==true"));
     }
 
     [TestMethod]

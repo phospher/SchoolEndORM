@@ -3,6 +3,7 @@ using log4net.Config;
 using log4net.Repository;
 
 namespace ORMFramework.LogHelper;
+
 public static class LogHelper
 {
     private static ILog _log = null!;

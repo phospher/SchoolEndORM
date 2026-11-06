@@ -2,6 +2,7 @@ using ORMFramework.Cache;
 using ORMFramework.Statment;
 
 namespace ORMFramework.Test.Fakes;
+
 public sealed class FakeSessionCache : ISessionCache
 {
     private readonly List<Type> _searchTypes = new List<Type>();

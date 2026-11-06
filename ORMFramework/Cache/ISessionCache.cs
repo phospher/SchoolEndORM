@@ -1,6 +1,7 @@
 using ORMFramework.Statment;
 
 namespace ORMFramework.Cache;
+
 public interface ISessionCache : IDisposable
 {
     void Commit();

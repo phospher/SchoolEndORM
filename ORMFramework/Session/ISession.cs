@@ -2,6 +2,7 @@ using System.Data;
 using ORMFramework.Listener;
 
 namespace ORMFramework;
+
 public interface ISession : IDisposable
 {
     IDbConnection Connection { get; }

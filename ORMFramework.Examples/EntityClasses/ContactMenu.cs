@@ -1,4 +1,5 @@
 ﻿namespace ORMFramework.Examples;
+
 public class ContactMenu
 {
     public int Id { get; set; }

@@ -1,4 +1,5 @@
 namespace ORMFramework.Configuration;
+
 public class EntityRelation
 {
     public required string KeyColum { get; set; }

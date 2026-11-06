@@ -1,4 +1,5 @@
 ﻿namespace ORMFramework;
+
 public interface ISessionFactory
 {
     void Initialize();

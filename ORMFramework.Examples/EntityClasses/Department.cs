@@ -1,4 +1,5 @@
 ﻿namespace ORMFramework.Examples;
+
 public class Department
 {
     public int Id { get; set; }

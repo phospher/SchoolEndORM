@@ -2,6 +2,7 @@ using ORMFramework.Cache;
 using ORMFramework.Event;
 
 namespace ORMFramework.Listener;
+
 public sealed class DefaultSelectListener : ISelectListener
 {
 

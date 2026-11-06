@@ -3,6 +3,7 @@ using ORMFramework.Configuration;
 using ORMFramework.SQL;
 
 namespace ORMFramework;
+
 public interface IPersistenceContext
 {
     IDbDriverFactory DbDriverFactory { get; }

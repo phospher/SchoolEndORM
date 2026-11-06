@@ -1,4 +1,5 @@
 ﻿namespace ORMFramework.Examples;
+
 public class Student
 {
     public string? StudentId { get; set; }

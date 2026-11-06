@@ -5,6 +5,7 @@ using ORMFramework.Statment;
 #pragma warning disable CA1707 // test method names are specified with underscores by the task spec
 
 namespace ORMFramework.Test;
+
 [TestClass]
 public class StatementAnalystTest
 {
@@ -65,14 +66,14 @@ public class StatementAnalystTest
     [TestMethod]
     public void QueryString_Empty_ThrowsArgumentException()
     {
-        var ex = Assert.ThrowsException<ArgumentException>(() => Parse(""));
+        var ex = Assert.ThrowsExactly<ArgumentException>(() => Parse(""));
         Assert.AreEqual("value", ex.ParamName);
     }
 
     [TestMethod]
     public void QueryString_WhitespaceOnly_ThrowsArgumentException()
     {
-        var ex = Assert.ThrowsException<ArgumentException>(() => Parse("   "));
+        var ex = Assert.ThrowsExactly<ArgumentException>(() => Parse("   "));
         Assert.AreEqual("value", ex.ParamName);
     }
 
@@ -80,35 +81,35 @@ public class StatementAnalystTest
     public void QueryString_Null_ThrowsArgumentNullException()
     {
         // ThrowIfNullOrWhiteSpace(null) 抛 ArgumentNullException（ArgumentException 子类）。
-        var ex = Assert.ThrowsException<ArgumentNullException>(() => Parse(null));
+        var ex = Assert.ThrowsExactly<ArgumentNullException>(() => Parse(null));
         Assert.AreEqual("value", ex.ParamName);
     }
 
     [TestMethod]
     public void QueryString_UnbalancedParenthesis_ThrowsQuerySyntaxException()
     {
-        var ex = Assert.ThrowsException<QuerySyntaxException>(() => Parse("! ( b== 3"));
+        var ex = Assert.ThrowsExactly<QuerySyntaxException>(() => Parse("! ( b== 3"));
         Assert.AreEqual(") is expected", ex.Message);
     }
 
     [TestMethod]
     public void QueryString_UnclosedQuote_ThrowsQuerySyntaxException()
     {
-        var ex = Assert.ThrowsException<QuerySyntaxException>(() => Parse("a=='x"));
+        var ex = Assert.ThrowsExactly<QuerySyntaxException>(() => Parse("a=='x"));
         Assert.AreEqual("' is expected", ex.Message);
     }
 
     [TestMethod]
     public void QueryString_UnrecognizedOperator_ThrowsQuerySyntaxException()
     {
-        var ex = Assert.ThrowsException<QuerySyntaxException>(() => Parse("a=<1"));
+        var ex = Assert.ThrowsExactly<QuerySyntaxException>(() => Parse("a=<1"));
         Assert.AreEqual("Invaild Operator:=<", ex.Message);
     }
 
     [TestMethod]
     public void QueryString_InvalidNumericConstant_ThrowsQuerySyntaxException()
     {
-        var ex = Assert.ThrowsException<QuerySyntaxException>(() => Parse("a==1x"));
+        var ex = Assert.ThrowsExactly<QuerySyntaxException>(() => Parse("a==1x"));
         Assert.AreEqual("Invalid Vairable:1x", ex.Message);
     }
 

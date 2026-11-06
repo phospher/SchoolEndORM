@@ -1,6 +1,7 @@
 using ORMFramework.Event;
 
 namespace ORMFramework.Listener;
+
 public interface ISelectListener
 {
     void OnSelect(SelectEvent @event, object sender);

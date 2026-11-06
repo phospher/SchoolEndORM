@@ -2,6 +2,7 @@ using System.Xml;
 using ORMFramework.Exceptions;
 
 namespace ORMFramework.Configuration;
+
 public sealed class ConfigManager(string? configFilePath = null)
 {
     public string ConfigFilePath { get; set; } = string.IsNullOrEmpty(configFilePath) ? Path.Combine(Environment.CurrentDirectory, "Config.xml") : configFilePath;

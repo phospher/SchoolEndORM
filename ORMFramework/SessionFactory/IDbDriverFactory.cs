@@ -2,6 +2,7 @@ using System.Data;
 using System.Data.Common;
 
 namespace ORMFramework;
+
 public interface IDbDriverFactory
 {
     string ConnectionString { get; set; }

@@ -1,6 +1,7 @@
 using ORMFramework.Event;
 
 namespace ORMFramework.Listener;
+
 public sealed class DefaultSubmitListener : ISubmitListener
 {
 

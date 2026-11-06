@@ -1,4 +1,5 @@
 namespace ORMFramework.Cache;
+
 public class GlobalCacheResult(Guid objectId, object value, long version)
 {
     public Guid ObjectId { get; set; } = objectId;

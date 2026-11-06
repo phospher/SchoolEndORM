@@ -6,6 +6,7 @@ using ORMFramework.Exceptions;
 using ORMFramework.Statment;
 
 namespace ORMFramework.Cache;
+
 public static class ObjectCalculator
 {
 

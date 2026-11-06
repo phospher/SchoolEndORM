@@ -6,6 +6,7 @@ using ORMFramework.SQL;
 using ORMFramework.Statment;
 
 namespace ORMFramework.Cache;
+
 public sealed class SessionCache : ISessionCache
 {
     private readonly Dictionary<object, CacheEntity> _objList = new();

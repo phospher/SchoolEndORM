@@ -1,4 +1,5 @@
 namespace ORMFramework.Event;
+
 public class CommandEvent
 {
 
