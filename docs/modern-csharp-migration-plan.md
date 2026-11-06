@@ -1,3 +1,7 @@
+> **状态横幅（补记于 `upgrade-net10-csharp14` 收尾后）**
+> §1–§16 描述的是历史 net6.0 → net8.0 / C# 12 迁移方案，作为历史记录原样保留，不再代表当前工程状态。
+> 当前状态为 `net10.0` / C# 14 / .NET 10 SDK，实施与收尾记录见 §17、§18；当前状态的权威文档以 `AGENTS.md` 与 `README.md` 为准。
+
 # SchoolEndORM 现代 C# 语法改造方案
 
 > 文档性质：**改造方案（只读分析）**，本文不包含任何代码修改。
@@ -24,6 +28,8 @@
 - [14. 红线：禁止改动的部分](#14-红线禁止改动的部分)
 - [15. 逐文件改造清单](#15-逐文件改造清单)
 - [16. 执行顺序、验证与回滚](#16-执行顺序验证与回滚)
+- [17. 附录：C# 14 `field` 关键字改写记录（提交 #3）](#17-附录c-14-field-关键字改写记录提交-3)
+- [18. C# 14 特性采用矩阵与 net8 → net10 升级收尾记录（提交 #6）](#18-c-14-特性采用矩阵与-net8--net10-升级收尾记录提交-6)
 
 ---
 
@@ -1588,3 +1594,13 @@ dotnet test ORMFramework.Test/ORMFramework.Test.csproj # 全绿
 ### 18.4 验证（提交 #6）
 
 `dotnet restore SchoolEndORM.sln` / `dotnet format --verify-no-changes SchoolEndORM.sln` / `dotnet build SchoolEndORM.sln -warnaserror`（0 警告 0 错误；删除 IDE0032 抑制后 `field` 半自动属性不触发 IDE0032）/ `dotnet test ORMFramework.Test/ORMFramework.Test.csproj`（74/74）四道门槛全绿；`--filter FullyQualifiedName~ConfigManagerTest`（9/9）与 `--filter FullyQualifiedName~StatementAnalystTest`（13/13）聚焦过滤通过；三道 `dotnet test` 命令（plain / `--filter FullyQualifiedName~StatementAnalystTest` / `--collect:"XPlat Code Coverage"`）原样可用；`diff /tmp/sql-snapshot-before.txt docs/baselines/sql-snapshot.txt` 为空、`git diff --exit-code -- docs/baselines/sql-snapshot.txt` 退出 0；`grep -n 'IDE0032' .editorconfig` 零命中，剩余 4 条 `severity = none`（CA1716 / CA1720 / CA1840 / CA1859）均带准确理由注释；`git diff -- ORMFramework/Cache/GlobalCache.cs` 为空；未新增任何 `[TestMethod]` / `[DataRow]`（74/74 不变）。
+
+### 18.5 回滚耦合与 SDK 支持基线
+
+> 本节为 `upgrade-net10-csharp14` 收尾后的补充说明，回应最终评审的三项 Minor 文档发现；不改任何代码，只记录回滚边界、diff 口径与 SDK 支持基线。
+
+**（1）IDE0032 抑制与 `field` 改写的回滚耦合（提交 #1 → #3 → #6）。** 提交 #1（`e1cc823`）在 `.editorconfig` 新增 `dotnet_diagnostic.IDE0032.severity = none`，为 `EntityMapping` / `PersistenceContext` / `LoadList` / `FakePersistenceContext` 等显式后备字段的属性访问器免除 IDE0032（"使用自动属性"）告警。提交 #3（`b28c21f`）把生产侧 4 个后备字段（`EntityMapping.cs`、`PersistenceContext.cs`、`CacheEntity.cs`、`SessionFactory*.cs`，详见 §17）改写为 C# 14 `field` 半自动属性；提交 #6（`2c93e3e`）又改写 `ORMFramework.Test/Fakes/FakePersistenceContext.cs` 的 2 个测试假件后备字段（§18.2），并据此**删除** #1 加入的 `IDE0032` 抑制及其过时理由注释，`.editorconfig` 恢复为 4 条既有抑制（CA1716 / CA1720 / CA1840 / CA1859）。因此该删除仅在 #3 + #6 全部在场时成立：若对最终交付状态**单独** `git revert` #3（还原上述生产文件的显式后备字段）而保留 #6 的 `.editorconfig`，`dotnet build SchoolEndORM.sln -warnaserror --no-incremental` 会因 `EntityMapping.cs(5,5)(6,6)`、`PersistenceContext.cs(9,5)` 的 IDE0032 告警被升级为错误而失败。正确回滚：**按逆序 #6 → #1 逐个 revert**（顺序回滚保持每步自洽）；若必须孤立回滚 #3 而保留后续提交，须同时重新加入 `dotnet_diagnostic.IDE0032.severity = none` 抑制，否则 `-warnaserror` 失败。`tasks.md` §6.5 与 design D5 所述"每个提交独立可 `git revert`"是在**各提交自身基线**上验证的结论，不适用于对最终状态孤立回滚 #3 的情形；交付态本身全绿且顺序回滚可用，此处仅为文档补记。
+
+**（2）§18.4 `GlobalCache.cs` diff 口径。** §18.4 的 `git diff -- ORMFramework/Cache/GlobalCache.cs` 为**空**仅针对**提交 #6 自身**（单提交 diff）——#6 未触碰该文件。**累计分支 diff**（`git diff --stat c0d7de3..HEAD -- ORMFramework/Cache/GlobalCache.cs`）为 `1 file changed, 2 insertions(+), 1 deletion(-)`，并非空，来源为两处纯机械改动：提交 #1 依其强制 `dotnet format whitespace` 在 file-scoped namespace 后补入的一个空行；提交 #5 扩展成员改写后的一次调用点改写 `sql.Append(SqlLiteral.Format(o))` → `sql.Append(o.Format())`。上述累计改动**不含**任何 `Monitor` / `Thread` / `Interrupt` / `ConcurrentDictionary` 或锁获取顺序（lock-order）变更；手写锁模型仍为冻结红线，`docs/baselines/sql-snapshot.txt` 白名单零改动（见 §18.4）。
+
+**（3）SDK 支持基线（`global.json` / `rollForward`）。** `global.json` 固定 `10.0.100`（10.0.1xx feature band）并设 `rollForward: latestFeature`、`allowPrerelease: false`，实现严格遵循 design C2 / D2，本次不做代码改动。`latestFeature` 选取已安装的最高 10.0.x feature band，因此**任何已安装的 10.0.x ≥ 10.0.100 均满足该固定**，不要求特定补丁版本。四道门槛（`dotnet restore` / `dotnet format --verify-no-changes` / `dotnet build -warnaserror` / `dotnet test`）实际在 **SDK 10.0.403**（`dotnet --version` = `10.0.403`）上验证通过；本次选择"文档化支持基线"而非下载 10.0.1xx SDK 另测。R9 已表明分析器告警与空白格式诊断对 **feature band 敏感**：跨 feature band 迁移 SDK 时须重新运行上述四道门槛以确认 0 警告 / 0 错误与 74/74，不能仅凭 "10.0.x" 推断门槛恒绿。
