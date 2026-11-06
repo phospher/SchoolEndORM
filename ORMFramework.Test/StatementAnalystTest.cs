@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Buffers;
+using System.Text;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ORMFramework.Exceptions;
 using ORMFramework.Statment;
 
@@ -9,21 +11,48 @@ namespace ORMFramework.Test;
 [TestClass]
 public sealed class StatementAnalystTest
 {
+    private static readonly SearchValues<char> _tokenDelimiters = SearchValues.Create("|:");
+
     private static string Render(List<StatElement> expression)
     {
-        var parts = new List<string>();
-        foreach (StatElement element in expression)
+        var builder = new StringBuilder();
+        for (int i = 0; i < expression.Count; i++)
         {
-            if (element.Type == StatElementType.Operator)
+            if (i > 0)
             {
-                parts.Add("Operator:" + (Operator)element.Value);
+                builder.Append('|');
             }
-            else
-            {
-                parts.Add(element.Type + ":" + element.Value);
-            }
+            AppendToken(builder, expression[i]);
         }
-        return string.Join("|", parts);
+        return builder.ToString();
+    }
+
+    private static void AppendToken(StringBuilder builder, StatElement element)
+    {
+        string token;
+        if (element.Type == StatElementType.Operator)
+        {
+            token = "Operator:" + (Operator)element.Value;
+        }
+        else
+        {
+            token = element.Type + ":" + element.Value;
+        }
+        ReadOnlySpan<char> remaining = token.AsSpan();
+        // design D4「采用（测试沙盒）」/ D9：以 ReadOnlySpan<char> 切片追加 token，
+        // SearchValues<char>.IndexOfAny 定位 ':' / '|' 分段；不分配子字符串，
+        // 逐字符按原顺序追加一次，渲染文本与旧版 string.Join("|", parts) 逐字节一致。
+        while (true)
+        {
+            int boundary = remaining.IndexOfAny(_tokenDelimiters);
+            if (boundary < 0)
+            {
+                builder.Append(remaining);
+                return;
+            }
+            builder.Append(remaining[..(boundary + 1)]);
+            remaining = remaining[(boundary + 1)..];
+        }
     }
 
     private static QueryExpression Parse(string? query)

@@ -61,10 +61,3 @@ dotnet_diagnostic.CA1720.severity = none
 dotnet_diagnostic.CA1840.severity = none
 # CA1859："用具体类型代替接口" 属于改变签名的微优化，超出本次范围。
 dotnet_diagnostic.CA1859.severity = none
-
-# ---- .NET 10 SDK 新增诊断的处置（2.16–2.18）----
-# IDE0032：EntityMapping / PersistenceContext / LoadList / FakePersistenceContext 的后备字段，其属性访问器带有
-# null-coalescing（?? [] / ?? new Dictionary）、懒加载（??= LoadItems()）与 null 时 throw 语义；改成自动属性会丢失这些判定，
-# 与 C6 语义等价硬边界及「LoadList 懒加载只触发一次」红线冲突。行为等价的 C# 14 `field` 改写属于提交 #3 范围
-# （C8：每个提交只承载一类变换），故本次基础设施提交不改行为，按范围外规则抑制。
-dotnet_diagnostic.IDE0032.severity = none

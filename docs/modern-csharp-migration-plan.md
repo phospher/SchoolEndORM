@@ -1542,3 +1542,49 @@ dotnet test ORMFramework.Test/ORMFramework.Test.csproj # 全绿
 ### 17.4 验证
 
 `dotnet restore` / `dotnet format --verify-no-changes` / `dotnet build -warnaserror`（0 警告 0 错误，`field` 标识符扫描 CS9258/CS9272 零命中）/ `dotnet test`（74/74）四道门槛全绿；`ConfigManagerTest`、`SessionTest`、`SessionCacheTest`、`LoadListTest`、`ComponentProviderTest` 聚焦过滤通过；`diff /tmp/sql-snapshot-before.txt docs/baselines/sql-snapshot.txt` 为空，SQL 快照白名单零改动。
+
+---
+
+## 18. C# 14 特性采用矩阵与 net8 → net10 升级收尾记录（提交 #6）
+
+> 本节追加于 `upgrade-net10-csharp14` 变更的收尾提交 #6；语言版本 C# 14 / SDK 10.0.403 / 目标框架 net10.0。
+> 与 `design.md` D4「C# 13/14 特性采用矩阵」及 §5.1–5.12 实际提交代码逐条核对。§17（`field` 关键字改写记录）与本文档此前章节均为既有内容，本节仅追加、不改写。
+
+### 18.1 net8 → net10 升级状态：已完成
+
+- **状态：已完成**（提交 #1–#6）。`net10.0` / `LangVersion 14.0` 由仓库根 `Directory.Build.props` 统一声明一次（C1）；`global.json` 固定 10.0.1xx Feature Band、`rollForward: latestFeature`、`allowPrerelease: false`（C2）；全部 `PackageReference` 升到提供 `net10.0` 资产的稳定版本，`dotnet restore` 无 NU1701 / NU190x（C3）。
+- 最低运行时提升为 .NET 10（BREAKING，仅装 .NET 8 的下游消费者须同步升级，C2）；未启用 `MSTestAnalysisMode=Recommended`、未引入新分析器规则集、未把测试项目重写为 MTP 原生项目文件（C5）。
+- 回归网：`dotnet test` 74/74；`docs/baselines/sql-snapshot.txt` 五行白名单逐字节未变；四类 SQL 文本、中缀/后缀序列快照、`ObjectCalculator` 真值表、`ConfigManager` 映射断言、`LoadList` 懒加载只触发一次、异常类型层次、幂等 `Dispose`、`Config.xml` 解析结果与公开 API 名称与拼写保持不变（C6 / C7）。
+
+### 18.2 C# 14 特性采用矩阵（采用 / 条件采用 / 不采用）
+
+| 特性 | 结论 | 落点 / 理由 | 提交 |
+| --- | --- | --- | --- |
+| `field` 关键字（semi-auto 属性） | **采用 + 有限扩面** | 生产侧 8 处（详见 §17）：`EntityMapping.Keys` / `Relations`、`PersistenceContext.Connection`、`LoadList<T>.Items`、`CacheEntity.Value` / `ForeignKeys`、两个 `SessionFactory.Configuration`；只做机械替换、不加运行时 null 守卫、不改公开属性名与反射可见性。 | #3 |
+| `field`（测试沙盒，R19 首选路径） | **采用** | `ORMFramework.Test/Fakes/FakePersistenceContext.cs` 的 `_connection` / `_dbDriverFactory` 两个显式后备字段改为 `{ get => field ?? throw new InvalidOperationException("no database in unit test"); set => field = value; } = null!;`，保留 `?? throw` 行为、异常类型与消息、属性初始化器语义；随后删除 `.editorconfig` 的 `dotnet_diagnostic.IDE0032.severity = none` 及其过时理由注释（原注释误称该改写「属于提交 #3 范围」），解决提交 #3 R11 遗留的抑制债务。 | #6 |
+| `nameof` 非绑定泛型 | **条件采用** | 先经最小编译探针验证 `nameof(LoadList<>.X)` 合法，再替换 `SessionCache.cs` 的 4 处并以 `LoadListTest` 验证（D4「条件采用」）。 | #4 |
+| `Span<T>` / `ReadOnlySpan<T>` / `SearchValues<char>` 一等公民 | **采用（受限）** | 生产侧 `StatementAnalyst` / `ObjectCalculator` 的引号剥离与字符扫描、`LoadList` / `SQLGenerator` 的 `StringBuilder.Append(ReadOnlySpan<char>)` 拼接（提交 #4）；测试侧 `StatementAnalystTest.Render` 的辅助方法以 `ReadOnlySpan<char>` 切片 + `SearchValues<char>.IndexOfAny` 分段追加，输出与旧版 `string.Join("|", parts)` 逐字节一致（design D9 测试沙盒）。只在文本输出完全等价、不分配子字符串处改写。 | #4 / #6 |
+| 扩展成员（`extension` 块） | **采用** | `SQL/SqlLiteral.cs` 把 `Format(object?)` 改为 `object?` 上的 `Format()`、`Comparison(string, object?)` 改为 `string` 上的 `Comparison(object?)` 扩展成员，并新增 `StringBuilder.AppendComparison` 收拢重复的 `Append(column).Append("==").Append(value.Format())` 序列；纯转发、无状态，由 `SqlLiteralTest` / `SQLGeneratorTest` / `LoadListTest` 与 SQL 快照覆盖（D4 放宽「不新增抽象层」后允许的一处）。 | #5 |
+| partial 构造 / 事件 | **采用（受限）** | 仅把 `Configuration/ConfigManager.cs` 按解析阶段拆为 partial：`ConfigManager.cs`（定义声明 `public partial ConfigManager(string? configFilePath = null);` + SessionFactory 阶段方法）与新增 `ConfigManager.Mappings.cs`（实现声明 + Mappings 阶段方法），构成 C# 14 partial 构造对（R24）；`Statment/StatementAnalyst.cs`（优先级表下标耦合）与冻结的 `Cache/GlobalCache.cs` **都不拆**。`Config.xml` 的 `SessionFactory` → `Mappings` 解析顺序与未知元素硬报错行为不变，`new ConfigManager()` / `new ConfigManager(path)` 行为等价。 | #6 |
+| lambda 参数修饰符 / 空条件赋值（`?.` 赋值） | **不采用（无可审阅落点）** | R25 核定：仓库无 `double.TryParse` 委托（仅 `StatementAnalyst.cs` 生产直调，范围外）；`ORMFramework.Test/Fakes/` 假件与 helper 中无 `?.` 赋值、无需 `ref` / `out` / `in` 修饰符的委托或 lambda 落点。为凑齐特性新建委托类型或调用点无行为收益，违反 design D4「不为打勾新建类型」与 YAGNI；按 D4「不采用必须给出理由、而不是遗漏」在此记录理由，不省略。 | — |
+| `System.Threading.Lock`（C# 13） | **不采用** | 唯一落点是 `Cache/GlobalCache.cs` 手写 `Monitor` / `Thread.Interrupt` 锁模型（C7 红线冻结），改写需先有并发回归测试，属 §12.1 / §16.4 独立提案，本变更明确不动。 | — |
+| 用户自定义复合赋值、file-based app 指令、`params` 集合、`\e`、隐式索引初始化器 | **不采用** | 无运算符重载类型、无 file-based app、无 `params` 数组 helper、无 `\e` 转义字符需求、无隐式索引初始化场景；为凑齐特性新建类型会改变公开类型列表，超出「小规模、可审阅」边界（D4）。 | — |
+| 枚举 / 索引对齐改动（`_sqlOperators` / `_priorityTable` / `Operator` 顺序） | **不采用（红线）** | 三张表按下标索引对齐，禁止重排（C7 红线 / D4）。 | — |
+| `MSTestAnalysisMode=Recommended` | **不采用** | AGENTS.md 与 C5 明确要求保持默认值、不引入新分析器规则集、不把测试项目重写为 MTP 原生项目文件；仅修 v4 升为 Warning 的规则与已删除 API 引入的告警。 | — |
+
+### 18.3 §16.4 八项后续提案核对：仍为「未实施」
+
+以下 8 项属本变更之外的后续独立提案（§16.4），本次 `upgrade-net10-csharp14` 变更**全部仍未实施**，状态与 §16.4 一致、未在本变更范围内改动：
+
+1. `GlobalCache` 锁模型重写（`ReaderWriterLockSlim` / `SemaphoreSlim`）—— 未实施（见 §12.1）。
+2. 全链路异步 + `DbDataReader` 替代 `DataSet` —— 未实施（见 §12.2）。
+3. 参数化 SQL（`DbParameter`）—— 未实施（见 §7.4 结尾）。
+4. `log4net` → `Microsoft.Extensions.Logging` —— 未实施（见 §12.3）。
+5. 公开 API 拼写修正（`NifixExpression`、`MantToMany`、`ReleaseReferenct`、`KeyColum` 系列）—— 未实施（见 §14.1）。
+6. `Statment` 命名空间改名、命名空间与目录对齐 —— 未实施（见 §14.5）。
+7. `ConfigManager` 改用 `XDocument` / `XmlSerializer` —— 未实施（见 §14.4）。
+8. 反射结果缓存（`ConcurrentDictionary<Type, PropertyInfo[]>`）—— 未实施（见 §9.3）。
+
+### 18.4 验证（提交 #6）
+
+`dotnet restore SchoolEndORM.sln` / `dotnet format --verify-no-changes SchoolEndORM.sln` / `dotnet build SchoolEndORM.sln -warnaserror`（0 警告 0 错误；删除 IDE0032 抑制后 `field` 半自动属性不触发 IDE0032）/ `dotnet test ORMFramework.Test/ORMFramework.Test.csproj`（74/74）四道门槛全绿；`--filter FullyQualifiedName~ConfigManagerTest`（9/9）与 `--filter FullyQualifiedName~StatementAnalystTest`（13/13）聚焦过滤通过；三道 `dotnet test` 命令（plain / `--filter FullyQualifiedName~StatementAnalystTest` / `--collect:"XPlat Code Coverage"`）原样可用；`diff /tmp/sql-snapshot-before.txt docs/baselines/sql-snapshot.txt` 为空、`git diff --exit-code -- docs/baselines/sql-snapshot.txt` 退出 0；`grep -n 'IDE0032' .editorconfig` 零命中，剩余 4 条 `severity = none`（CA1716 / CA1720 / CA1840 / CA1859）均带准确理由注释；`git diff -- ORMFramework/Cache/GlobalCache.cs` 为空；未新增任何 `[TestMethod]` / `[DataRow]`（74/74 不变）。
