@@ -11,7 +11,7 @@ using ORMFramework.Test.Fakes;
 namespace ORMFramework.Test;
 
 [TestClass]
-public class SessionCacheTest
+public sealed class SessionCacheTest
 {
     private sealed class TestEntity
     {
@@ -119,7 +119,7 @@ public class SessionCacheTest
         objList.Add(sourceEntity, cacheEntity);
 
         var ex = Assert.ThrowsExactly<OrmConfigurationException>(() => sessionCache.GetReferenceClasses(sourceEntity));
-        StringAssert.Contains(ex.Message, "MissingProp");
-        StringAssert.Contains(ex.Message, entityType.FullName!);
+        Assert.Contains("MissingProp", ex.Message);
+        Assert.Contains(entityType.FullName!, ex.Message);
     }
 }

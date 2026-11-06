@@ -68,6 +68,3 @@ dotnet_diagnostic.CA1859.severity = none
 # 与 C6 语义等价硬边界及「LoadList 懒加载只触发一次」红线冲突。行为等价的 C# 14 `field` 改写属于提交 #3 范围
 # （C8：每个提交只承载一类变换），故本次基础设施提交不改行为，按范围外规则抑制。
 dotnet_diagnostic.IDE0032.severity = none
-# CA2263：建议的 Assert.IsInstanceOfType<T> 泛型改写属于提交 #2 的 3.5（MSTest 4 断言规范化），超出本次基础设施提交范围
-# （C8：每个提交只承载一类变换）；它不改判定顺序与输出文本、与 ORM 红线无关，待 3.5 就地修复，故按范围外规则抑制。
-dotnet_diagnostic.CA2263.severity = none

@@ -6,7 +6,7 @@ using ORMFramework.Listener;
 namespace ORMFramework.Test;
 
 [TestClass]
-public class ComponentProviderTest
+public sealed class ComponentProviderTest
 {
     [TestMethod]
     public void TestGetSession()
@@ -14,7 +14,8 @@ public class ComponentProviderTest
         IComponentProvider componentProvider = new ComponentProviderBuilder()
             .Build();
         ISession session = componentProvider.GetComponent<ISession>();
-        Assert.IsInstanceOfType<Session>(session);
+        Session concreteSession = Assert.IsInstanceOfType<Session>(session);
+        Assert.IsNotNull(concreteSession);
     }
 
     [TestMethod]
@@ -24,7 +25,8 @@ public class ComponentProviderTest
             .SetSession<CustomSession>()
             .Build();
         ISession session = componentProvider.GetComponent<ISession>();
-        Assert.IsInstanceOfType<CustomSession>(session);
+        CustomSession concreteSession = Assert.IsInstanceOfType<CustomSession>(session);
+        Assert.IsNotNull(concreteSession);
     }
 
     private sealed class CustomSession : ISession

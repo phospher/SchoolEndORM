@@ -7,7 +7,7 @@ using ORMFramework.Statment;
 namespace ORMFramework.Test;
 
 [TestClass]
-public class StatementAnalystTest
+public sealed class StatementAnalystTest
 {
     private static string Render(List<StatElement> expression)
     {
@@ -32,85 +32,44 @@ public class StatementAnalystTest
     }
 
     [TestMethod]
-    public void GetQueryExpression_IdEquals1_ProducesExpectedInfixAndSuffix()
+    [DataRow("Id==1", "Variable:Id|Operator:Equals|Constant:1", "Variable:Id|Constant:1|Operator:Equals")]
+    [DataRow("a==1 && b like 'x%'", "Variable:a|Operator:Equals|Constant:1 |Operator:And|Variable:b|Operator:Like|Constant:'x%'", "Variable:a|Constant:1 |Operator:Equals|Variable:b|Constant:'x%'|Operator:Like|Operator:And")]
+    [DataRow("! ( b== 3 )", "Operator:Not|Operator:LeftParenthesis|Variable:b|Operator:Equals|Constant:3 |Operator:RightParenthesis", "Variable:b|Constant:3 |Operator:Equals|Operator:Not")]
+    [DataRow("Student like '%' && a=='2' || ! ( b== 3 )", "Variable:Student|Operator:Like|Constant:'%'|Operator:And|Variable:a|Operator:Equals|Constant:'2'|Operator:Or|Operator:Not|Operator:LeftParenthesis|Variable:b|Operator:Equals|Constant:3 |Operator:RightParenthesis", "Variable:Student|Constant:'%'|Operator:Like|Variable:a|Constant:'2'|Operator:Equals|Operator:And|Variable:b|Constant:3 |Operator:Equals|Operator:Not|Operator:Or")]
+    public void GetQueryExpression_ProducesExpectedInfixAndSuffix(string query, string expectedInfix, string expectedSuffix)
     {
-        QueryExpression expression = Parse("Id==1");
-        Assert.AreEqual("Variable:Id|Operator:Equals|Constant:1", Render(expression.NifixExpression));
-        Assert.AreEqual("Variable:Id|Constant:1|Operator:Equals", Render(expression.SuffixExpression));
+        QueryExpression expression = Parse(query);
+        Assert.AreEqual(expectedInfix, Render(expression.NifixExpression));
+        Assert.AreEqual(expectedSuffix, Render(expression.SuffixExpression));
     }
 
     [TestMethod]
-    public void GetQueryExpression_AndLike_ProducesExpectedInfixAndSuffix()
+    [DataRow("", typeof(ArgumentException), "value")]
+    [DataRow("   ", typeof(ArgumentException), "value")]
+    [DataRow(null, typeof(ArgumentNullException), "value")]
+    [DataRow("! ( b== 3", typeof(QuerySyntaxException), ") is expected")]
+    [DataRow("a=='x", typeof(QuerySyntaxException), "' is expected")]
+    [DataRow("a=<1", typeof(QuerySyntaxException), "Invaild Operator:=<")]
+    [DataRow("a==1x", typeof(QuerySyntaxException), "Invalid Vairable:1x")]
+    public void QueryString_Invalid_ThrowsExpectedException(string? query, Type exceptionType, string message)
     {
-        QueryExpression expression = Parse("a==1 && b like 'x%'");
-        Assert.AreEqual("Variable:a|Operator:Equals|Constant:1 |Operator:And|Variable:b|Operator:Like|Constant:'x%'", Render(expression.NifixExpression));
-        Assert.AreEqual("Variable:a|Constant:1 |Operator:Equals|Variable:b|Constant:'x%'|Operator:Like|Operator:And", Render(expression.SuffixExpression));
-    }
+        Exception? thrown = null;
+        try
+        {
+            Parse(query);
+        }
+        catch (Exception caught)
+        {
+            thrown = caught;
+        }
 
-    [TestMethod]
-    public void GetQueryExpression_NotParenthesized_ProducesExpectedInfixAndSuffix()
-    {
-        QueryExpression expression = Parse("! ( b== 3 )");
-        Assert.AreEqual("Operator:Not|Operator:LeftParenthesis|Variable:b|Operator:Equals|Constant:3 |Operator:RightParenthesis", Render(expression.NifixExpression));
-        Assert.AreEqual("Variable:b|Constant:3 |Operator:Equals|Operator:Not", Render(expression.SuffixExpression));
-    }
-
-    [TestMethod]
-    public void GetQueryExpression_MixedExpression_ProducesExpectedInfixAndSuffix()
-    {
-        QueryExpression expression = Parse("Student like '%' && a=='2' || ! ( b== 3 )");
-        Assert.AreEqual("Variable:Student|Operator:Like|Constant:'%'|Operator:And|Variable:a|Operator:Equals|Constant:'2'|Operator:Or|Operator:Not|Operator:LeftParenthesis|Variable:b|Operator:Equals|Constant:3 |Operator:RightParenthesis", Render(expression.NifixExpression));
-        Assert.AreEqual("Variable:Student|Constant:'%'|Operator:Like|Variable:a|Constant:'2'|Operator:Equals|Operator:And|Variable:b|Constant:3 |Operator:Equals|Operator:Not|Operator:Or", Render(expression.SuffixExpression));
-    }
-
-    [TestMethod]
-    public void QueryString_Empty_ThrowsArgumentException()
-    {
-        var ex = Assert.ThrowsExactly<ArgumentException>(() => Parse(""));
-        Assert.AreEqual("value", ex.ParamName);
-    }
-
-    [TestMethod]
-    public void QueryString_WhitespaceOnly_ThrowsArgumentException()
-    {
-        var ex = Assert.ThrowsExactly<ArgumentException>(() => Parse("   "));
-        Assert.AreEqual("value", ex.ParamName);
-    }
-
-    [TestMethod]
-    public void QueryString_Null_ThrowsArgumentNullException()
-    {
-        // ThrowIfNullOrWhiteSpace(null) 抛 ArgumentNullException（ArgumentException 子类）。
-        var ex = Assert.ThrowsExactly<ArgumentNullException>(() => Parse(null));
-        Assert.AreEqual("value", ex.ParamName);
-    }
-
-    [TestMethod]
-    public void QueryString_UnbalancedParenthesis_ThrowsQuerySyntaxException()
-    {
-        var ex = Assert.ThrowsExactly<QuerySyntaxException>(() => Parse("! ( b== 3"));
-        Assert.AreEqual(") is expected", ex.Message);
-    }
-
-    [TestMethod]
-    public void QueryString_UnclosedQuote_ThrowsQuerySyntaxException()
-    {
-        var ex = Assert.ThrowsExactly<QuerySyntaxException>(() => Parse("a=='x"));
-        Assert.AreEqual("' is expected", ex.Message);
-    }
-
-    [TestMethod]
-    public void QueryString_UnrecognizedOperator_ThrowsQuerySyntaxException()
-    {
-        var ex = Assert.ThrowsExactly<QuerySyntaxException>(() => Parse("a=<1"));
-        Assert.AreEqual("Invaild Operator:=<", ex.Message);
-    }
-
-    [TestMethod]
-    public void QueryString_InvalidNumericConstant_ThrowsQuerySyntaxException()
-    {
-        var ex = Assert.ThrowsExactly<QuerySyntaxException>(() => Parse("a==1x"));
-        Assert.AreEqual("Invalid Vairable:1x", ex.Message);
+        Assert.IsNotNull(thrown);
+        Exception ex = thrown!;
+        Assert.AreEqual(exceptionType, ex.GetType());
+        string actual = ex is ArgumentException argumentException
+            ? argumentException.ParamName!
+            : ex.Message;
+        Assert.AreEqual(message, actual);
     }
 
     [TestMethod]

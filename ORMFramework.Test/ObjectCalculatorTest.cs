@@ -7,7 +7,7 @@ using ORMFramework.Statment;
 namespace ORMFramework.Test;
 
 [TestClass]
-public class ObjectCalculatorTest
+public sealed class ObjectCalculatorTest
 {
     private sealed class CalcEntity
     {
@@ -27,66 +27,54 @@ public class ObjectCalculatorTest
     }
 
     [TestMethod]
-    public void IsTargetObject_IntComparisons_ReturnExpectedTruthTable()
+    [DataRow("Id==1", true)]
+    [DataRow("Id==2", false)]
+    [DataRow("Id!=1", false)]
+    [DataRow("Id!=2", true)]
+    [DataRow("Id>0", true)]
+    [DataRow("Id>1", false)]
+    [DataRow("Id>=1", true)]
+    [DataRow("Id>=2", false)]
+    [DataRow("Id<2", true)]
+    [DataRow("Id<1", false)]
+    [DataRow("Id<=1", true)]
+    [DataRow("Id<=0", false)]
+    [DataRow("Name=='abc'", true)]
+    [DataRow("Name=='xyz'", false)]
+    [DataRow("Name!='abc'", false)]
+    [DataRow("Created=='2024-01-02 03:04:05'", true)]
+    [DataRow("Created=='2024-01-02 03:04:06'", false)]
+    // 两个 bool 属性比较时走数值路径（Convert.ToDouble），当前返回 true。
+    [DataRow("Active==Other", true)]
+    public void IsTargetObject_Comparisons_ReturnExpectedTruthTable(string query, bool expected)
     {
-        var entity = new CalcEntity { Id = 1 };
+        var entity = new CalcEntity
+        {
+            Id = 1,
+            Name = "abc",
+            Created = new DateTime(2024, 1, 2, 3, 4, 5),
+            Active = true,
+            Other = true,
+            Grade = 'A',
+        };
 
-        Assert.IsTrue(IsTarget(entity, "Id==1"));
-        Assert.IsFalse(IsTarget(entity, "Id==2"));
-        Assert.IsFalse(IsTarget(entity, "Id!=1"));
-        Assert.IsTrue(IsTarget(entity, "Id!=2"));
-        Assert.IsTrue(IsTarget(entity, "Id>0"));
-        Assert.IsFalse(IsTarget(entity, "Id>1"));
-        Assert.IsTrue(IsTarget(entity, "Id>=1"));
-        Assert.IsFalse(IsTarget(entity, "Id>=2"));
-        Assert.IsTrue(IsTarget(entity, "Id<2"));
-        Assert.IsFalse(IsTarget(entity, "Id<1"));
-        Assert.IsTrue(IsTarget(entity, "Id<=1"));
-        Assert.IsFalse(IsTarget(entity, "Id<=0"));
+        Assert.AreEqual(expected, IsTarget(entity, query));
     }
 
     [TestMethod]
-    public void IsTargetObject_StringComparisons_ReturnExpectedTruthTable()
+    [DataRow("Active==true")]
+    [DataRow("Active==false")]
+    [DataRow("Grade=='A'")]
+    [DataRow("Grade=='B'")]
+    public void IsTargetObject_BoolAndCharDefects_ThrowInvalidCastException(string query)
     {
-        var entity = new CalcEntity { Name = "abc" };
-
-        Assert.IsTrue(IsTarget(entity, "Name=='abc'"));
-        Assert.IsFalse(IsTarget(entity, "Name=='xyz'"));
-        Assert.IsFalse(IsTarget(entity, "Name!='abc'"));
-    }
-
-    [TestMethod]
-    public void IsTargetObject_DateTimeComparisons_ReturnExpectedTruthTable()
-    {
-        var entity = new CalcEntity { Created = new DateTime(2024, 1, 2, 3, 4, 5) };
-
-        Assert.IsTrue(IsTarget(entity, "Created=='2024-01-02 03:04:05'"));
-        Assert.IsFalse(IsTarget(entity, "Created=='2024-01-02 03:04:06'"));
-    }
-
-    [TestMethod]
-    public void IsTargetObject_BoolComparisons_RecordCurrentBehavior()
-    {
-        var entity = new CalcEntity { Active = true, Other = true };
-
         // TODO(12.2): bool 常量参与 == 当前抛 InvalidCastException（IsString 对 bool 常量做强转），
         // 后续阶段修复后应断言 true/false 而非异常。
-        Assert.ThrowsExactly<InvalidCastException>(() => IsTarget(entity, "Active==true"));
-        Assert.ThrowsExactly<InvalidCastException>(() => IsTarget(entity, "Active==false"));
-
-        // 两个 bool 属性比较时走数值路径（Convert.ToDouble），当前返回 true。
-        Assert.IsTrue(IsTarget(entity, "Active==Other"));
-    }
-
-    [TestMethod]
-    public void IsTargetObject_CharComparisons_RecordCurrentBehavior()
-    {
-        var entity = new CalcEntity { Grade = 'A' };
-
         // TODO(12.2): char 属性参与 == 当前抛 InvalidCastException（CalculateStringOperator 对 char 值强转为 string），
         // 后续阶段修复后应断言 true/false 而非异常。
-        Assert.ThrowsExactly<InvalidCastException>(() => IsTarget(entity, "Grade=='A'"));
-        Assert.ThrowsExactly<InvalidCastException>(() => IsTarget(entity, "Grade=='B'"));
+        var entity = new CalcEntity { Active = true, Other = true, Grade = 'A' };
+
+        Assert.ThrowsExactly<InvalidCastException>(() => IsTarget(entity, query));
     }
 
     [TestMethod]

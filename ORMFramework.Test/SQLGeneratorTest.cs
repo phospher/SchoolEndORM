@@ -9,7 +9,7 @@ using ORMFramework.Test.Fakes;
 namespace ORMFramework.Test;
 
 [TestClass]
-public class SQLGeneratorTest
+public sealed class SQLGeneratorTest
 {
     private sealed class TestEntity
     {

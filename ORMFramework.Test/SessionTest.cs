@@ -10,7 +10,7 @@ using ORMFramework.Test.Fakes;
 namespace ORMFramework.Test;
 
 [TestClass]
-public class SessionTest
+public sealed class SessionTest
 {
     [TestMethod]
     public void Commit_DisposesSelfCreatedConnection_AfterUsingBlockExits()

@@ -6,7 +6,7 @@ using ORMFramework.Exceptions;
 namespace ORMFramework.Test;
 
 [TestClass]
-public class OrmExceptionTest
+public sealed class OrmExceptionTest
 {
     [TestMethod]
     public void OrmException_CatchesAllThreeSpecificFailureKinds()
@@ -20,7 +20,7 @@ public class OrmExceptionTest
     public void OrmException_IsStillCatchableAsGenericException()
     {
         // 行为不变：OrmException 仍是 Exception 的子类，按 Exception 捕获的调用方不受影响。
-        Assert.IsInstanceOfType(new QuerySyntaxException("x"), typeof(Exception));
+        Assert.IsInstanceOfType<Exception>(new QuerySyntaxException("x"));
         Assert.IsTrue(IsException(() => throw new OrmException("orm")));
     }
 

@@ -7,24 +7,17 @@ using ORMFramework.SQL;
 namespace ORMFramework.Test;
 
 [TestClass]
-public class SqlLiteralTest
+public sealed class SqlLiteralTest
 {
     [TestMethod]
-    public void Format_Null_ReturnsNullKeyword()
+    [DataRow(null, "NULL")]
+    [DataRow("abc", "'abc'")]
+    [DataRow('A', "'A'")]
+    [DataRow(1, "1")]
+    [DataRow(true, "True")]
+    public void Format_ReturnsExpected(object? input, string expected)
     {
-        Assert.AreEqual("NULL", SqlLiteral.Format(null));
-    }
-
-    [TestMethod]
-    public void Format_String_ReturnsSingleQuoted()
-    {
-        Assert.AreEqual("'abc'", SqlLiteral.Format("abc"));
-    }
-
-    [TestMethod]
-    public void Format_Char_ReturnsSingleQuoted()
-    {
-        Assert.AreEqual("'A'", SqlLiteral.Format('A'));
+        Assert.AreEqual(expected, SqlLiteral.Format(input));
     }
 
     [TestMethod]
@@ -34,12 +27,7 @@ public class SqlLiteralTest
     }
 
     [TestMethod]
-    public void Format_Int_ReturnsInvariantNumber()
-    {
-        Assert.AreEqual("1", SqlLiteral.Format(1));
-    }
-
-    [TestMethod]
+    [DoNotParallelize]
     public void Format_Double_ReturnsInvariantNumber_EvenUnderDeDeCulture()
     {
         CultureInfo original = CultureInfo.CurrentCulture;
@@ -55,20 +43,10 @@ public class SqlLiteralTest
     }
 
     [TestMethod]
-    public void Format_Bool_ReturnsKeyword()
+    [DataRow(null, "Name is null")]
+    [DataRow("abc", "Name='abc'")]
+    public void Comparison_ReturnsExpected(object? value, string expected)
     {
-        Assert.AreEqual("True", SqlLiteral.Format(true));
-    }
-
-    [TestMethod]
-    public void Comparison_Null_ReturnsIsNull()
-    {
-        Assert.AreEqual("Name is null", SqlLiteral.Comparison("Name", null));
-    }
-
-    [TestMethod]
-    public void Comparison_Value_ReturnsEquality()
-    {
-        Assert.AreEqual("Name='abc'", SqlLiteral.Comparison("Name", "abc"));
+        Assert.AreEqual(expected, SqlLiteral.Comparison("Name", value));
     }
 }

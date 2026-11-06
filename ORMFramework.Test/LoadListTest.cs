@@ -6,7 +6,7 @@ using ORMFramework.Test.Fakes;
 namespace ORMFramework.Test;
 
 [TestClass]
-public class LoadListTest
+public sealed class LoadListTest
 {
     private sealed class Item
     {

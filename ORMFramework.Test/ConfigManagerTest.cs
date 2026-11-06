@@ -7,7 +7,7 @@ using SystemConfiguration = ORMFramework.Configuration.Configuration;
 namespace ORMFramework.Test;
 
 [TestClass]
-public class ConfigManagerTest
+public sealed class ConfigManagerTest
 {
     private static SystemConfiguration GetConfiguration()
     {
@@ -23,15 +23,16 @@ public class ConfigManagerTest
     }
 
     [TestMethod]
-    public void GetSystemConfiguration_Mappings_HaveExpectedClassAndTableNames()
+    [DataRow("ORMFramework.Examples.Student", "Student")]
+    [DataRow("ORMFramework.Examples.Department", "Department")]
+    [DataRow("ORMFramework.Examples.Teacher", "Teacher")]
+    [DataRow("ORMFramework.Examples.ContactMenu", "ContactMenu")]
+    [DataRow("ORMFramework.Examples.Course", "Course")]
+    public void GetSystemConfiguration_Mappings_HaveExpectedClassAndTableNames(string className, string tableName)
     {
         Dictionary<string, EntityMapping> mappings = GetConfiguration().Mappings.ToDictionary(m => m.ClassName);
 
-        Assert.AreEqual("Student", mappings["ORMFramework.Examples.Student"].TableName);
-        Assert.AreEqual("Department", mappings["ORMFramework.Examples.Department"].TableName);
-        Assert.AreEqual("Teacher", mappings["ORMFramework.Examples.Teacher"].TableName);
-        Assert.AreEqual("ContactMenu", mappings["ORMFramework.Examples.ContactMenu"].TableName);
-        Assert.AreEqual("Course", mappings["ORMFramework.Examples.Course"].TableName);
+        Assert.AreEqual(tableName, mappings[className].TableName);
     }
 
     [TestMethod]
@@ -54,10 +55,10 @@ public class ConfigManagerTest
             .Select(r => r.Type)
             .ToList();
 
-        CollectionAssert.Contains(types, RelationType.OneToOne);
-        CollectionAssert.Contains(types, RelationType.OneToMany);
-        CollectionAssert.Contains(types, RelationType.ManyToOne);
-        CollectionAssert.Contains(types, RelationType.MantToMany);
+        Assert.Contains(RelationType.OneToOne, types);
+        Assert.Contains(RelationType.OneToMany, types);
+        Assert.Contains(RelationType.ManyToOne, types);
+        Assert.Contains(RelationType.MantToMany, types);
     }
 
     [TestMethod]
