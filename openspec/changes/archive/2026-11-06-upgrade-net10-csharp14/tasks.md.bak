@@ -1,0 +1,71 @@
+# Tasks
+
+## 1. 环境与升级前基线
+
+- [ ] 1.1 安装 .NET 10 SDK，运行 `dotnet --list-sdks` 确认出现 `10.x`、在仓库根运行 `dotnet --version` 输出 `10.x`（当前机器仅有 8.0.133）；若环境不允许安装则停止并报告，不在未验证的状态下继续
+- [ ] 1.2 在干净工作树上记录升级前基线：`dotnet build SchoolEndORM.sln 2>&1 | tee /tmp/net10-before-build.txt` 与 `dotnet test ORMFramework.Test/ORMFramework.Test.csproj 2>&1 | tee /tmp/net10-before-test.txt`，确认升级前全绿，并记录 `git log --oneline -1` 作为回滚起点
+- [ ] 1.3 把 `docs/baselines/sql-snapshot.txt` 复制到 `/tmp/sql-snapshot-before.txt` 作为逐字节比对基准，运行 `git diff --exit-code -- docs/baselines/sql-snapshot.txt` 确认基线文件本身未被改动
+- [ ] 1.4 运行 `rg -n '\b(field|extension)\b|\.Reverse\(|is not .* or ' ORMFramework ORMFramework.Examples ORMFramework.Test` 确认 C# 14 关键字与 Span 重载解析破坏性变更零命中，并留存输出作为升级后对照
+
+## 2. .NET 10 基础设施与依赖基线（提交 #1，回滚边界）
+
+- [ ] 2.1 新建仓库根 `global.json`，声明 .NET 10 SDK Feature Band 版本、`rollForward: latestFeature`、`allowPrerelease: false`；验证在仓库根执行 `dotnet --version` 输出 `10.x` 且版本由该文件解析得到
+- [ ] 2.2 修改 `Directory.Build.props`：`TargetFramework` → `net10.0`、`LangVersion` → `14.0`，`Nullable` / `ImplicitUsings` / 分析器开关保持不变；验证 `dotnet build SchoolEndORM.sln` 后三个项目产物落在 `bin/Debug/net10.0`，且 `*.runtimeconfig.json` 的 `tfm` 为 `net10.0`
+- [ ] 2.3 升级 `ORMFramework/ORMFramework.csproj` 的 `Microsoft.Extensions.DependencyInjection` → 10.x、`log4net` → 3.x 最新稳定版；验证 `dotnet restore SchoolEndORM.sln` 无 NU1701/NU190x，且 `dotnet build ORMFramework/ORMFramework.csproj` 通过（`LogHelper` 的 `CreateRepository` / `Configure` / `GetLogger` 调用面仍编译）
+- [ ] 2.4 升级 `ORMFramework.Examples/ORMFramework.Examples.csproj` 的 `MySql.Data` → 9.x 最新稳定版；验证 `dotnet build ORMFramework.Examples` 通过、输出目录仍含 `Config.xml`、`<StartupObject>` 未丢失
+- [ ] 2.5 升级 `ORMFramework.Test/ORMFramework.Test.csproj` 的 `Microsoft.NET.Test.Sdk` → 18.x、`MSTest.TestAdapter` / `MSTest.TestFramework` → 4.x、`coverlet.collector` → 6.x，并把 13 处 `Assert.ThrowsException<T>` 改为 `Assert.ThrowsExactly<T>`（v4 已删除旧 API，属编译必需；`StatementAnalystTest` 7 处、`ObjectCalculatorTest` 5 处、`SessionCacheTest` 1 处，逐处保留 `ex.ParamName` / `ex.Message` 断言）；验证 `dotnet build ORMFramework.Test/ORMFramework.Test.csproj -warnaserror` 通过，且 `dotnet test ORMFramework.Test/ORMFramework.Test.csproj`、`dotnet test --filter FullyQualifiedName~StatementAnalystTest`、`dotnet test --collect:"XPlat Code Coverage"` 三条命令按原样全绿
+- [ ] 2.6 处理 .NET 10 与 MSTest 4 新增分析器 / 编译器告警：重新运行 1.4 的扫描，就地修复可修项（如 Span 重载歧义加显式 `.AsSpan()`、`Assert.AreEqual` 泛型推断问题加显式类型实参），确需抑制的规则在 `.editorconfig` 加带理由注释；**不**启用 `MSTestAnalysisMode=Recommended`；验证 `dotnet build SchoolEndORM.sln -warnaserror` 与 `dotnet format --verify-no-changes SchoolEndORM.sln` 均通过
+- [ ] 2.7 运行全量 `dotnet test` 与 1.2 基线比对，确认 `ConfigManagerTest`、`ComponentProviderTest`、`SQLGeneratorTest` 等结果一致；确认 `docs/baselines/sql-snapshot.txt` 与 1.3 副本逐字节一致
+- [ ] 2.8 更新 `AGENTS.md` 与 `README.md` 中的目标框架（`net10.0`）、C# 14、`global.json` / SDK 与依赖版本记述，并在 `README.md` 明示最低运行时为 .NET 10；验证文档所列命令与 2.2–2.7 实际执行的命令一致
+- [ ] 2.9 提交 `build: 升级到 net10.0 / C# 14 + SDK 固定 + 依赖对齐（含 MSTest 4 编译必需断言改名）`，并确认此为唯一基础设施提交、之后不再改动 TFM / 依赖版本
+
+## 3. MSTest 4 测试套件规范化（提交 #2，必须先于任何 C# 14 语法改写）
+
+- [ ] 3.1 把 `SessionCacheTest` 2 处 `StringAssert.Contains` 与 `ConfigManagerTest` 4 处 `CollectionAssert.Contains` 改为 `Assert.Contains`；验证 `dotnet test --filter FullyQualifiedName~SessionCacheTest` 与 `ConfigManagerTest` 通过
+- [ ] 3.2 给 10 个测试类加 `sealed`（`SqlLiteralTest`、`SessionCacheTest`、`SessionTest`、`ObjectCalculatorTest`、`ConfigManagerTest`、`OrmExceptionTest`、`LoadListTest`、`SQLGeneratorTest`、`StatementAnalystTest`、`ComponentProviderTest`）；`ComponentProviderTest` 的 2 处 `Assert.IsInstanceOfType<T>` 改用其返回的强类型实例，`OrmExceptionTest` 的 `Assert.IsInstanceOfType(x, typeof(Exception))` 改泛型形式；验证 `dotnet build SchoolEndORM.sln -warnaserror` 通过
+- [ ] 3.3 把 `ORMFramework.Test/ObjectCalculatorTest.cs` 的 5 个真值表方法（约 40 条 `IsTrue` / `IsFalse`）改为 `[TestMethod] + [DataRow(string query, bool expected)]`，逐行保留原期望值与注释里的既有缺陷说明；验证 `dotnet test --filter FullyQualifiedName~ObjectCalculatorTest` 覆盖的断言条数与改造前一致
+- [ ] 3.4 把 `StatementAnalystTest` 的 4 个快照方法收敛为 `[DataRow(query, expectedInfix, expectedSuffix)]`、7 个异常方法收敛为 `[DataRow(query, Type, message)]`，`SqlLiteralTest` 的 9 个单断言方法收敛为 `[DataRow(input, expected)]`，`ConfigManagerTest` 的 5 条 TableName 断言收敛为 `[DataRow(className, tableName)]`；**不使用 `[DataTestMethod]`**（MSTEST0044），`[DataRow]` 承载 `Type` / `null` 实参的写法按实际编译结果确定；验证全部序列快照文本与 `docs/baselines/sql-snapshot.txt` 逐字节一致
+- [ ] 3.5 给 `SqlLiteralTest` 中改 `CultureInfo.CurrentCulture` 的用例加 `[DoNotParallelize]`（MSTEST0076），保留 try/finally 恢复；确认 `MSTestAnalysisMode` 保持默认、未设为 `Recommended`，只修 v4 升为 Warning 的 12 条规则引入的告警；验证 `dotnet build -warnaserror` 与 `dotnet format --verify-no-changes` 通过
+- [ ] 3.6 验证数据驱动与测试宿主：依次运行 `dotnet test ORMFramework.Test/ORMFramework.Test.csproj`、`dotnet test --filter FullyQualifiedName~StatementAnalystTest`、`dotnet test --collect:"XPlat Code Coverage"`，三条命令按原样全绿；核对用例总数与 1.2 基线一致（v4 的 `TestCase.Id` 重基线不产生用例丢失）
+- [ ] 3.7 运行全量 `dotnet test` 并与 1.2 基线比对，`diff /tmp/sql-snapshot-before.txt docs/baselines/sql-snapshot.txt` 零差异；确认测试重构本身未改变任何断言语义后，才进入第 4 组
+- [ ] 3.8 提交 `test: 单元测试重构为 MSTest 4 规范（数据驱动 + sealed + 现代断言）`
+
+## 4. C# 14 `field` 关键字改写（提交 #3）
+
+- [ ] 4.1 改 `ORMFramework/Configuration/EntityClass/EntityMapping.cs`：删除 `_keys` / `_relations` 两个私有字段，`Keys` / `Relations` 改为 `field` 关键字的 semi-auto 属性（`get;` + `set => field = value ?? ...;` + 属性初始化器），保留"赋 null 后 get 仍返回空集合"语义；验证 `dotnet build -warnaserror` 无新增 CS86xx，且 `ConfigManagerTest` 的映射断言通过
+- [ ] 4.2 改 `ORMFramework/Session/PersistenceContext.cs`：删除 `_connection` 字段，`Connection` getter 用 `field` 判定 `is null || State == ConnectionState.Closed` 后重建；验证 `dotnet test --filter FullyQualifiedName~SessionTest` 与 `SessionCacheTest` 通过（共享连接不被使用方释放的语义不变）
+- [ ] 4.3 改 `ORMFramework/Session/LoadList.cs`：删除 `_items` 字段，`Items` 改为 `private List<T> Items => field ??= LoadItems();`；验证 `dotnet test --filter FullyQualifiedName~LoadListTest` 通过（懒加载只触发一次、谓词文本不变）
+- [ ] 4.4 有限扩面：把 `ORMFramework/Cache/CacheEntity.cs` 的 `Value` / `ForeignKeys` 与 `SessionFactory.cs` / `SessionFactoryIoc.cs` 的 `Configuration` 做 `field` 半自动属性的**机械替换**，不加运行时 null 守卫、不碰 `required` 属性；验证 `ConfigManagerTest` / `SessionCacheTest` / `ComponentProviderTest` 通过（两条工厂装配路径均覆盖）
+- [ ] 4.5 运行 `rg -n '\bfield\b' ORMFramework ORMFramework.Examples ORMFramework.Test` 确认无名为 `field` 的成员 / 局部变量（CS9258/CS9272 零命中），运行全量 `dotnet test`，并用 `diff /tmp/sql-snapshot-before.txt docs/baselines/sql-snapshot.txt` 确认 SQL 快照零差异
+- [ ] 4.6 在 `docs/modern-csharp-migration-plan.md` 追加一节记录 `field` 关键字的原 4 处落点与有限扩面位置、"属性初始化器直接写后备字段、不经过 setter"的核对结论，以及"扩面只做机械替换、不引入运行时守卫"的边界；验证文档描述与 4.1–4.4 的实际代码一致
+- [ ] 4.7 提交 `refactor: 采用 C# 14 field 关键字替换显式后备字段`
+
+## 5. 其余 C# 14 特性：反射、Span、扩展成员、partial（提交 #4–#6）
+
+- [ ] 5.1 做最小编译探针（临时文件编译后立即删除）验证 `nameof(LoadList<>.ForeignKeyName)` 在 C# 14 下是否合法并记录结果；不合法则跳过 5.2，把不采用结论写入 5.11 的文档与 5.5 的提交信息
+- [ ] 5.2 若 5.1 合法，把 `ORMFramework/Cache/SessionCache.cs` 中 4 处 `nameof(LoadList<object>.X)` 改为 `nameof(LoadList<>.X)`；验证 `dotnet build -warnaserror` 通过，且 `LoadListTest` / `SessionCacheTest` 全绿（反射取到的属性名不变）
+- [ ] 5.3 在 `ORMFramework/Statment/StatementAnalyst.cs` 与 `ORMFramework/Cache/ObjectCalculator.cs` 的首尾引号剥离 / 字符扫描处改用 `AsSpan()` 切片与 `SearchValues<char>.Contains`，避免分配子字符串；验证 `StatementAnalystTest` 的中缀 / 后缀序列快照与 `ObjectCalculatorTest` 真值表逐条一致
+- [ ] 5.4 在 `ORMFramework/Session/LoadList.cs` 与 `ORMFramework/SQLGenerator/SQLGenerator.cs` 的 `StringBuilder` 拼接处改用 `Append(ReadOnlySpan<char>)`；验证 `SQLGeneratorTest` 通过且与 `/tmp/sql-snapshot-before.txt` 逐字节零差异
+- [ ] 5.5 提交 `refactor: nameof 非绑定泛型与 Span 一等公民转换`（若 5.1 不合法，在本提交信息中说明不采用理由，不产生空提交）
+- [ ] 5.6 扩展成员 I：把 `ORMFramework/SQL/SqlLiteral.cs` 的 `Format(object?)` / `Comparison(string, object?)` 改为 `extension` 块（分别在 `object?` 与 `string` 接收者上），更新 `SessionCache.cs` / `LoadList.cs` / `SQLGenerator.cs` / `GlobalCache.cs` / `SqlLiteralTest.cs` 等约 5 个文件 / 15 个调用点；验证 `SqlLiteralTest` / `SQLGeneratorTest` 全绿且与 `/tmp/sql-snapshot-before.txt` 逐字节零差异
+- [ ] 5.7 扩展成员 II：为 `StringBuilder` 增加一个 SQL 片段扩展方法，收拢 `LoadList` / `SessionCache` / `SQLGenerator` 中重复的 `Append(col).Append("==").Append(...)` 序列；验证 `LoadListTest` 谓词文本与 SQL 快照不变
+- [ ] 5.8 提交 `refactor: 采用 C# 14 扩展成员`
+- [ ] 5.9 partial 构造：把 `ORMFramework/Configuration/ConfigManager.cs` 按解析阶段拆为 partial 并使用 partial 构造（**不拆** `StatementAnalyst.cs` 与 `GlobalCache.cs`）；验证 `ConfigManagerTest` 全绿、`Config.xml` 的 `SessionFactory` → `Mappings` 解析顺序与未知元素报错行为不变
+- [ ] 5.10 测试项目 C# 14 沙盒：`StatementAnalystTest.Render` 改用 `ReadOnlySpan<char>` / `SearchValues<char>` 风格辅助方法，`FakeDb*` 假件用 `field` 与空条件赋值，`double.TryParse` 委托用 lambda 参数修饰符；验证四道门槛通过、序列快照与 SQL 快照零差异
+- [ ] 5.11 更新 `docs/modern-csharp-migration-plan.md`：追加 C# 14 特性采用矩阵（采用 / 条件采用 / 不采用及理由，含用户自定义复合赋值、file-based app 指令、`System.Threading.Lock` 仍不采用），标注 net8 → net10 升级完成状态，并确认 §16.4 的 8 项后续提案仍为"未实施"；验证文档与 `design.md` D4 及实际代码一致
+- [ ] 5.12 提交 `refactor: partial 构造 + 测试项目 C# 14 沙盒 + 采用矩阵记录`
+
+## 6. 全量集成验证与收尾
+
+- [ ] 6.1 依次运行四道门槛 `dotnet restore SchoolEndORM.sln`、`dotnet format --verify-no-changes SchoolEndORM.sln`、`dotnet build SchoolEndORM.sln -warnaserror`、`dotnet test ORMFramework.Test/ORMFramework.Test.csproj`，全部通过且无任何警告
+- [ ] 6.2 与 1.2 / 1.3 基线做最终比对：SQL 文本快照逐字节一致、中缀 / 后缀序列快照与真值表一致、`Config.xml` 解析断言一致，并运行 `git diff --exit-code -- docs/baselines/sql-snapshot.txt` 确认基线文件未被改动
+- [ ] 6.3 运行 `dotnet publish ORMFramework.Examples -c Release -o /tmp/schoolendorm-net10-dist`，确认产物 `runtimeconfig.json` 的 `tfm` 为 `net10.0` 且包含 `Config.xml`
+- [ ] 6.4 检查 `git log --oneline` 与 2.9 / 3.8 / 4.7 / 5.5 / 5.8 / 5.12 的提交序列一致、每个提交可独立 `git revert`；运行 `openspec validate "upgrade-net10-csharp14" --strict` 确认本变更规格校验通过
+- [ ] 6.5 验证 MSTest 4 规范落地：`rg -n 'Assert\.ThrowsException|StringAssert|CollectionAssert|DataTestMethod' ORMFramework.Test --include=*.cs` 零命中、10 个测试类均为 `sealed`、`MSTestAnalysisMode` 未设为 `Recommended`；重跑 2.5 的三条 `dotnet test` 命令并确认用例总数与 1.2 基线一致
+- [ ] 6.6 确认 47 项任务全部完成、`docs/baselines/sql-snapshot.txt` 未被改动、`openspec status --change upgrade-net10-csharp14` 为 4/4
+- [ ] 6.7 （需可达 MySQL；环境不具备时标注未执行）临时取消 `ORMFramework.Examples/Program.cs` 中 `TestMultitransaction` / `TestOneToMany` / `TestManyToMany` 的注释并运行 `dotnet run --project ORMFramework.Examples`，确认并发与懒加载行为与升级前一致，随后恢复注释状态
+
+## Workflow follow-up
+
+- 实现并验证通过后，由用户显式启动归档流程，把 `build-configuration` 的 delta 同步进 `openspec/specs/build-configuration/spec.md`。
+- 归档前复核 `README.md` / `AGENTS.md` 中的最低运行时与依赖记述已随本次变更更新。

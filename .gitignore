@@ -9,3 +9,4 @@ ORMFramework.Test/obj/
 .vscode/
 .codebuddy/
 ORMFramework.Test/TestResults/
+.dsh/
