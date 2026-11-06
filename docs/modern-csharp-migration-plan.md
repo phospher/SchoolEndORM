@@ -1501,3 +1501,44 @@ dotnet test ORMFramework.Test/ORMFramework.Test.csproj # 全绿
 6. `Statment` 命名空间改名、命名空间与目录对齐 —— 见 14.5。
 7. `ConfigManager` 改用 `XDocument`/`XmlSerializer` —— 见 14.4。
 8. 反射结果缓存（`ConcurrentDictionary<Type, PropertyInfo[]>`）—— 见 9.3。
+
+---
+
+## 17. 附录：C# 14 `field` 关键字改写记录（提交 #3）
+
+> 本节记录 `upgrade-net10-csharp14` 变更提交 #3 的实际落点，语言版本 C# 14 / SDK 10.0.403。
+> 性质：把显式后备字段（或自动属性）改写为使用 `field` 上下文关键字的半自动属性，**机械、语义等价**；不新增运行时守卫，不改公开属性名与反射可见性。
+
+### 17.1 原 4 处显式后备字段落点
+
+| 文件 | 成员 | 改写后形式 |
+| --- | --- | --- |
+| `Configuration/EntityClass/EntityMapping.cs` | `Keys` | 删除 `_keys`；`{ get => field; set => field = value ?? []; } = [];` |
+| `Configuration/EntityClass/EntityMapping.cs` | `Relations` | 删除 `_relations`；`{ get => field; set => field = value ?? new Dictionary<string, EntityRelation>(); } = new Dictionary<string, EntityRelation>();` |
+| `Session/PersistenceContext.cs` | `Connection` | 删除 `_connection`；getter 内 `if (field is null || field.State == ConnectionState.Closed) { field = DbDriverFactory.GetDbConnection(); } return field;` |
+| `Session/LoadList.cs` | `Items` | 删除 `_items`；`private List<T> Items => field ??= LoadItems();` |
+
+- `Keys` / `Relations` 的 `set` 保留 `?? []` / `?? new Dictionary<...>()`，"赋 `null` 后 `get` 仍返回空集合"的既有语义不变；属性初始化器 `= []` / `= new Dictionary<string, EntityRelation>()` 保留。
+- `PersistenceContext.Connection` 的短路顺序 `field is null || field.State == ConnectionState.Closed` 与"共享连接不被使用方释放"的语义不变（未在 `Connection` 上加 `using`、未新增释放逻辑）。
+- `LoadList<T>.Items` 的 `??=` 保持"懒加载只触发一次"；`ForeignKeyName` / `ForeignKeyValues` / `SessionCache` 属性名及 `fk=='v1' || fk=='v2'` 谓词文本不变。
+
+### 17.2 有限扩面落点（机械替换）
+
+| 文件 | 成员 | 改写后形式 |
+| --- | --- | --- |
+| `Cache/CacheEntity.cs` | `Value` | `{ get => field; set => field = value; } = null!;` |
+| `Cache/CacheEntity.cs` | `ForeignKeys` | `{ get => field; set => field = value; } = [];` |
+| `SessionFactory/SessionFactory.cs` | `Configuration` | `{ get => field; private set => field = value; } = null!;` |
+| `SessionFactory/SessionFactoryIoc.cs` | `Configuration` | `{ get => field; private set => field = value; } = null!;` |
+
+这 4 处原本是自动属性（无显式后备字段），按 C# 14 `field` 特性规格对自动属性的等价展开（`{ get; set; }` ≡ `{ get { return field; } set { field = value; } }`）改为 `field` 半自动属性。`SessionFactory`（手工装配）与 `SessionFactoryIoc`（DI + 事后补配）两条路径都覆盖；`Configuration` 的 `private set` 与 `= null!` 初始化器保持不变。
+
+### 17.3 核对结论
+
+1. **属性初始化器直接写后备字段、不经过 setter**：C# 14 `field` 特性规格明确"Properties with initializers may use `field`. The backing field is directly initialized rather than the setter being called"。因此 `EntityMapping.Keys` / `Relations` 的 `= []` / `= new Dictionary<...>()` 直接写编译器合成的后备字段，`set` 中的 `?? []` / `?? new Dictionary<...>()` 在初始化阶段不运行；由于初始化值本身非 `null`，与"经 setter 再合并"结果一致，语义等价。`CacheEntity` / 两个 `SessionFactory` 的 `= null!` / `= []` 同理直接写后备字段，而这些 setter 均为无逻辑的直通赋值，行为不变。
+2. **扩面只做机械替换、不引入运行时守卫**：`CacheEntity.Value` / `ForeignKeys` 与两个 `SessionFactory.Configuration` 未加任何 `null` 守卫、未改 `required` 属性、未改公开属性名与反射可见性、未改 SQL 文本或谓词文本。`Cache/GlobalCache.cs`（手写 `Monitor` / `Thread.Interrupt` 锁模型）为冻结文件，本提交未触碰。
+3. **文档与代码一致**：上述 8 处形式与 4.1–4.5 实际提交代码逐条对应；`ORMFramework.Test/Fakes/FakePersistenceContext.cs` 的显式后备字段不在本提交范围内（留待后续提交）。
+
+### 17.4 验证
+
+`dotnet restore` / `dotnet format --verify-no-changes` / `dotnet build -warnaserror`（0 警告 0 错误，`field` 标识符扫描 CS9258/CS9272 零命中）/ `dotnet test`（74/74）四道门槛全绿；`ConfigManagerTest`、`SessionTest`、`SessionCacheTest`、`LoadListTest`、`ComponentProviderTest` 聚焦过滤通过；`diff /tmp/sql-snapshot-before.txt docs/baselines/sql-snapshot.txt` 为空，SQL 快照白名单零改动。

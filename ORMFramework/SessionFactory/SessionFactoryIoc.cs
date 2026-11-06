@@ -11,7 +11,8 @@ public sealed class SessionFactoryIoc : ISessionFactory
 
     public Configuration.Configuration Configuration
     {
-        get; private set;
+        get => field;
+        private set => field = value;
     } = null!;
 
     public void Initialize() => Initialize(string.Empty);

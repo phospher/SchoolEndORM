@@ -10,8 +10,6 @@ namespace ORMFramework;
 
 public sealed class LoadList<T> : IList<T>
 {
-    private List<T>? _items;
-
     public ISessionCache SessionCache { get; set; } = null!;
 
     public string ForeignKeyName { get; set; } = "";
@@ -20,7 +18,7 @@ public sealed class LoadList<T> : IList<T>
 
     public ISelectListener SelectListener { get; }
 
-    private List<T> Items => _items ??= LoadItems();
+    private List<T> Items => field ??= LoadItems();
 
     public LoadList()
     {

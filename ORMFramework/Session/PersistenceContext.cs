@@ -6,19 +6,17 @@ namespace ORMFramework;
 
 public sealed class PersistenceContext : IPersistenceContext
 {
-    private IDbConnection? _connection;
-
     public IDictionary<string, EntityMapping> Mappings { get; set; } = new Dictionary<string, EntityMapping>();
 
     public IDbConnection Connection
     {
         get
         {
-            if (_connection == null || _connection.State == ConnectionState.Closed)
+            if (field is null || field.State == ConnectionState.Closed)
             {
-                _connection = DbDriverFactory.GetDbConnection();
+                field = DbDriverFactory.GetDbConnection();
             }
-            return _connection;
+            return field;
         }
     }
 
